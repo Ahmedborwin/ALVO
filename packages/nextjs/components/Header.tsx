@@ -4,6 +4,10 @@ import React, { useCallback, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { LogoutButton, SignInAgainButton } from "./buttons";
+import { AlchemySignerStatus } from "@alchemy/aa-alchemy";
+import { useSignerStatus } from "@alchemy/aa-alchemy/react";
+import { useAccount } from "wagmi";
 import { Bars3Icon, BugAntIcon } from "@heroicons/react/24/outline";
 import { FaucetButton, RainbowKitCustomConnectButton } from "~~/components/scaffold-eth";
 import { useOutsideClick } from "~~/hooks/scaffold-eth";
@@ -52,9 +56,27 @@ export const HeaderMenuLinks = () => {
   );
 };
 
-/**
- * Site header
- */
+const WalletUI = () => {
+  const { isConnected, status } = useSignerStatus();
+  const { address } = useAccount();
+  if (!isConnected && status === AlchemySignerStatus.DISCONNECTED)
+    return (
+      <div className="navbar-end flex-grow mr-4">
+        <RainbowKitCustomConnectButton />
+        <FaucetButton />
+      </div>
+    );
+
+  if (address && isConnected && status === AlchemySignerStatus.CONNECTED) return <SignInAgainButton />;
+
+  if (isConnected && status === AlchemySignerStatus.CONNECTED)
+    return (
+      <div className="navbar-end flex-grow mr-4">
+        <LogoutButton />
+      </div>
+    );
+};
+
 export const Header = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const burgerMenuRef = useRef<HTMLDivElement>(null);
@@ -101,10 +123,7 @@ export const Header = () => {
           <HeaderMenuLinks />
         </ul>
       </div>
-      <div className="navbar-end flex-grow mr-4">
-        <RainbowKitCustomConnectButton />
-        <FaucetButton />
-      </div>
+      <WalletUI />
     </div>
   );
 };

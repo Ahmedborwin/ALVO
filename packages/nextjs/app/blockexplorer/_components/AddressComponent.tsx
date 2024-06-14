@@ -1,5 +1,6 @@
 import { BackButton } from "./BackButton";
 import { ContractTabs } from "./ContractTabs";
+import { Hex } from "viem";
 import { Address, Balance } from "~~/components/scaffold-eth";
 
 export const AddressComponent = ({
@@ -19,10 +20,10 @@ export const AddressComponent = ({
           <div className="bg-base-100 border-base-300 border shadow-md shadow-secondary rounded-3xl px-6 lg:px-8 mb-6 space-y-1 py-4 overflow-x-auto">
             <div className="flex">
               <div className="flex flex-col gap-1">
-                <Address address={address} format="long" />
+                <Address address={address as Hex} format="long" />
                 <div className="flex gap-1 items-center">
                   <span className="font-bold text-sm">Balance:</span>
-                  <Balance address={address} className="text" />
+                  <Balance address={address as Hex} className="text" />
                 </div>
               </div>
             </div>

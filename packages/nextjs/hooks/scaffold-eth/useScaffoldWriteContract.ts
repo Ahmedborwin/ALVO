@@ -1,10 +1,14 @@
 import { useState } from "react";
 import { useTargetNetwork } from "./useTargetNetwork";
+import { useAccount as userOperationAccount } from "@alchemy/aa-alchemy/react";
 import { MutateOptions } from "@tanstack/react-query";
 import { Abi, ExtractAbiFunctionNames } from "abitype";
+import { encodeFunctionData } from "viem";
 import { Config, UseWriteContractParameters, useAccount, useWriteContract } from "wagmi";
 import { WriteContractErrorType, WriteContractReturnType } from "wagmi/actions";
 import { WriteContractVariables } from "wagmi/query";
+import { handleSentUserOP } from "~~/components/providers/UserOperationProvider";
+import { chain as accountChain, accountType } from "~~/config/AlchemyConfig";
 import { useDeployedContractInfo, useTransactor } from "~~/hooks/scaffold-eth";
 import { notification } from "~~/utils/scaffold-eth";
 import {
@@ -20,11 +24,17 @@ import {
  * @param contractName - name of the contract to be written to
  * @param writeContractParams - wagmi's useWriteContract parameters
  */
+/**
+ * Custom notification content for TXs.
+ */
+
 export const useScaffoldWriteContract = <TContractName extends ContractName>(
   contractName: TContractName,
   writeContractParams?: UseWriteContractParameters,
 ) => {
-  const { chain } = useAccount();
+  const { chain, address } = useAccount();
+  const { address: accountAddress } = userOperationAccount({ type: accountType });
+
   const writeTx = useTransactor();
   const [isMining, setIsMining] = useState(false);
   const { targetNetwork } = useTargetNetwork();
@@ -44,37 +54,57 @@ export const useScaffoldWriteContract = <TContractName extends ContractName>(
       return;
     }
 
-    if (!chain?.id) {
-      notification.error("Please connect your wallet");
+    if (!chain?.id && !address && !accountAddress && !accountChain?.id) {
+      notification.error("Please connect your wallet or embedded account");
       return;
     }
-    if (chain?.id !== targetNetwork.id) {
+
+    if ((address && chain?.id !== targetNetwork.id) || (accountAddress && accountChain?.id !== targetNetwork.id)) {
       notification.error("You are on the wrong network");
       return;
     }
 
     try {
       setIsMining(true);
-      const { blockConfirmations, onBlockConfirmation, ...mutateOptions } = options || {};
-      const makeWriteWithParams = () =>
-        wagmiContractWrite.writeContractAsync(
-          {
-            abi: deployedContractData.abi as Abi,
-            address: deployedContractData.address,
-            ...variables,
-          } as WriteContractVariables<Abi, string, any[], Config, number>,
-          mutateOptions as
-            | MutateOptions<
-                WriteContractReturnType,
-                WriteContractErrorType,
-                WriteContractVariables<Abi, string, any[], Config, number>,
-                unknown
-              >
-            | undefined,
-        );
-      const writeTxResult = await writeTx(makeWriteWithParams, { blockConfirmations, onBlockConfirmation });
+      if (!address && accountAddress) {
+        const args: any = variables?.args ?? [];
+        const data = encodeFunctionData({
+          abi: deployedContractData.abi as any,
+          functionName: variables.functionName,
+          args: args,
+        });
 
-      return writeTxResult;
+        handleSentUserOP({
+          uo: {
+            target: deployedContractData.address,
+            data: data,
+            value: variables?.value,
+          },
+        });
+        notification.loading("Waiting for transaction to complete.");
+        return;
+      } else if (address && !accountAddress) {
+        const { blockConfirmations, onBlockConfirmation, ...mutateOptions } = options || {};
+        const makeWriteWithParams = () =>
+          wagmiContractWrite.writeContractAsync(
+            {
+              abi: deployedContractData.abi as Abi,
+              address: deployedContractData.address,
+              ...variables,
+            } as WriteContractVariables<Abi, string, any[], Config, number>,
+            mutateOptions as
+              | MutateOptions<
+                  WriteContractReturnType,
+                  WriteContractErrorType,
+                  WriteContractVariables<Abi, string, any[], Config, number>,
+                  unknown
+                >
+              | undefined,
+          );
+        const writeTxResult = await writeTx(makeWriteWithParams, { blockConfirmations, onBlockConfirmation });
+
+        return writeTxResult;
+      }
     } catch (e: any) {
       throw e;
     } finally {

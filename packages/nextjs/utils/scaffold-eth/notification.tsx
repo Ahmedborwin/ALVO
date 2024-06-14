@@ -1,5 +1,5 @@
 import React from "react";
-import { ToastPosition, toast } from "react-hot-toast";
+import { Toast, ToastPosition, toast } from "react-hot-toast";
 import { XMarkIcon } from "@heroicons/react/20/solid";
 import {
   CheckCircleIcon,
@@ -68,6 +68,48 @@ const Notification = ({
   );
 };
 
+const customNotification = ({ content, customFunction }: { content: string; customFunction: () => void }) => {
+  const handleConfirm = (t: Toast) => {
+    customFunction();
+    toast.dismiss(t.id);
+  };
+  return toast.custom(
+    t => (
+      <div
+        className={`${
+          t.visible ? "animate-enter" : "animate-leave"
+        } max-w-md w-full bg-white shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
+      >
+        <div className="flex-1 w-0 p-4">
+          <div className="flex items-start">
+            <div className="ml-3 flex-1">
+              <p className="text-sm font-medium text-gray-900">{content}</p>
+            </div>
+          </div>
+        </div>
+        <div className="flex border-l border-gray-200">
+          <button
+            onClick={() => handleConfirm(t)}
+            className="w-1/2 border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-green-600 hover:text-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
+          >
+            Confirm
+          </button>
+          <button
+            onClick={() => toast.dismiss(t.id)}
+            className="w-1/2 border-l border-gray-200 rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-red-600 hover:text-red-500 focus:outline-none focus:ring-2 focus:ring-red-500"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    ),
+    {
+      duration: Infinity,
+      position: DEFAULT_POSITION,
+    },
+  );
+};
+
 export const notification = {
   success: (content: React.ReactNode, options?: NotificationOptions) => {
     return Notification({ content, status: "success", ...options });
@@ -83,6 +125,9 @@ export const notification = {
   },
   loading: (content: React.ReactNode, options?: NotificationOptions) => {
     return Notification({ content, status: "loading", ...options });
+  },
+  confirm: (content: string, customFunction: () => void) => {
+    return customNotification({ content, customFunction });
   },
   remove: (toastId: string) => {
     toast.remove(toastId);
