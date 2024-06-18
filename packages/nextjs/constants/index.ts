@@ -1,4 +1,4 @@
 import { apiUrl, rpcUrl, rpcUrlWChain } from "./AlchemyConsts";
-import { ALCHEMY_API_KEY, ALCHEMY_GAS_MANAGER_POLICY_ID } from "./EnvConsts";
+import { ALCHEMY_GAS_MANAGER_POLICY_ID, NEXT_PUBLIC_ALCHEMY_API_KEY } from "./EnvConsts";
 
-export { rpcUrl, rpcUrlWChain, apiUrl, ALCHEMY_API_KEY, ALCHEMY_GAS_MANAGER_POLICY_ID };
+export { rpcUrl, rpcUrlWChain, apiUrl, NEXT_PUBLIC_ALCHEMY_API_KEY, ALCHEMY_GAS_MANAGER_POLICY_ID };
