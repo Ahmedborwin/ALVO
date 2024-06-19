@@ -3,7 +3,7 @@ import { SupportedAccountTypes, cookieStorage, createConfig } from "@alchemy/aa-
 import { SmartAccountClientOptsSchema, sepolia } from "@alchemy/aa-core";
 import { QueryClient } from "@tanstack/react-query";
 import { z } from "zod";
-import { ALCHEMY_GAS_MANAGER_POLICY_ID, rpcUrl, rpcUrlWChain } from "~~/constants";
+import { NEXT_PUBLIC_ALCHEMY_GAS_MANAGER_POLICY_ID, rpcUrl, rpcUrlWChain } from "~~/constants";
 
 export const chain = sepolia;
 export const config = createConfig({
@@ -19,7 +19,7 @@ export const config = createConfig({
 export const queryClient = new QueryClient();
 export const accountType: SupportedAccountTypes = "LightAccount";
 export const gasManagerConfig: AlchemyGasManagerConfig = {
-  policyId: ALCHEMY_GAS_MANAGER_POLICY_ID,
+  policyId: NEXT_PUBLIC_ALCHEMY_GAS_MANAGER_POLICY_ID,
 };
 type SmartAccountClienOptions = z.infer<typeof SmartAccountClientOptsSchema>;
 export const accountClientOptions: Partial<SmartAccountClienOptions> = {
