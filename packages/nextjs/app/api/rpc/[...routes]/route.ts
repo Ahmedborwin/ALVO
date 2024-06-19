@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import { ALCHEMY_API_KEY, apiUrl } from "~~/constants";
+import { NEXT_PUBLIC_ALCHEMY_API_KEY, apiUrl } from "~~/constants";
 
 export async function POST(req: Request, { params }: { params: { routes: string[] } }) {
-  const apiKey = ALCHEMY_API_KEY;
+  const apiKey = NEXT_PUBLIC_ALCHEMY_API_KEY;
 
   if (apiKey == null) {
     return NextResponse.json({ error: "ALCHEMY_API_KEY is not set" }, { status: 500 });

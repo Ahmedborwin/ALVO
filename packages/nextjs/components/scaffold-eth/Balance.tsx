@@ -19,13 +19,13 @@ export const Balance = ({ address, className = "", usdMode }: BalanceProps) => {
   const { targetNetwork } = useTargetNetwork();
   const nativeCurrencyPrice = useGlobalState(state => state.nativeCurrency.price);
   const isNativeCurrencyPriceFetching = useGlobalState(state => state.nativeCurrency.isFetching);
-
   const {
     data: balance,
     isError,
     isLoading,
   } = useWatchBalance({
     address,
+    chainId: targetNetwork.id,
   });
 
   const { displayUsdMode, toggleDisplayUsdMode } = useDisplayUsdMode({ defaultUsdMode: usdMode });

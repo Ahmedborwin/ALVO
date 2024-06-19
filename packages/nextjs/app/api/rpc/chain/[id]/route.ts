@@ -1,5 +1,5 @@
 import { getChain } from "@alchemy/aa-core";
-import { ALCHEMY_API_KEY } from "~~/constants";
+import { NEXT_PUBLIC_ALCHEMY_API_KEY } from "~~/constants";
 
 export async function POST(req: Request) {
   const id = req.url?.split("/").pop();
@@ -12,7 +12,7 @@ export async function POST(req: Request) {
   }
   const rpcUrl = chain.rpcUrls.alchemy.http[0];
 
-  const apiKey = ALCHEMY_API_KEY;
+  const apiKey = NEXT_PUBLIC_ALCHEMY_API_KEY;
   if (!apiKey) {
     return new Response("ALCHEMY_API_KEY is not set", {
       status: 500,
