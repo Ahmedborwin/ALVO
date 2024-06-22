@@ -11,24 +11,15 @@ export const StravaLogin = () => {
   const connectToStrava = () => {
     window.location.href = STRAVA_AUTH_URL;
   };
-  const getToken = useCallback(
-    (authorizationCode: string) => {
-      requestToken(authorizationCode);
-    },
-    [requestToken],
-  );
+  const getToken = useCallback((authorizationCode: string) => {
+    requestToken(authorizationCode);
+  }, []);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const authorizationCode = urlParams ? urlParams.get("code") : null;
     if (authorizationCode) getToken(authorizationCode);
   }, [getToken]);
-
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const authorizationCode = urlParams ? urlParams.get("code") : null;
-    if (authorizationCode) requestToken(authorizationCode);
-  }, [requestToken]);
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-indigo-500 to-purple-700">
