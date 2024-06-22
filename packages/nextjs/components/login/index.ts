@@ -1,3 +1,4 @@
 import { LogInCard } from "./AALogin";
+import { StravaLogin } from "./StravaLogin";
 
-export { LogInCard };
+export { LogInCard, StravaLogin };

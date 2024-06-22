@@ -2,16 +2,19 @@
 
 import { Fragment, ReactNode } from "react";
 import { MoonSpinner } from "../loader";
-import { LogInCard } from "../login";
+import { LogInCard, StravaLogin } from "../login";
 import { UserOperationProvider } from "../providers/UserOperationProvider";
 import { StwwError } from "../stww";
 import { AlchemySignerStatus } from "@alchemy/aa-alchemy";
 import { useSignerStatus } from "@alchemy/aa-alchemy/react";
 import { useAccount } from "wagmi";
+import { useStravaState } from "~~/services/store/store";
 
 function GlobalWrapper({ children }: { children: ReactNode }) {
   const { isInitializing, isConnected, status } = useSignerStatus();
   const { address } = useAccount();
+
+  const stravaData = useStravaState(state => state.getStravaTokens());
 
   if (
     !address &&
@@ -23,6 +26,13 @@ function GlobalWrapper({ children }: { children: ReactNode }) {
 
   if (!address && ((!isConnected && status === AlchemySignerStatus.DISCONNECTED) || isAwaitingEmail))
     return <LogInCard isAwaitingEmail={isAwaitingEmail} />;
+
+  if (
+    ((address && status === AlchemySignerStatus.DISCONNECTED) ||
+      (!address && status === AlchemySignerStatus.CONNECTED)) &&
+    (!stravaData.access_token || !stravaData.refresh_token)
+  )
+    return <StravaLogin />;
 
   if (
     (address && status === AlchemySignerStatus.DISCONNECTED) ||
