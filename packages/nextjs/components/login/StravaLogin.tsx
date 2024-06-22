@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect } from "react";
+import { useEffect } from "react";
 import { SubmitButton } from "../buttons";
 import { STRAVA_AUTH_URL } from "~~/constants";
 import { useStrava } from "~~/hooks/strava";
@@ -11,15 +11,12 @@ export const StravaLogin = () => {
   const connectToStrava = () => {
     window.location.href = STRAVA_AUTH_URL;
   };
-  const getToken = useCallback((authorizationCode: string) => {
-    requestToken(authorizationCode);
-  }, []);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const authorizationCode = urlParams ? urlParams.get("code") : null;
-    if (authorizationCode) getToken(authorizationCode);
-  }, [getToken]);
+    if (authorizationCode) requestToken(authorizationCode);
+  }, [requestToken]);
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-indigo-500 to-purple-700">

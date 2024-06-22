@@ -13,20 +13,8 @@ export const useStrava = () => {
       return data;
     } catch (error) {
       console.error(error);
-      notification.error("Something went wrong request failed");
     }
   };
-
-  // const deAuthorizeStrava = async () => {
-  //   try {
-  //     await axios.post(STRAVA_DE_AUTHORIZE_URL);
-  //     setReinitializeData();
-  //     return;
-  //   } catch (error) {
-  //     console.error(error);
-  //     notification.error("Something went wrong request failed");
-  //   }
-  // };
 
   const refreshExpiredToken = async (refresh_token: string) => {
     try {
