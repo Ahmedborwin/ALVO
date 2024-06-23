@@ -3,7 +3,7 @@ import { PersistOptions, createJSONStorage, persist } from "zustand/middleware";
 import scaffoldConfig from "~~/scaffold.config";
 import { Athlete, StravaRefreshTokenResponse, StravaState, StravaTokenResponse } from "~~/types/utils";
 import { ChainWithAttributes } from "~~/utils/scaffold-eth";
-import { filterStravaResponse } from "~~/utils/strava";
+import { filterStravaResponse, reInitializeStravaData } from "~~/utils/strava";
 
 type GlobalState = {
   nativeCurrency: {
@@ -55,6 +55,7 @@ export const useStravaState = create<StravaState>(
       },
       setUserData: (data: StravaTokenResponse) =>
         set(state => ({ ...state, userData: filterStravaResponse(state.userData, data) })),
+      clearUserData: () => set(state => ({ ...state, userData: reInitializeStravaData(state.userData) })),
       updateTokens: ({ access_token, expires_at, expires_in, refresh_token }: StravaRefreshTokenResponse) =>
         set(state => {
           state.userData.access_token = access_token;

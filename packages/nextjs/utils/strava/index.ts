@@ -13,10 +13,10 @@ const filterAthleteDetails = (initialState: Athlete, newState: any): Athlete => 
   return newObj as Athlete;
 };
 
-// const reInitializeStravaData = (initialState: StravaTokenResponse): StravaTokenResponse => {
-//   const newObj: any = {};
-//   for (const key in initialState) if (Object.prototype.hasOwnProperty.call(initialState, key)) newObj[key] = null;
-//   return newObj as StravaTokenResponse;
-// };
+const reInitializeStravaData = (initialState: StravaTokenResponse): StravaTokenResponse => {
+  const newObj: any = {};
+  for (const key in initialState) if (Object.prototype.hasOwnProperty.call(initialState, key)) newObj[key] = null;
+  return newObj as StravaTokenResponse;
+};
 
-export { filterStravaResponse };
+export { filterStravaResponse, reInitializeStravaData };

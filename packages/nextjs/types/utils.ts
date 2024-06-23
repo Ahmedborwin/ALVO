@@ -37,6 +37,7 @@ export interface StravaState {
   userData: StravaTokenResponse;
   setUserData: (data: StravaTokenResponse) => void;
   updateTokens: (data: StravaRefreshTokenResponse) => void;
+  clearUserData: () => void;
   getStravaProfile: () => Athlete;
   getStravaTokens: () => StravaRefreshTokenResponse;
 }

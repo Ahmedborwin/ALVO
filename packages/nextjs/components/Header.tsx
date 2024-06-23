@@ -6,11 +6,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LogoutButton, SignInAgainButton } from "./buttons";
 import { AlchemySignerStatus } from "@alchemy/aa-alchemy";
-import { useSignerStatus } from "@alchemy/aa-alchemy/react";
+import { useSignerStatus, useAccount as userOperationAccount } from "@alchemy/aa-alchemy/react";
 import { useAccount } from "wagmi";
 import { Bars3Icon, BugAntIcon } from "@heroicons/react/24/outline";
 import { FaucetButton, RainbowKitCustomConnectButton } from "~~/components/scaffold-eth";
+import { accountType } from "~~/config/AlchemyConfig";
 import { useOutsideClick } from "~~/hooks/scaffold-eth";
+import { useStravaState } from "~~/services/store/store";
 
 type HeaderMenuLink = {
   label: string;
@@ -30,35 +32,10 @@ export const menuLinks: HeaderMenuLink[] = [
   },
 ];
 
-export const HeaderMenuLinks = () => {
-  const pathname = usePathname();
-
-  return (
-    <>
-      {menuLinks.map(({ label, href, icon }) => {
-        const isActive = pathname === href;
-        return (
-          <li key={href}>
-            <Link
-              href={href}
-              passHref
-              className={`${
-                isActive ? "bg-secondary shadow-md" : ""
-              } hover:bg-secondary hover:shadow-md focus:!bg-secondary active:!text-neutral py-1.5 px-3 text-sm rounded-full gap-2 grid grid-flow-col`}
-            >
-              {icon}
-              <span>{label}</span>
-            </Link>
-          </li>
-        );
-      })}
-    </>
-  );
-};
-
 const WalletUI = () => {
   const { isConnected, status } = useSignerStatus();
   const { address } = useAccount();
+
   if (!isConnected && status === AlchemySignerStatus.DISCONNECTED)
     return (
       <div className="navbar-end flex-grow mr-4">
@@ -77,6 +54,45 @@ const WalletUI = () => {
     );
 };
 
+export const HeaderMenuLinks = ({ isDrawerOpen }: { isDrawerOpen?: boolean }) => {
+  const pathname = usePathname();
+  const { address: accountAddress } = userOperationAccount({ type: accountType });
+  const { address } = useAccount();
+  const stravaData = useStravaState(state => state.getStravaTokens());
+
+  if ((!accountAddress && !address) || (!stravaData.access_token && !stravaData.refresh_token)) return "";
+
+  return (
+    <>
+      {menuLinks.map(({ label, href, icon }) => {
+        const isActive = pathname === href;
+        return (
+          <Link
+            key={href}
+            href={href}
+            passHref
+            className={`
+              flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium
+              ${isActive ? "bg-white/20 text-white shadow-md" : "text-indigo-100 hover:bg-white/10 hover:text-white"}
+              transition-all duration-200
+            `}
+          >
+            {icon}
+            <span>{label}</span>
+          </Link>
+        );
+      })}
+      {isDrawerOpen ? (
+        <div className="flex items-center">
+          <WalletUI />
+        </div>
+      ) : (
+        ""
+      )}
+    </>
+  );
+};
+
 export const Header = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const burgerMenuRef = useRef<HTMLDivElement>(null);
@@ -86,44 +102,48 @@ export const Header = () => {
   );
 
   return (
-    <div className="sticky lg:static top-0 navbar bg-base-100 min-h-0 flex-shrink-0 justify-between z-20 shadow-md shadow-secondary px-0 sm:px-2">
-      <div className="navbar-start w-auto lg:w-1/2">
-        <div className="lg:hidden dropdown" ref={burgerMenuRef}>
-          <label
-            tabIndex={0}
-            className={`ml-1 btn btn-ghost ${isDrawerOpen ? "hover:bg-secondary" : "hover:bg-transparent"}`}
-            onClick={() => {
-              setIsDrawerOpen(prevIsOpenState => !prevIsOpenState);
-            }}
-          >
-            <Bars3Icon className="h-1/2" />
-          </label>
-          {isDrawerOpen && (
-            <ul
-              tabIndex={0}
-              className="menu menu-compact dropdown-content mt-3 p-2 shadow bg-base-100 rounded-box w-52"
-              onClick={() => {
-                setIsDrawerOpen(false);
-              }}
-            >
-              <HeaderMenuLinks />
-            </ul>
-          )}
+    <header className="sticky top-0 z-20 w-full backdrop-blur-md bg-gradient-to-r from-[#5e40a0]/95 to-[#6b429a]/95 border-b border-white/10 shadow-lg">
+      <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center py-4">
+          <div className="flex items-center">
+            <Link href="/" passHref className="flex items-center gap-3">
+              <div className="relative w-10 h-10">
+                <Image alt="ChainHabits logo" className="cursor-pointer" fill src="/logo.svg" />
+              </div>
+              <div className="flex flex-col">
+                <span className="font-bold text-white text-lg leading-tight">ChainHabits</span>
+                <span className="text-indigo-200 text-xs">Forge Your Path</span>
+              </div>
+            </Link>
+          </div>
+
+          <nav className="hidden lg:flex items-center space-x-4">
+            <HeaderMenuLinks />
+          </nav>
+
+          <div className="flex items-center gap-4">
+            <div className="hidden lg:flex">
+              <WalletUI />
+            </div>
+            <div className="lg:hidden">
+              <button
+                className="p-2 rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors duration-200"
+                onClick={() => setIsDrawerOpen(prev => !prev)}
+              >
+                <Bars3Icon className="h-6 w-6" />
+              </button>
+            </div>
+          </div>
         </div>
-        <Link href="/" passHref className="hidden lg:flex items-center gap-2 ml-4 mr-6 shrink-0">
-          <div className="flex relative w-10 h-10">
-            <Image alt="SE2 logo" className="cursor-pointer" fill src="/logo.svg" />
-          </div>
-          <div className="flex flex-col">
-            <span className="font-bold leading-tight">Scaffold-ETH</span>
-            <span className="text-xs">Ethereum dev stack</span>
-          </div>
-        </Link>
-        <ul className="hidden lg:flex lg:flex-nowrap menu menu-horizontal px-1 gap-2">
-          <HeaderMenuLinks />
-        </ul>
       </div>
-      <WalletUI />
-    </div>
+
+      {isDrawerOpen && (
+        <div className="lg:hidden">
+          <nav className="px-4 pt-2 pb-4 space-y-2">
+            <HeaderMenuLinks isDrawerOpen={isDrawerOpen} />
+          </nav>
+        </div>
+      )}
+    </header>
   );
 };

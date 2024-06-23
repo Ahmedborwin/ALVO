@@ -5,7 +5,7 @@ import { useStravaState } from "~~/services/store/store";
 import { notification } from "~~/utils/scaffold-eth";
 
 export const useStrava = () => {
-  const { setUserData, updateTokens, getStravaTokens } = useStravaState(state => state);
+  const { setUserData, updateTokens, getStravaTokens, clearUserData } = useStravaState(state => state);
   const requestToken = async (authorizationCode: string) => {
     try {
       const { data } = await axios.post(`${STRAVA_REQUEST_TOKEN_URL}&code=${authorizationCode}`);
@@ -33,6 +33,10 @@ export const useStrava = () => {
     }
   };
 
+  const clearStravaData = () => {
+    clearUserData();
+  };
+
   const callStravaApi = async (cb: () => Promise<any>) => {
     try {
       const stateData = getStravaTokens();
@@ -54,6 +58,7 @@ export const useStrava = () => {
 
   return {
     requestToken,
+    clearStravaData,
     callStravaApi,
   };
 };
