@@ -15,7 +15,7 @@ const LogoutButton = () => {
   const { data: ensName } = useEnsName({ address });
 
   return address ? (
-    <button className="logout-button bg-secondary text-neutral py-2 px-4 rounded-full flex items-center justify-center hover:bg-secondary/80 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-secondary/50 active:bg-secondary/70 transition-all duration-300">
+    <button className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium bg-white/20 text-black shadow-md transition-all duration-200">
       <div className="flex flex-col items-center mr-1">
         <Balance address={address as Address} className="min-h-0 h-auto" />
         <span className="text-xs" style={{ color: networkColor }}>

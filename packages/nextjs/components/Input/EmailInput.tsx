@@ -1,11 +1,25 @@
-import { MailSVG } from "../svg";
+import { MailSVG, MailSVG2 } from "../svg";
 import CustomInput from "./CustomInput";
 
-function EmailInput({ value, onChange }: { value: string; onChange: (value: string) => void }) {
+function EmailInput({
+  value,
+  onChange,
+  className,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  className?: string;
+}) {
   return (
     <div className="relative">
-      <CustomInput type="email" placeholder="Enter your email" value={value} onChange={onChange} />
-      <div className="absolute inset-y-0 right-0 pr-3 flex items-center">{MailSVG}</div>
+      <CustomInput
+        type="email"
+        className={className}
+        placeholder="Enter your email"
+        value={value}
+        onChange={onChange}
+      />
+      <div className="absolute inset-y-0 right-0 pr-3 flex items-center">{className ? MailSVG2 : MailSVG}</div>
     </div>
   );
 }

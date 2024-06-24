@@ -16,6 +16,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { BlockieAvatar, isENS } from "~~/components/scaffold-eth";
 import { useOutsideClick } from "~~/hooks/scaffold-eth";
+import { useStravaState } from "~~/services/store/store";
 import { getTargetNetworks, notification } from "~~/utils/scaffold-eth";
 
 const allowedNetworks = getTargetNetworks();
@@ -35,6 +36,8 @@ export const AddressInfoDropdown = ({
 }: AddressInfoDropdownProps) => {
   const { disconnect } = useDisconnect();
   const { logout } = useLogout();
+  const { clearUserData } = useStravaState(state => state);
+
   const checkSumAddress = getAddress(address);
 
   const [addressCopied, setAddressCopied] = useState(false);
@@ -131,6 +134,7 @@ export const AddressInfoDropdown = ({
                 notification.confirm("Are you sure?", () => {
                   logout();
                   disconnect();
+                  clearUserData();
                 });
               }}
             >
