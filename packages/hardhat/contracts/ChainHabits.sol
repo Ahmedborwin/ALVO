@@ -44,6 +44,9 @@ contract ChainHabits {
 		uint256 SuccessfulChallenges;
 		uint256 TotalStaked;
 		uint256 TotalDonated;
+		uint256 userID;
+		string accessToken;
+		string refreshToken;
 	}
 
 	struct ChallengeDetails {
@@ -73,13 +76,24 @@ contract ChainHabits {
 
 	//Create New Manager Pofile
 	function registerNewUser(
-		string calldata _username
+		string calldata _username,
+		string calldata _accessToken,
+		string calldata _refreshToken
 	) external isUserNotRegistered(msg.sender) {
 		if (isUserNameTaken[_username]) {
 			revert CHAINHABITS__UsernameTaken();
 		}
 
-		userTable[msg.sender] = UserDetails(_username, 0, 0, 0, 0);
+		userTable[msg.sender] = UserDetails(
+			_username,
+			0,
+			0,
+			0,
+			0,
+			0,
+			_accessToken,
+			_refreshToken
+		);
 		isUserRegisteredTable[msg.sender] = true;
 
 		//emit New Manager Event
@@ -109,8 +123,10 @@ contract ChainHabits {
 	}
 
 	//GETTER FUNCTIONS
-	function getUserDetails() external view returns (UserDetails memory) {
-		return userTable[msg.sender];
+	function getUserDetails(
+		address _user
+	) external view returns (UserDetails memory) {
+		return userTable[_user];
 	}
 
 	function getChallengeDetails(
