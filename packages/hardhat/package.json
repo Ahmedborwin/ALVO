@@ -17,6 +17,7 @@
     "hardhat-verify": "hardhat verify"
   },
   "devDependencies": {
+    "@chainlink/contracts": "^1.1.1",
     "@ethersproject/abi": "^5.7.0",
     "@ethersproject/providers": "^5.7.1",
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.3",
