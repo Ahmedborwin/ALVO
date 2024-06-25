@@ -22,4 +22,7 @@ node_modules
 # cli
 dist
 
-node_modules.nosync
+# subgraph
+subgraph/build/*
+subgraph/generated/*
+subgraph/graph-node/data/*
