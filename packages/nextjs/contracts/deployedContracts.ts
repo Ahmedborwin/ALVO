@@ -699,411 +699,6 @@ const deployedContracts = {
     },
   },
   31337: {
-    APIConsumer: {
-      address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
-      abi: [
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "router",
-              type: "address",
-            },
-            {
-              internalType: "bytes32",
-              name: "_donId",
-              type: "bytes32",
-            },
-          ],
-          stateMutability: "nonpayable",
-          type: "constructor",
-        },
-        {
-          inputs: [],
-          name: "EmptyArgs",
-          type: "error",
-        },
-        {
-          inputs: [],
-          name: "EmptySource",
-          type: "error",
-        },
-        {
-          inputs: [],
-          name: "NoInlineSecrets",
-          type: "error",
-        },
-        {
-          inputs: [],
-          name: "OnlyRouterCanFulfill",
-          type: "error",
-        },
-        {
-          anonymous: false,
-          inputs: [
-            {
-              indexed: true,
-              internalType: "address",
-              name: "from",
-              type: "address",
-            },
-            {
-              indexed: true,
-              internalType: "address",
-              name: "to",
-              type: "address",
-            },
-          ],
-          name: "OwnershipTransferRequested",
-          type: "event",
-        },
-        {
-          anonymous: false,
-          inputs: [
-            {
-              indexed: true,
-              internalType: "address",
-              name: "from",
-              type: "address",
-            },
-            {
-              indexed: true,
-              internalType: "address",
-              name: "to",
-              type: "address",
-            },
-          ],
-          name: "OwnershipTransferred",
-          type: "event",
-        },
-        {
-          anonymous: false,
-          inputs: [
-            {
-              indexed: true,
-              internalType: "bytes32",
-              name: "id",
-              type: "bytes32",
-            },
-          ],
-          name: "RequestFulfilled",
-          type: "event",
-        },
-        {
-          anonymous: false,
-          inputs: [
-            {
-              indexed: true,
-              internalType: "bytes32",
-              name: "id",
-              type: "bytes32",
-            },
-          ],
-          name: "RequestSent",
-          type: "event",
-        },
-        {
-          anonymous: false,
-          inputs: [
-            {
-              indexed: false,
-              internalType: "bytes32",
-              name: "_requestId",
-              type: "bytes32",
-            },
-            {
-              indexed: false,
-              internalType: "bytes",
-              name: "_response",
-              type: "bytes",
-            },
-          ],
-          name: "ResponseReceived",
-          type: "event",
-        },
-        {
-          anonymous: false,
-          inputs: [
-            {
-              indexed: false,
-              internalType: "bytes32",
-              name: "requestID",
-              type: "bytes32",
-            },
-          ],
-          name: "_RequestSent",
-          type: "event",
-        },
-        {
-          inputs: [],
-          name: "StravaCall",
-          outputs: [
-            {
-              internalType: "string",
-              name: "",
-              type: "string",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "_router",
-          outputs: [
-            {
-              internalType: "address",
-              name: "",
-              type: "address",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "acceptOwnership",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "bytes32",
-              name: "_bytes32",
-              type: "bytes32",
-            },
-          ],
-          name: "bytes32ToString",
-          outputs: [
-            {
-              internalType: "string",
-              name: "",
-              type: "string",
-            },
-          ],
-          stateMutability: "pure",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "callbackGasLimit",
-          outputs: [
-            {
-              internalType: "uint32",
-              name: "",
-              type: "uint32",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "contract_Admin",
-          outputs: [
-            {
-              internalType: "address",
-              name: "",
-              type: "address",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "donId",
-          outputs: [
-            {
-              internalType: "bytes32",
-              name: "",
-              type: "bytes32",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "bytes32",
-              name: "requestId",
-              type: "bytes32",
-            },
-            {
-              internalType: "bytes",
-              name: "response",
-              type: "bytes",
-            },
-            {
-              internalType: "bytes",
-              name: "err",
-              type: "bytes",
-            },
-          ],
-          name: "handleOracleFulfillment",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "owner",
-          outputs: [
-            {
-              internalType: "address",
-              name: "",
-              type: "address",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "string",
-              name: "_stravaCall",
-              type: "string",
-            },
-          ],
-          name: "populateStravaCall",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "uint64",
-              name: "_subId",
-              type: "uint64",
-            },
-            {
-              internalType: "uint32",
-              name: "_callbackGasLimit",
-              type: "uint32",
-            },
-          ],
-          name: "populateSubIdANDGasLimit",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "s_lastError",
-          outputs: [
-            {
-              internalType: "bytes",
-              name: "",
-              type: "bytes",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "s_lastRequestId",
-          outputs: [
-            {
-              internalType: "bytes32",
-              name: "",
-              type: "bytes32",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "s_lastResponse",
-          outputs: [
-            {
-              internalType: "bytes",
-              name: "",
-              type: "bytes",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "string[]",
-              name: "args",
-              type: "string[]",
-            },
-          ],
-          name: "sendRequest",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "_newAdmin",
-              type: "address",
-            },
-          ],
-          name: "setContractAdmin",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "bytes32",
-              name: "newDonId",
-              type: "bytes32",
-            },
-          ],
-          name: "setDonId",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "subscriptionId",
-          outputs: [
-            {
-              internalType: "uint64",
-              name: "",
-              type: "uint64",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "to",
-              type: "address",
-            },
-          ],
-          name: "transferOwnership",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-      ],
-      inheritedFunctions: {
-        handleOracleFulfillment: "@chainlink/contracts/src/v0.8/functions/v1_0_0/FunctionsClient.sol",
-        acceptOwnership: "@chainlink/contracts/src/v0.8/shared/access/ConfirmedOwner.sol",
-        owner: "@chainlink/contracts/src/v0.8/shared/access/ConfirmedOwner.sol",
-        transferOwnership: "@chainlink/contracts/src/v0.8/shared/access/ConfirmedOwner.sol",
-      },
-    },
     ChainHabits: {
       address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
       abi: [
@@ -1266,7 +861,13 @@ const deployedContracts = {
           type: "function",
         },
         {
-          inputs: [],
+          inputs: [
+            {
+              internalType: "address",
+              name: "_user",
+              type: "address",
+            },
+          ],
           name: "getUserDetails",
           outputs: [
             {
@@ -1295,6 +896,21 @@ const deployedContracts = {
                   internalType: "uint256",
                   name: "TotalDonated",
                   type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "userID",
+                  type: "uint256",
+                },
+                {
+                  internalType: "string",
+                  name: "accessToken",
+                  type: "string",
+                },
+                {
+                  internalType: "string",
+                  name: "refreshToken",
+                  type: "string",
                 },
               ],
               internalType: "struct ChainHabits.UserDetails",
@@ -1348,6 +964,16 @@ const deployedContracts = {
             {
               internalType: "string",
               name: "_username",
+              type: "string",
+            },
+            {
+              internalType: "string",
+              name: "_accessToken",
+              type: "string",
+            },
+            {
+              internalType: "string",
+              name: "_refreshToken",
               type: "string",
             },
           ],

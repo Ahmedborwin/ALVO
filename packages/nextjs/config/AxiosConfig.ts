@@ -1,6 +1,6 @@
 import axios from "axios";
 import { STRAVA_AXIOS_BASE_URL } from "~~/constants";
-import { useStravaState } from "~~/services/store/store";
+import { StravaTokenResponse } from "~~/types/utils";
 
 const AxiosInstance = axios.create({
   baseURL: STRAVA_AXIOS_BASE_URL,
@@ -11,10 +11,8 @@ const AxiosInstance = axios.create({
 
 AxiosInstance.interceptors.request.use(
   config => {
-    const accessToken = useStravaState(state => state.getStravaTokens()).access_token;
-    if (accessToken) {
-      if (config.headers) config.headers.Authorization = `Bearer ${accessToken}`;
-    }
+    const accessToken: StravaTokenResponse = JSON.parse(localStorage.getItem("strava-data") ?? "")?.state?.userData;
+    if (accessToken) if (config.headers) config.headers.Authorization = `Bearer ${accessToken.access_token}`;
     return config;
   },
   error => {

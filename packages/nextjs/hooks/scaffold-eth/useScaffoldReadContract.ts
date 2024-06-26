@@ -1,9 +1,12 @@
 import { useEffect } from "react";
 import { useTargetNetwork } from "./useTargetNetwork";
+import { useAccount as useAlchemyAccount } from "@alchemy/aa-alchemy/react";
 import { QueryObserverResult, RefetchOptions, useQueryClient } from "@tanstack/react-query";
 import type { ExtractAbiFunctionNames } from "abitype";
 import { ReadContractErrorType } from "viem";
 import { useBlockNumber, useReadContract } from "wagmi";
+import { useAccount } from "wagmi";
+import { accountType } from "~~/config/AlchemyConfig";
 import { useDeployedContractInfo } from "~~/hooks/scaffold-eth";
 import {
   AbiFunctionReturnType,
@@ -27,8 +30,11 @@ export const useScaffoldReadContract = <
   contractName,
   functionName,
   args,
+  account,
   ...readConfig
 }: UseScaffoldReadConfig<TContractName, TFunctionName>) => {
+  const { address } = useAccount();
+  const { address: alchemyAddress } = useAlchemyAccount({ type: accountType });
   const { data: deployedContract } = useDeployedContractInfo(contractName);
   const { targetNetwork } = useTargetNetwork();
   const { query: queryOptions, watch, ...readContractConfig } = readConfig;
@@ -40,6 +46,7 @@ export const useScaffoldReadContract = <
     functionName,
     address: deployedContract?.address,
     abi: deployedContract?.abi,
+    account: account ?? alchemyAddress ?? address,
     args,
     ...(readContractConfig as any),
     query: {

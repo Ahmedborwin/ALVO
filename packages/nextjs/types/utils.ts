@@ -41,3 +41,8 @@ export interface StravaState {
   getStravaProfile: () => Athlete;
   getStravaTokens: () => StravaRefreshTokenResponse;
 }
+
+export type ProfileStatProps = {
+  label: string;
+  value: string | number;
+};
