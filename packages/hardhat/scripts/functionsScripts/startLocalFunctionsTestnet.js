@@ -3,8 +3,9 @@ const path = require("path");
 const fs = require("fs");
 const { startLocalFunctionsTestnet } = require("@chainlink/functions-toolkit");
 const { parseEther, Wallet } = require("ethers");
-// Loads environment variables from .env.enc file (if it exists)
-require("dotenv").config("../../.env");
+
+// TODO why cannot i not get private key from env??
+require("dotenv").config(path.resolve(__dirname, "../../.env"));
 
 (async () => {
   const requestConfigPath = path.join(process.cwd(), "Functions-request-config.js"); // @dev Update this to point to your desired request config file
@@ -29,7 +30,7 @@ require("dotenv").config("../../.env");
   });
 
   // Fund wallets with ETH and LINK
-  const addressToFund = new Wallet("0x6c455eb33b4e2abaea3396083b51c3968175437d7dbc7b03ec2675c34c05070e").address;
+  const addressToFund = new Wallet("bf0c60264942544c1ecb566e558207f5d84d08bd66d524bbc7df9b92b9d6f946").address;
   await localFunctionsTestnetInfo.getFunds(addressToFund, {
     weiAmount: parseEther("100").toString(), // 100 ETH
     juelsAmount: parseEther("100").toString(), // 100 LINK

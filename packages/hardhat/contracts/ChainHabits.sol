@@ -77,6 +77,7 @@ contract ChainHabits {
 	//Create New Manager Pofile
 	function registerNewUser(
 		string calldata _username,
+		uint256 userID,
 		string calldata _accessToken,
 		string calldata _refreshToken
 	) external isUserNotRegistered(msg.sender) {
@@ -90,7 +91,7 @@ contract ChainHabits {
 			0,
 			0,
 			0,
-			0,
+			userID,
 			_accessToken,
 			_refreshToken
 		);

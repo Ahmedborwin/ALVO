@@ -14,7 +14,8 @@
     "format": "prettier --write ./*.ts ./deploy/**/*.ts ./scripts/**/*.ts ./test/**/*.ts",
     "test": "REPORT_GAS=true hardhat test --network hardhat",
     "verify": "hardhat etherscan-verify",
-    "hardhat-verify": "hardhat verify"
+    "hardhat-verify": "hardhat verify",
+    "BackendScript": "yarn hardhat run scripts/chainHabitsBackEndService.ts --network localFunctionsTestnet"
   },
   "devDependencies": {
     "@chainlink/contracts": "^1.1.1",
