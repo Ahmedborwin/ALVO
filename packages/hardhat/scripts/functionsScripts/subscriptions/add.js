@@ -1,11 +1,23 @@
 const { SubscriptionManager } = require("@chainlink/functions-toolkit");
 const { networks } = require("../../../networks");
+const dotenv = require("dotenv");
+const path = require("path");
 
-async function addConsumer(contractAddress, subId, networkName = "baseSepolia", signer) {
+dotenv.config();
+
+async function addConsumer(contractAddress, subId, networkName = "baseSepolia") {
+  // Dynamically import the specific version of ethers
+  const ethersPath = path.resolve(__dirname, "./node_modules/ethers");
+  const { ethers } = await import(ethersPath);
+
   const consumerAddress = contractAddress;
   const subscriptionId = parseInt(subId);
 
-  console.log(signer, "@@@signer");
+  const provider = new ethers.providers.JsonRpcProvider(networks[networkName].url);
+  const wallet = new ethers.Wallet("bf0c60264942544c1ecb566e558207f5d84d08bd66d524bbc7df9b92b9d6f946");
+  const signer = wallet.connect(provider);
+
+  console.log(signer);
 
   const linkTokenAddress = networks[networkName].linkToken;
   const functionsRouterAddress = networks[networkName].functionsRouter;
@@ -28,7 +40,7 @@ if (!subId || !contractAddress) {
   process.exit(1);
 }
 
-addConsumer(subId, contractAddress).catch(error => {
+addConsumer(contractAddress, subId).catch(error => {
   console.error(error);
   process.exit(1);
 });
