@@ -50,6 +50,7 @@ export const StravaLogin = () => {
     const handleTransaction = async () => {
       try {
         setIsLoading(true);
+        notification.info("Please make the transaction to register account");
         await writeYourContractAsync({
           functionName: "registerNewUser",
           args: [
@@ -59,9 +60,11 @@ export const StravaLogin = () => {
           ],
         });
         await storeStravaToken(authorizationCode as string);
+        notification.success("Successfully registered");
       } catch (e) {
         console.error("Error in transaction", e);
       } finally {
+        toast.remove();
         setIsLoading(false);
       }
     };
