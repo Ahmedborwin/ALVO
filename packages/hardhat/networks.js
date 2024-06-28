@@ -16,11 +16,10 @@ const isSimulation = process.argv.length === 3 && process.argv[2] === "functions
 
 // Set EVM private keys (required)
 const PRIVATE_KEY = process.env.DEPLOYER_PRIVATE_KEY;
-
 // TODO @dev - set this to run the accept.js task.
 const PRIVATE_KEY_2 = process.env.PRIVATE_KEY_2;
 
-const providerApiKey = process.env.ALCHEMY_API_KEY || "oKxs-03sij-U_N0iOlrSsZFr29-IqbuF";
+const ALCHEMY_KEY = process.env.ALCHEMY_API_KEY || "oKxs-03sij-U_N0iOlrSsZFr29-IqbuF";
 
 if (!isTestEnvironment && !isSimulation && !PRIVATE_KEY) {
   throw Error("Set the PRIVATE_KEY environment variable with your EVM wallet private key");
@@ -147,7 +146,7 @@ const networks = {
     vrfSubscriptionId: "22893234025567037033211099490406710378626671179684264872588321889309253644677", // add your ID here!
   },
   arbitrumSepolia: {
-    url: `https://arb-sepolia.g.alchemy.com/v2/${providerApiKey}` || "UNSET",
+    url: `https://arb-sepolia.g.alchemy.com/v2/${ALCHEMY_KEY}` || "UNSET",
     gasPrice: undefined,
     nonce: undefined,
     accounts,
@@ -171,10 +170,11 @@ const networks = {
     vrfSubscriptionId: "48125460975452738352769560243362603208942727282100407618626170760680889733130", // add your ID here!
   },
   baseSepolia: {
-    url: process.env.BASE_SEPOLIA_RPC_URL || "UNSET", // https://docs.basescan.org/v/sepolia-basescan/
+    url: `https://base-sepolia.g.alchemy.com/v2/${ALCHEMY_KEY}`,
     gasPrice: undefined,
     nonce: undefined,
     accounts,
+    subscriptionId: 98,
     verifyApiKey: process.env.BASESCAN_API_KEY || "UNSET",
     chainId: 84532,
     confirmations: DEFAULT_VERIFICATION_BLOCK_CONFIRMATIONS,

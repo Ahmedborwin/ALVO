@@ -9,9 +9,6 @@ const defaultConfigPath = path.join(__dirname, "../../Functions-request-config.j
 // Get the config path from the command line arguments or use the default
 const args = process.argv.slice(2);
 let configPath = defaultConfigPath;
-if (args[0]) {
-  configPath = path.isAbsolute(args[0]) ? args[0] : path.join(process.cwd(), args[0]);
-}
 
 // Check if the config file exists
 if (!fs.existsSync(configPath)) {

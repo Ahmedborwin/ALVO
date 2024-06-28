@@ -14,6 +14,7 @@
     "chain": "yarn workspace @se-2/hardhat chain",
     "fork": "yarn workspace @se-2/hardhat fork",
     "deploy": "yarn workspace @se-2/hardhat deploy",
+    "BackendScript": "yarn workspace @se-2/hardhat BackendScript",
     "verify": "yarn workspace @se-2/hardhat verify",
     "hardhat-verify": "yarn workspace @se-2/hardhat hardhat-verify",
     "compile": "yarn workspace @se-2/hardhat compile",
@@ -47,8 +48,10 @@
   "packageManager": "yarn@3.2.3",
   "devDependencies": {
     "@chainlink/functions-toolkit": "^0.2.8",
+    "axios": "^1.7.2",
     "husky": "^8.0.1",
-    "lint-staged": "^13.0.3"
+    "lint-staged": "^13.0.3",
+    "ora": "^8.0.1"
   },
   "engines": {
     "node": ">=18.17.0"

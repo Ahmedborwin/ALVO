@@ -2,8 +2,9 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
 import { Contract } from "ethers";
 import { networks } from "../networks.js"; // Import networks
-import * as fs from "fs"; // Import fs module
-import * as path from "path"; // Import path module
+import * as fs from "fs";
+import * as path from "path";
+import addSubscription from "../scripts/functionsScripts/subscriptions/add";
 /**
  *
  * @param hre HardhatRuntimeEnvironment object.
@@ -28,7 +29,8 @@ const deployAPIConsumer: DeployFunction = async function (hre: HardhatRuntimeEnv
 
   // Get the deployed contract to interact with it after deploying.
   const apiConsumer = await hre.ethers.getContract<Contract>("APIConsumer", deployer);
-  console.log("👋 API Consumer Deployed to:", await apiConsumer.getAddress());
+  const apiConsumerAddress = await apiConsumer.getAddress();
+  console.log("👋 API Consumer Deployed to: ", apiConsumerAddress);
 
   //pre-populate variables
   //populate js script for gameEngine
@@ -37,6 +39,23 @@ const deployAPIConsumer: DeployFunction = async function (hre: HardhatRuntimeEnv
 
   //populate subID and gaslimit
   await apiConsumer.populateSubIdANDGasLimit(subId, callbackGasLimit);
+
+  //verfiy smart contract
+  if (hre.network.name !== "localhost" && hre.network.name !== "localFunctionsTestnet") {
+    console.log("-----------Verifying Contract-----------");
+    await hre.run("verify:verify", {
+      address: apiConsumerAddress,
+      constructorArguments: [functionsRouterAddress, donIdBytes32],
+    });
+  }
+
+  if (hre.network.name == "localFunctionsTestnet") {
+    //create subscription
+  } else if (hre.network.name !== "localhost") {
+    //Add API address as a consumer to functions subscription
+    console.log("-----------add consumer to subscription-------------------");
+    await addSubscription(apiConsumerAddress, subId, hre.network.name, signer);
+  }
 };
 
 export default deployAPIConsumer;

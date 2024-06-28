@@ -1,18 +1,15 @@
 // build HTTP request object
 const athleteId = args[0];
-const beforeDate = args[1];
-const afterDate = args[2];
 
 const stravaGetAtheleteRequest = Functions.makeHttpRequest({
-  url: `https://www.strava.com/api/v3/athlete/activities?before=${beforeDate}&after=${afterDate}&page=1&per_page=30`,
+  url: `https://www.strava.com/api/v3/athletes/${athleteId}/stats`,
   headers: {
     "Content-Type": `application/json`,
-    Authorization: `Bearer 9b319fc542e8cd2e3284d76453612b9c5e5b9a45`,
+    Authorization: `Bearer ${secrets.accessToken}`,
   },
 });
 
 // Make the HTTP request
-
 const stravaGetAtheleteResponse = await stravaGetAtheleteRequest;
 
 if (stravaGetAtheleteResponse.error) {
@@ -21,24 +18,13 @@ if (stravaGetAtheleteResponse.error) {
 }
 
 const data = stravaGetAtheleteResponse["data"];
-
 if (data.Response === "Error") {
   console.error(data.Message);
   throw Error(`Functional error. Read message: ${data.Message}`);
 }
 
-let arrayOfRuns = data.filter(event => {
-  return event.workout_type == 0;
-});
+const { distance } = data["all_run_totals"];
 
-console.log(arrayOfRuns);
-const initialValue = 0;
-let distanceLogged = arrayOfRuns.reduce((acc, event) => {
-  return acc + parseInt(event.distance);
-}, 0);
+const result = parseInt(distance);
 
-distanceLogged / 100;
-
-console.log("meters logged:", distanceLogged);
-
-return Functions.encodeUint256(distanceLogged);
+return Functions.encodeUint256(result);

@@ -32,7 +32,17 @@ const deployChainHabits: DeployFunction = async function (hre: HardhatRuntimeEnv
 
   // Get the deployed contract to interact with it after deploying.
   const chainHabits = await hre.ethers.getContract<Contract>("ChainHabits", deployer);
-  console.log("👋 ChainHabits Deployed:", await chainHabits.getAddress());
+  const chainHabitsAddress = await chainHabits.getAddress();
+  console.log("👋 ChainHabits Deployed: ", chainHabitsAddress);
+
+  //verfiy smart contract
+  if (hre.network.name !== "localhost" && hre.network.name !== "localFunctionsTestnet") {
+    console.log("-----------Verifying Contract-----------");
+    await hre.run("verify:verify", {
+      address: chainHabitsAddress,
+      constructorArguments: [],
+    });
+  }
 };
 
 export default deployChainHabits;
