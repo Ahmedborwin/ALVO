@@ -23,7 +23,6 @@
         "typescript": "^5.0.4"
     },
     "devDependencies": {
-        "@types/chalk": "^2.2.0",
         "@types/node": "^20.11.17",
         "matchstick-as": "^0.6.0"
     }
