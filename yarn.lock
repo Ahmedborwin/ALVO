@@ -139,8 +139,8 @@ __metadata:
   linkType: hard
 
 "@apollo/client@npm:^3.9.4":
-  version: 3.10.6
-  resolution: "@apollo/client@npm:3.10.6"
+  version: 3.10.8
+  resolution: "@apollo/client@npm:3.10.8"
   dependencies:
     "@graphql-typed-document-node/core": ^3.1.1
     "@wry/caches": ^1.0.0
@@ -171,7 +171,7 @@ __metadata:
       optional: true
     subscriptions-transport-ws:
       optional: true
-  checksum: b37a49af0f5315f0de890b8f8bd03d16d88477fba861985582a6c101c3522e60c10bce399f2eff18a094bb094301ee94abe2301648131739f1eddf52c1eb9992
+  checksum: 965e95389bdbde8aa5f542f11860fd930438f635560c766c716f186d5a9d6c5f0bfb31088cf28150c4f3969191030f1bbc0254418738a5737568108e96ffd815
   languageName: node
   linkType: hard
 
@@ -4507,11 +4507,10 @@ __metadata:
   dependencies:
     "@graphprotocol/graph-cli": ^0.55.0
     "@graphprotocol/graph-ts": ^0.31.0
-    "@types/chalk": ^2.2.0
     "@types/node": ^20.11.17
     matchstick-as: ^0.6.0
     ts-node: ^10.9.1
-    typescript: ^5.0.4
+    typescript: ^5.1.6
   languageName: unknown
   linkType: soft
 
@@ -5243,15 +5242,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/chalk@npm:^2.2.0":
-  version: 2.2.0
-  resolution: "@types/chalk@npm:2.2.0"
-  dependencies:
-    chalk: "*"
-  checksum: 846437590d0bf0026d8c2f454e5d91a486becfabde61c0441025e791a0fed75304e143717bc4d025569394dcce5a32f2c53d97253d0c735ac1abae63f1b25c3e
-  languageName: node
-  linkType: hard
-
 "@types/cli-progress@npm:^3.11.0":
   version: 3.11.5
   resolution: "@types/cli-progress@npm:3.11.5"
@@ -5459,11 +5449,11 @@ __metadata:
   linkType: hard
 
 "@types/node@npm:>=13.7.0, @types/node@npm:^20.11.17":
-  version: 20.14.8
-  resolution: "@types/node@npm:20.14.8"
+  version: 20.14.9
+  resolution: "@types/node@npm:20.14.9"
   dependencies:
     undici-types: ~5.26.4
-  checksum: a9128840005d4a0aba68826e22ac0fdd86bb9073f1d274217d3509b52f969d1aab83415c85a8461259f33cf34f9eee02fb13dca059865bed2ba2e728bc936a76
+  checksum: 5e9eda1ac8c6cc6bcd1063903ae195eaede9aad1bdad00408a919409cfbcdd2d6535aa3d50346f0d385528f9e03dafc7d1b3bad25aedb1dcd79a6ad39d06c35d
   languageName: node
   linkType: hard
 
@@ -8435,13 +8425,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chalk@npm:*, chalk@npm:5.3.0":
-  version: 5.3.0
-  resolution: "chalk@npm:5.3.0"
-  checksum: 623922e077b7d1e9dedaea6f8b9e9352921f8ae3afe739132e0e00c275971bdd331268183b2628cf4ab1727c45ea1f28d7e24ac23ce1db1eb653c414ca8a5a80
-  languageName: node
-  linkType: hard
-
 "chalk@npm:3.0.0":
   version: 3.0.0
   resolution: "chalk@npm:3.0.0"
@@ -8449,6 +8432,13 @@ __metadata:
     ansi-styles: ^4.1.0
     supports-color: ^7.1.0
   checksum: 8e3ddf3981c4da405ddbd7d9c8d91944ddf6e33d6837756979f7840a29272a69a5189ecae0ff84006750d6d1e92368d413335eab4db5476db6e6703a1d1e0505
+  languageName: node
+  linkType: hard
+
+"chalk@npm:5.3.0":
+  version: 5.3.0
+  resolution: "chalk@npm:5.3.0"
+  checksum: 623922e077b7d1e9dedaea6f8b9e9352921f8ae3afe739132e0e00c275971bdd331268183b2628cf4ab1727c45ea1f28d7e24ac23ce1db1eb653c414ca8a5a80
   languageName: node
   linkType: hard
 
@@ -15161,9 +15151,9 @@ __metadata:
   linkType: hard
 
 "lru-cache@npm:^10.2.0":
-  version: 10.2.2
-  resolution: "lru-cache@npm:10.2.2"
-  checksum: 98e8fc93691c546f719a76103ef2bee5a3ac823955c755a47641ec41f8c7fafa1baeaba466937cc1cbfa9cfd47e03536d10e2db3158a64ad91ff3a58a32c893e
+  version: 10.3.0
+  resolution: "lru-cache@npm:10.3.0"
+  checksum: f2289639bd94cf3c87bfd8a77ac991f9afe3af004ddca3548c3dae63ead1c73bba449a60a4e270992e16cf3261b3d4130943234d52ca3a4d4de2fc074a3cc7b5
   languageName: node
   linkType: hard
 
@@ -21118,16 +21108,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:^5.0.4":
-  version: 5.5.2
-  resolution: "typescript@npm:5.5.2"
-  bin:
-    tsc: bin/tsc
-    tsserver: bin/tsserver
-  checksum: 9c5a7982dadcb2d38d129c575dd38645ae11588ae0d4a12852fb04482bbc5a1660b2371e48fd5b33b6b605cc57cefe777670054546856945a05e77bd22c8c2cd
-  languageName: node
-  linkType: hard
-
 "typescript@npm:^5.1":
   version: 5.4.5
   resolution: "typescript@npm:5.4.5"
@@ -21165,16 +21145,6 @@ __metadata:
     tsc: bin/tsc
     tsserver: bin/tsserver
   checksum: 6a1fe9a77bb9c5176ead919cc4a1499ee63e46b4e05bf667079f11bf3a8f7887f135aa72460a4c3b016e6e6bb65a822cb8689a6d86cbfe92d22cc9f501f09213
-  languageName: node
-  linkType: hard
-
-"typescript@patch:typescript@^5.0.4#~builtin<compat/typescript>":
-  version: 5.5.2
-  resolution: "typescript@patch:typescript@npm%3A5.5.2#~builtin<compat/typescript>::version=5.5.2&hash=a1c5e5"
-  bin:
-    tsc: bin/tsc
-    tsserver: bin/tsserver
-  checksum: 9d89bac0de650e15d6846485f238d1e65f1013f2c260d9e53e86a1da6ecf8109d9fad9402575c5c36a6592dc5d4370db090e12971c8630ae84453654baabb6b4
   languageName: node
   linkType: hard
 
