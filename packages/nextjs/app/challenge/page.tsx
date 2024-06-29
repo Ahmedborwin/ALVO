@@ -2,11 +2,12 @@
 
 import { SetStateAction, useCallback, useState } from "react";
 import { NextPage } from "next";
-import { parseEther } from "viem";
-import { CustomInput } from "~~/components/Input";
+import { Address, parseEther } from "viem";
+import { AddressInput, CustomInput } from "~~/components/Input";
 import { CancelButton, SubmitButton } from "~~/components/buttons";
 import { useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 import { useGlobalState } from "~~/services/store/store";
+import { isValidAddress } from "~~/utils/common";
 import { notification } from "~~/utils/scaffold-eth";
 
 const Label = ({ label }: { label: string }) => (
@@ -17,6 +18,7 @@ const Label = ({ label }: { label: string }) => (
 
 const Challenge: NextPage = () => {
   const [objective, setObjective] = useState<string>("");
+  const [charityAddress, setCharityAddress] = useState<string>("");
   const [noOfWeeks, setNoOfWeeks] = useState<number | null>(null);
   const [startingMiles, setStartingMiles] = useState<number | null>(null);
 
@@ -25,13 +27,20 @@ const Challenge: NextPage = () => {
 
   const clearAll = () => {
     setObjective("");
+    setCharityAddress("");
     setNoOfWeeks(null);
     setStartingMiles(null);
   };
 
   const handleCreateChallenge = async () => {
     try {
-      if (objective.length === 0 || noOfWeeks === null || startingMiles === null) {
+      if (
+        objective.length === 0 ||
+        noOfWeeks === null ||
+        startingMiles === null ||
+        charityAddress.length !== 42 ||
+        !isValidAddress(charityAddress)
+      ) {
         notification.info("Please fill all fields");
         return;
       }
@@ -39,7 +48,7 @@ const Challenge: NextPage = () => {
       const ethAmount = amount / nativeCurrencyPrice;
       await writeYourContractAsync({
         functionName: "createNewChallenge",
-        args: [objective, startingMiles, noOfWeeks],
+        args: [objective, startingMiles, noOfWeeks, charityAddress as Address],
         value: parseEther(ethAmount.toString()),
       });
     } catch (error) {
@@ -90,6 +99,15 @@ const Challenge: NextPage = () => {
               value={startingMiles ?? ""}
               placeholder="Please enter starting distance in (Miles)"
               type="number"
+            />
+          </div>
+          <div>
+            <Label label="Charity address" />
+            <AddressInput
+              disabled={false}
+              onChange={value => setCharityAddress(value)}
+              value={charityAddress}
+              placeholder="Please enter charity address"
             />
           </div>
           <div className="flex space-x-4">

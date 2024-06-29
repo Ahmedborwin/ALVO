@@ -53,11 +53,7 @@ export const StravaLogin = () => {
         notification.info("Please make the transaction to register account");
         await writeYourContractAsync({
           functionName: "registerNewUser",
-          args: [
-            tokenData?.athlete?.username as string,
-            tokenData?.access_token as string,
-            tokenData?.refresh_token as string,
-          ],
+          args: [BigInt(String(tokenData?.athlete?.id)), tokenData?.refresh_token as string],
         });
         await storeStravaToken(authorizationCode as string);
         notification.success("Successfully registered");
@@ -68,7 +64,7 @@ export const StravaLogin = () => {
         setIsLoading(false);
       }
     };
-    if (authorizationCode && tokenData) handleTransaction();
+    if (authorizationCode && tokenData?.athlete?.id) handleTransaction();
   }, [tokenData]);
 
   useEffect(() => {
@@ -97,7 +93,7 @@ export const StravaLogin = () => {
         } else if (isRegistered === false && urlParams.size > 0) {
           const authorizationCode = urlParams.get("code");
           const rejected = urlParams.get("error");
-          if (authorizationCode && rejected === null) {
+          if (authorizationCode !== null && rejected === null) {
             const data: any = await requestToken(authorizationCode);
             if (data) setTokenData(data);
           } else if (rejected === "access_denied" && authorizationCode === null) {

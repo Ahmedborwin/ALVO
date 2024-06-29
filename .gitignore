@@ -8,10 +8,10 @@ node_modules
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
-
 # eslint
 .eslintcache
-
+yarn.lock
+yarn copy.lock
 # misc
 .DS_Store
 

@@ -30,7 +30,7 @@ const Home: NextPage = () => {
     args: [address ?? alchemyAddress],
   });
 
-  const { challengeTally, SuccessfulChallenges, TotalStaked, TotalDonated } = userDetails ?? {};
+  const { challengeTally, SuccessfulChallenges, currenStaked, totalDonated } = userDetails ?? {};
 
   return (
     <div
@@ -57,8 +57,8 @@ const Home: NextPage = () => {
             <div className="bg-white bg-opacity-20 rounded-lg p-4 space-y-3">
               <ProfileStat label="Challenge Tally" value={String(challengeTally ?? 0n)} />
               <ProfileStat label="Successful Challenges" value={String(SuccessfulChallenges ?? 0n)} />
-              <ProfileStat label="Total Staked" value={`${formatEther(TotalStaked ?? 0n)} ETH`} />
-              <ProfileStat label="Total Donated" value={`${formatEther(TotalDonated ?? 0n)} ETH`} />
+              <ProfileStat label="Current Staked" value={`${formatEther(currenStaked ?? 0n)} ETH`} />
+              <ProfileStat label="Total Donated" value={`${formatEther(totalDonated ?? 0n)} ETH`} />
             </div>
           </div>
 
