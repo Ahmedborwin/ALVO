@@ -30,6 +30,10 @@ export const menuLinks: HeaderMenuLink[] = [
     href: "/debug",
     icon: <BugAntIcon className="h-4 w-4" />,
   },
+  {
+    label: "Challenge",
+    href: "/challenge",
+  },
 ];
 
 const WalletUI = () => {
@@ -60,7 +64,14 @@ export const HeaderMenuLinks = ({ isDrawerOpen }: { isDrawerOpen?: boolean }) =>
   const { address } = useAccount();
   const stravaData = useStravaState(state => state.getStravaTokens());
 
-  if ((!accountAddress && !address) || (!stravaData.access_token && !stravaData.refresh_token)) return "";
+  if ((!accountAddress && !address) || (!stravaData.access_token && !stravaData.refresh_token))
+    return isDrawerOpen ? (
+      <div className="flex items-center">
+        <WalletUI />
+      </div>
+    ) : (
+      ""
+    );
 
   return (
     <>

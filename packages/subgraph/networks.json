@@ -1,0 +1,10 @@
+{
+  "localFunctionsTestnet": {
+    "APIConsumer": {
+      "address": "0x268a077185D09d31eD20b098f65017477A06FFc2"
+    },
+    "ChainHabits": {
+      "address": "0x52caE9c670B19d3612848B1aa8c587EC73EaC6A7"
+    }
+  }
+}

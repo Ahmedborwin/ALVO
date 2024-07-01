@@ -8,10 +8,10 @@ node_modules
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
-
 # eslint
 .eslintcache
-
+yarn.lock
+yarn copy.lock
 # misc
 .DS_Store
 
@@ -22,4 +22,7 @@ node_modules
 # cli
 dist
 
-node_modules.nosync
+# subgraph
+subgraph/build/*
+subgraph/generated/*
+subgraph/graph-node/data/*

@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
+import { PORT, VERCEL_PROJECT_PRODUCTION_URL } from "~~/constants/EnvConsts";
 
-const baseUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
-  ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-  : `http://localhost:${process.env.PORT || 3000}`;
-const titleTemplate = "%s | Scaffold-ETH 2";
+const baseUrl = VERCEL_PROJECT_PRODUCTION_URL
+  ? `https://${VERCEL_PROJECT_PRODUCTION_URL}`
+  : `http://localhost:${PORT || 3000}`;
+const titleTemplate = "ChainHabits";
 
 export const getMetadata = ({
   title,
