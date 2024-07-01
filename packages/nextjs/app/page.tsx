@@ -18,6 +18,29 @@ const ProfileStat: React.FC<ProfileStatProps> = ({ label, value }) => (
   </div>
 );
 
+const ObjectiveCard: React.FC<{ index: number }> = ({ index }) => (
+  <div
+    className={`rounded-lg p-6 transition-all shadow-lg flex flex-col justify-between
+            ${
+              index % 2 === 0
+                ? "bg-gradient-to-br from-green-400/30 to-green-600/30 hover:from-green-400/40 hover:to-green-600/40"
+                : "bg-gradient-to-br from-red-400/30 to-red-600/30 hover:from-red-400/40 hover:to-red-600/40"
+            }`}
+  >
+    <div>
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-lg font-semibold text-white">Week {index + 1}</h3>
+        <span
+          className={`text-sm px-2 py-1 rounded-full
+                ${index % 2 === 0 ? "bg-green-500/50 text-green-100" : "bg-red-500/50 text-red-100"}`}
+        >
+          {index % 2 === 0 ? "Success" : "Failed"}
+        </span>
+      </div>
+    </div>
+  </div>
+);
+
 const Home: NextPage = () => {
   const { address } = useAccount();
   const { address: alchemyAddress } = useAlchemyAccount({ type: accountType });
@@ -39,36 +62,49 @@ const Home: NextPage = () => {
         backgroundImage: "linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(88, 28, 135, 0.8))",
       }}
     >
-      <div className="mt-16 relative z-10 w-full max-w-4xl p-6 md:p-8 backdrop-blur-md bg-white bg-opacity-10 rounded-2xl shadow-2xl border border-white border-opacity-20">
-        <div className="absolute -top-16 left-1/2 transform -translate-x-1/2">
-          <div className="w-32 h-32 bg-gradient-to-br from-purple-400 to-indigo-600 rounded-full flex items-center justify-center shadow-lg overflow-hidden">
-            {ProfileSVG}
-          </div>
-        </div>
-
-        <div className="text-center pt-20 mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">{username || "User Profile"}</h1>
-          <p className="text-indigo-200">{bio || "No bio available"}</p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="space-y-6">
-            <h2 className="text-2xl font-semibold text-white mb-4">Challenge Stats</h2>
-            <div className="bg-white bg-opacity-20 rounded-lg p-4 space-y-3">
-              <ProfileStat label="Challenge Tally" value={String(challengeTally ?? 0n)} />
-              <ProfileStat label="Successful Challenges" value={String(SuccessfulChallenges ?? 0n)} />
-              <ProfileStat label="Current Staked" value={`${formatEther(currenStaked ?? 0n)} ETH`} />
-              <ProfileStat label="Total Donated" value={`${formatEther(totalDonated ?? 0n)} ETH`} />
+      <div className="w-full max-w-6xl space-y-12 sm:space-y-16">
+        <div className="mt-16 z-10 w-full p-6 md:p-8 backdrop-blur-md bg-white bg-opacity-10 rounded-2xl shadow-2xl border border-white border-opacity-20">
+          <div className="absolute -top-16 left-1/2 transform -translate-x-1/2">
+            <div className="w-32 h-32 bg-gradient-to-br from-purple-400 to-indigo-600 rounded-full flex items-center justify-center shadow-lg overflow-hidden">
+              {ProfileSVG}
             </div>
           </div>
 
-          <div className="space-y-6">
-            <h2 className="text-2xl font-semibold text-white mb-4">Personal Info</h2>
-            <div className="bg-white bg-opacity-20 rounded-lg p-4 space-y-3">
-              <ProfileStat label="Name" value={`${firstname || ""} ${lastname || ""}`} />
-              <ProfileStat label="Location" value={`${city || ""}, ${state || ""}, ${country || ""}`} />
-              <ProfileStat label="Gender" value={sex || "Not specified"} />
-              <ProfileStat label="Account Type" value={premium ? "Premium" : "Standard"} />
+          <div className="text-center pt-20 mb-8">
+            <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">{username || "User Profile"}</h1>
+            <p className="text-indigo-200">{bio || "No bio available"}</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="space-y-6">
+              <h2 className="text-2xl font-semibold text-white mb-4">Challenge Stats</h2>
+              <div className="bg-white bg-opacity-20 rounded-lg p-4 space-y-3">
+                <ProfileStat label="Challenge Tally" value={String(challengeTally ?? 0n)} />
+                <ProfileStat label="Successful Challenges" value={String(SuccessfulChallenges ?? 0n)} />
+                <ProfileStat label="Current Staked" value={`${formatEther(currenStaked ?? 0n)} ETH`} />
+                <ProfileStat label="Total Donated" value={`${formatEther(totalDonated ?? 0n)} ETH`} />
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              <h2 className="text-2xl font-semibold text-white mb-4">Personal Info</h2>
+              <div className="bg-white bg-opacity-20 rounded-lg p-4 space-y-3">
+                <ProfileStat label="Name" value={`${firstname || ""} ${lastname || ""}`} />
+                <ProfileStat label="Location" value={`${city || ""}, ${state || ""}, ${country || ""}`} />
+                <ProfileStat label="Gender" value={sex || "Not specified"} />
+                <ProfileStat label="Account Type" value={premium ? "Premium" : "Standard"} />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="w-full max-w-6xl space-y-12 sm:space-y-16">
+          <div className="z-10 w-full p-6 md:p-8 backdrop-blur-md bg-white bg-opacity-10 rounded-2xl shadow-2xl border border-white border-opacity-20">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {/* // @ts-ignore */}
+              {[...Array(4)].map((task, index) => (
+                <ObjectiveCard key={index} index={index} />
+              ))}
             </div>
           </div>
         </div>
