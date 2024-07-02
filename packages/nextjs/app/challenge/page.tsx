@@ -19,7 +19,7 @@ const Label = ({ label }: { label: string }) => (
 const Challenge: NextPage = () => {
   const [objective, setObjective] = useState<string>("");
   const [charityAddress, setCharityAddress] = useState<string>("");
-  const [noOfWeeks, setNoOfWeeks] = useState<number | null>(null);
+  const [noOfWeeks, setNoOfWeeks] = useState<number | null>(4);
   const [startingMiles, setStartingMiles] = useState<number | null>(null);
 
   const { writeContractAsync: writeYourContractAsync } = useScaffoldWriteContract("ChainHabits");
@@ -28,7 +28,7 @@ const Challenge: NextPage = () => {
   const clearAll = () => {
     setObjective("");
     setCharityAddress("");
-    setNoOfWeeks(null);
+    setNoOfWeeks(4);
     setStartingMiles(null);
   };
 
@@ -77,7 +77,7 @@ const Challenge: NextPage = () => {
               className="w-full px-4 py-3 bg-white bg-opacity-20 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 text-white placeholder-indigo-200"
               onChange={value => setObjective(value)}
               value={objective}
-              placeholder="Please enter your objective"
+              placeholder="Enter your objective, e.g., 'Will run 1 mile a week'"
               type="text"
             />
           </div>
@@ -85,9 +85,10 @@ const Challenge: NextPage = () => {
             <Label label="No of weeks" />
             <CustomInput
               className="w-full px-4 py-3 bg-white bg-opacity-20 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 text-white placeholder-indigo-200"
-              onChange={value => assignValue(value, setNoOfWeeks)}
+              // eslint-disable-next-line @typescript-eslint/no-empty-function
+              onChange={() => {}}
               value={noOfWeeks ?? ""}
-              placeholder="Please enter no of weeks"
+              placeholder="Enter no of weeks"
               type="number"
             />
           </div>
@@ -97,7 +98,7 @@ const Challenge: NextPage = () => {
               className="w-full px-4 py-3 bg-white bg-opacity-20 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 text-white placeholder-indigo-200"
               onChange={value => assignValue(value, setStartingMiles)}
               value={startingMiles ?? ""}
-              placeholder="Please enter starting distance in (Miles)"
+              placeholder="Enter starting distance in miles (e.g., 1 mile)"
               type="number"
             />
           </div>
@@ -107,7 +108,7 @@ const Challenge: NextPage = () => {
               disabled={false}
               onChange={value => setCharityAddress(value)}
               value={charityAddress}
-              placeholder="Please enter charity address"
+              placeholder="Enter charity address (e.g., your friend's address)"
             />
           </div>
           <div className="flex space-x-4">

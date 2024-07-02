@@ -60,7 +60,6 @@ export const StravaLogin = () => {
       } catch (e) {
         console.error("Error in transaction", e);
       } finally {
-        toast.remove();
         setIsLoading(false);
       }
     };
