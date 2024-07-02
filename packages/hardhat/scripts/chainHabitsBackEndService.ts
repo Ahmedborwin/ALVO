@@ -26,8 +26,10 @@ const { CLIENT_ID, CLIENT_SECRET } = process.env;
 
 async function main() {
   const chainID = await hre.getChainId();
+  console.log("chainID", chainID);
 
   // const chainHabitsAbi = deployedContracts[chainID]["ChainHabits"].abi;
+  console.log(deployedContracts);
   const chainHabitsAddress = deployedContracts[chainID]["ChainHabits"].address;
 
   const { deployer } = await hre.getNamedAccounts();

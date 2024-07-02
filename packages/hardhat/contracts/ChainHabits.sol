@@ -80,6 +80,7 @@ contract ChainHabits {
 
 	constructor() {
 		admin = msg.sender;
+		console.log(admin);
 	}
 
 	//Create New User Pofile

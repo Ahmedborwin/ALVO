@@ -47,6 +47,7 @@
   },
   "packageManager": "yarn@3.2.3",
   "devDependencies": {
+    "@apollo/client": "^3.10.8",
     "@chainlink/functions-toolkit": "^0.2.8",
     "axios": "^1.7.2",
     "husky": "^8.0.1",

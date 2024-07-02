@@ -8,7 +8,7 @@ import { LogoutButton, SignInAgainButton } from "./buttons";
 import { AlchemySignerStatus } from "@alchemy/aa-alchemy";
 import { useSignerStatus, useAccount as userOperationAccount } from "@alchemy/aa-alchemy/react";
 import { useAccount } from "wagmi";
-import { Bars3Icon, BugAntIcon } from "@heroicons/react/24/outline";
+import { Bars3Icon } from "@heroicons/react/24/outline";
 import { FaucetButton, RainbowKitCustomConnectButton } from "~~/components/scaffold-eth";
 import { accountType } from "~~/config/AlchemyConfig";
 import { useOutsideClick } from "~~/hooks/scaffold-eth";
@@ -25,11 +25,11 @@ export const menuLinks: HeaderMenuLink[] = [
     label: "Home",
     href: "/",
   },
-  {
-    label: "Debug Contracts",
-    href: "/debug",
-    icon: <BugAntIcon className="h-4 w-4" />,
-  },
+  // {
+  //   label: "Debug Contracts",
+  //   href: "/debug",
+  //   icon: <BugAntIcon className="h-4 w-4" />,
+  // },
   {
     label: "Challenge",
     href: "/challenge",

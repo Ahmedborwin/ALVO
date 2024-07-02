@@ -18,7 +18,7 @@ const Label = ({ label }: { label: string }) => (
 
 const Challenge: NextPage = () => {
   const [objective, setObjective] = useState<string>("");
-  const [charityAddress, setCharityAddress] = useState<string>("");
+  const [forfeitAddress, setForfeitAddress] = useState<string>("");
   const [noOfWeeks, setNoOfWeeks] = useState<number | null>(4);
   const [startingMiles, setStartingMiles] = useState<number | null>(null);
 
@@ -27,7 +27,7 @@ const Challenge: NextPage = () => {
 
   const clearAll = () => {
     setObjective("");
-    setCharityAddress("");
+    setForfeitAddress("");
     setNoOfWeeks(4);
     setStartingMiles(null);
   };
@@ -38,8 +38,8 @@ const Challenge: NextPage = () => {
         objective.length === 0 ||
         noOfWeeks === null ||
         startingMiles === null ||
-        charityAddress.length !== 42 ||
-        !isValidAddress(charityAddress)
+        forfeitAddress.length !== 42 ||
+        !isValidAddress(forfeitAddress)
       ) {
         notification.info("Please fill all fields");
         return;
@@ -48,7 +48,7 @@ const Challenge: NextPage = () => {
       const ethAmount = amount / nativeCurrencyPrice;
       await writeYourContractAsync({
         functionName: "createNewChallenge",
-        args: [objective, startingMiles, noOfWeeks, charityAddress as Address],
+        args: [objective, startingMiles, noOfWeeks, forfeitAddress as Address],
         value: parseEther(ethAmount.toString()),
       });
     } catch (error) {
@@ -77,7 +77,7 @@ const Challenge: NextPage = () => {
               className="w-full px-4 py-3 bg-white bg-opacity-20 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 text-white placeholder-indigo-200"
               onChange={value => setObjective(value)}
               value={objective}
-              placeholder="Enter your objective, e.g., 'Will run 1 mile a week'"
+              placeholder="What is Your Objective? e.g. Run Marathon"
               type="text"
             />
           </div>
@@ -88,27 +88,27 @@ const Challenge: NextPage = () => {
               // eslint-disable-next-line @typescript-eslint/no-empty-function
               onChange={() => {}}
               value={noOfWeeks ?? ""}
-              placeholder="Enter no of weeks"
+              placeholder="What is Your Training Period?"
               type="number"
             />
           </div>
           <div>
-            <Label label="Starting distance in (Miles)" />
+            <Label label="Target distance in (Miles)" />
             <CustomInput
               className="w-full px-4 py-3 bg-white bg-opacity-20 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 text-white placeholder-indigo-200"
               onChange={value => assignValue(value, setStartingMiles)}
               value={startingMiles ?? ""}
-              placeholder="Enter starting distance in miles (e.g., 1 mile)"
+              placeholder="Target weekly distance in miles (e.g. 10 miles)"
               type="number"
             />
           </div>
           <div>
-            <Label label="Charity address" />
+            <Label label="Forfiet Address" />
             <AddressInput
               disabled={false}
-              onChange={value => setCharityAddress(value)}
-              value={charityAddress}
-              placeholder="Enter charity address (e.g., your friend's address)"
+              onChange={value => setForfeitAddress(value)}
+              value={forfeitAddress}
+              placeholder="Address funds will go to (e.g., charity or your friend's address)"
             />
           </div>
           <div className="flex space-x-4">
