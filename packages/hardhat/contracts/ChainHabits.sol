@@ -82,15 +82,15 @@ contract ChainHabits {
 		admin = msg.sender;
 	}
 
-	//Create New Manager Pofile
+	//Create New User Pofile
 	function registerNewUser(
 		uint256 userID,
 		string calldata _refreshToken
 	) external isUserNotRegistered(msg.sender) {
 		userTable[msg.sender] = UserDetails(0, 0, 0, 0, userID, _refreshToken);
 		isUserRegisteredTable[msg.sender] = true;
-
-		//emit New Manager Event
+		allUsers.push(msg.sender);
+		//emit New User Event
 		emit NewUserRegistered(msg.sender);
 	}
 
@@ -147,6 +147,7 @@ contract ChainHabits {
 		if (failed) {
 			challengeTable[_challengeId].failedWeeks++;
 		}
+		console.log("failedweek", challengeTable[_challengeId].failedWeeks);
 		//update intervals
 		challengeTable[_challengeId]
 			.currentIntervalEpoch = currentIntervalEpoch;
@@ -202,5 +203,9 @@ contract ChainHabits {
 		address _userAddress
 	) external view returns (uint256) {
 		return usersCurrentChallenge[_userAddress];
+	}
+
+	function getAllUserDetails() external view returns (address[] memory) {
+		return allUsers;
 	}
 }

@@ -44,7 +44,7 @@ require("dotenv").config(path.resolve(__dirname, "../../.env"));
   }
 
   // Update values in networks.js
-  let networkPath = (__dirname, "packages/hardhat/networks.js");
+  let networkPath = (__dirname, "networks.js");
   let networksConfig = fs.readFileSync(networkPath).toString();
 
   const regex = /localFunctionsTestnet:\s*{\s*([^{}]*)\s*}/s;

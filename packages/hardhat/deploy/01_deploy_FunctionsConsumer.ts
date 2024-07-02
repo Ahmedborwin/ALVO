@@ -4,7 +4,7 @@ import { Contract } from "ethers";
 import { networks } from "../networks.js"; // Import networks
 import * as fs from "fs";
 import * as path from "path";
-import addSubscription from "../scripts/functionsScripts/subscriptions/add";
+// import addSubscription from "../scripts/functionsScripts/subscriptions/add.js";
 /**
  *
  * @param hre HardhatRuntimeEnvironment object.
@@ -54,7 +54,7 @@ const deployAPIConsumer: DeployFunction = async function (hre: HardhatRuntimeEnv
   } else if (hre.network.name !== "localhost") {
     //Add API address as a consumer to functions subscription
     console.log("-----------add consumer to subscription-------------------");
-    await addSubscription(apiConsumerAddress, subId, hre.network.name, signer);
+    // await addSubscription(apiConsumerAddress, subId, hre.network.name, signer);
   }
 };
 

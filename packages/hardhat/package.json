@@ -15,7 +15,7 @@
     "test": "REPORT_GAS=true hardhat test --network hardhat",
     "verify": "hardhat etherscan-verify",
     "hardhat-verify": "hardhat verify",
-    "BackendScript": "yarn hardhat run scripts/chainHabitsBackEndService.ts --network localFunctionsTestnet"
+    "BackendScript": "hardhat deploy --reset && hardhat run scripts/chainHabitsBackEndService.ts --network localFunctionsTestnet"
   },
   "devDependencies": {
     "@chainlink/contracts": "^1.1.1",

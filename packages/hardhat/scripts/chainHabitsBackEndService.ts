@@ -3,7 +3,8 @@ import axios from "axios";
 import dotenv from "dotenv";
 // import { networks } from "../networks.js"; // Import networks
 dotenv.config();
-import deployedContractsObject from "../../../packages/nextjs/contracts/deployedContracts";
+import deployedContracts from "../../nextjs/contracts/deployedContracts";
+import { ChainHabits } from "../typechain-types/contracts/index";
 
 // [x] initiate the chainhabits smart contract with a signer
 // [x] read from smart contract which objective are due for review
@@ -17,37 +18,36 @@ import deployedContractsObject from "../../../packages/nextjs/contracts/deployed
 // [X] if fails then record failure somehow - mapping of interval to bool
 // [X] check if last interval
 // [X] if last interval mark challenge as complete
-// [] work on adding script to a backend service - create an api that cron job can call
-
-const deployedContracts = deployedContractsObject["default"];
+// [] deploy project on vercel
+// [] add env variables to vercel
+// [] add script as script with cron job on vercel
 
 const { CLIENT_ID, CLIENT_SECRET } = process.env;
 
 async function main() {
   const chainID = await hre.getChainId();
 
-  const chainHabitsAbi = deployedContracts[chainID]["ChainHabits"].abi;
+  // const chainHabitsAbi = deployedContracts[chainID]["ChainHabits"].abi;
   const chainHabitsAddress = deployedContracts[chainID]["ChainHabits"].address;
 
   const { deployer } = await hre.getNamedAccounts();
   const signer = await hre.ethers.getSigner(deployer);
 
-  const chainHabits = await hre.ethers.getContractAt(chainHabitsAbi, chainHabitsAddress, signer);
+  const chainHabits: ChainHabits = await hre.ethers.getContractAt("ChainHabits", chainHabitsAddress, signer);
 
   const currentEpoch = Math.floor(Date.now() / 1000);
 
   //get all users Address array from public mapping
-  const userAddressList = await chainHabits.allUsers();
+  const userAddressList = await chainHabits.getAllUserDetails();
+
+  console.log("userAddressList", userAddressList);
 
   //filter to array of users with live challenge
   const Address_liveChallenges = userAddressList.filter(async user => {
     await chainHabits.userHasLiveChallenge(user); //user public mapping to determine users with live challenge
   });
 
-  // for each live challenge handle review logic
-  Address_liveChallenges.map(async user => {
-    handleLogic(user);
-  });
+  console.log("Address_liveChallenges", Address_liveChallenges);
 
   const handleLogic = async user => {
     const _userDetails = await chainHabits.getUserDetails(user);
@@ -61,97 +61,152 @@ async function main() {
       refreshToken: _userDetails[5],
     };
 
-    // Request a new access token from Strava
-    const response = await axios.post("https://www.strava.com/oauth/token", null, {
-      params: {
-        client_id: CLIENT_ID,
-        client_secret: CLIENT_SECRET,
-        grant_type: "refresh_token",
-        refresh_token: userDetails.refreshToken,
-      },
-    });
-
-    const { new_access_token, new_refresh_token } = response.data;
-    console.log("New Access Token:", new_access_token);
-    console.log("New Refresh Token:", new_refresh_token);
-
-    //check if refresh token changed
-    if (new_refresh_token !== userDetails.refreshToken) {
-      // Write the new refresh token back to the smart contract
-      const handleRefreshToken = await chainHabits.updateRefreshToken(new_refresh_token);
-      await handleRefreshToken.wait();
-      console.log("New refresh token saved to the smart contract");
-    }
-
-    //get challenge ID
-    const challengeId = await chainHabits.getChallengeId(user);
-    const _challengeDetails = await chainHabits.getChallengeDetails(challengeId);
-
-    const challengeDetails = {
-      objective: _challengeDetails[0],
-      targetMiles: _challengeDetails[1],
-      NoOfWeeks: _challengeDetails[2],
-      failedWeeks: _challengeDetails[3],
-      isLive: _challengeDetails[4],
-      competitionDeadline: _challengeDetails[5],
-      currentIntervalEpoch: _challengeDetails[6],
-      nextIntervalEpoch: _challengeDetails[7],
-      defaultAddress: _challengeDetails[8],
+    const data = {
+      client_id: CLIENT_ID,
+      client_secret: CLIENT_SECRET,
+      grant_type: "refresh_token",
+      refresh_token: userDetails.refreshToken,
     };
 
-    //TODO how can i make sure that that
-    if (currentEpoch >= challengeDetails.nextIntervalEpoch) {
-      const distanceLogged = await getAthletesStravaData(challengeDetails, new_access_token);
-      const nextInterval = challengeDetails.currentIntervalEpoch + 604800;
-      //check if distance logged meets target
-      if (distanceLogged < challengeDetails.targetMiles) {
-        challengeDetails.failedWeeks++; //update local challengeObject incase its the final interval review
+    try {
+      // Request a new access token from Strava
+      const response = await axios.post("https://www.strava.com/oauth/token", data);
 
-        await chainHabits.handleIntervalReview(challengeId, true, challengeDetails.nextIntervalEpoch, nextInterval);
-      } else {
-        await chainHabits.handleIntervalReview(challengeId, false, challengeDetails.nextIntervalEpoch, nextInterval);
+      const { access_token: new_access_token, refresh_token: new_refresh_token } = response.data;
+      console.log("New Access Token:", new_access_token);
+      console.log("New Refresh Token:", new_refresh_token);
+
+      //check if refresh token changed
+      if (new_refresh_token !== userDetails.refreshToken) {
+        // Write the new refresh token back to the smart contract
+        const handleRefreshToken = await chainHabits.updateRefreshToken(new_refresh_token);
+        await handleRefreshToken.wait();
+        console.log("New refresh token saved to the smart contract");
       }
-    }
 
-    //check if challenge is over
-    if (challengeDetails.competitionDeadline <= currentEpoch) {
-      //evaluate how much is to be sent to defaul address
-      const ethToDefault = userDetails.currenStaked / challengeDetails.failedWeeks;
+      //get challenge ID
+      const challengeId = await chainHabits.getChallengeId(user);
+      console.log(challengeId);
+      const _challengeDetails = await chainHabits.getChallengeDetails(challengeId);
+      console.log(_challengeDetails);
 
-      await chainHabits.handleCompleteChallenge(challengeId, ethToDefault);
+      const challengeDetails = {
+        objective: _challengeDetails[0],
+        targetMiles: _challengeDetails[1],
+        NoOfWeeks: _challengeDetails[2],
+        failedWeeks: _challengeDetails[3],
+        isLive: _challengeDetails[4],
+        competitionDeadline: _challengeDetails[5],
+        currentIntervalEpoch: _challengeDetails[6],
+        nextIntervalEpoch: _challengeDetails[7],
+        defaultAddress: _challengeDetails[8],
+      };
+
+      //TODO how can i make sure that that
+      const testEpoch = currentEpoch + 604800;
+      if (testEpoch >= challengeDetails.nextIntervalEpoch) {
+        const distanceLogged = await getAthletesStravaData(challengeDetails, new_access_token);
+        const nextInterval = challengeDetails.currentIntervalEpoch + BigInt(604800);
+
+        //check if distance logged meets target
+        if (distanceLogged < challengeDetails.targetMiles) {
+          challengeDetails.failedWeeks++; //update local challengeObject incase its the final interval review
+
+          const tx = await chainHabits.handleIntervalReview(
+            challengeId,
+            true,
+            challengeDetails.nextIntervalEpoch,
+            nextInterval,
+          );
+          await tx.wait();
+        } else {
+          const tx = await chainHabits.handleIntervalReview(
+            challengeId,
+            false,
+            challengeDetails.nextIntervalEpoch,
+            nextInterval,
+          );
+          await tx.wait();
+        }
+
+        const _challengeDetailsUpdated = await chainHabits.getChallengeDetails(challengeId);
+        console.log(_challengeDetails);
+
+        const challengeDetailsNew = {
+          objective: _challengeDetailsUpdated[0],
+          targetMiles: _challengeDetailsUpdated[1],
+          NoOfWeeks: _challengeDetailsUpdated[2],
+          failedWeeks: _challengeDetailsUpdated[3],
+          isLive: _challengeDetailsUpdated[4],
+          competitionDeadline: _challengeDetailsUpdated[5],
+          currentIntervalEpoch: _challengeDetailsUpdated[6],
+          nextIntervalEpoch: _challengeDetailsUpdated[7],
+          defaultAddress: _challengeDetailsUpdated[8],
+        };
+
+        console.log("challengeDetailsNew", challengeDetailsNew);
+      }
+
+      //check if challenge is over
+      if (challengeDetails.competitionDeadline <= currentEpoch) {
+        //evaluate how much is to be sent to defaul address
+        const ethToDefault = userDetails.currenStaked / challengeDetails.failedWeeks;
+
+        await chainHabits.handleCompleteChallenge(challengeId, ethToDefault);
+      }
+    } catch (e) {
+      console.error(e);
     }
   };
 
+  // for each live challenge handle review logic
+  Address_liveChallenges.map(async user => {
+    handleLogic(user);
+  });
+
   async function getAthletesStravaData(challengeDetails, new_access_token) {
-    {
-      try {
-        const url = `https://www.strava.com/api/v3/athlete/activities?before=${challengeDetails.nextIntervalEpoch}&after=${challengeDetails.currentIntervalEpoch}&page=1&per_page=30`;
-        const stravaGetAtheleteResponse = await axios.post(url, null, {
-          headers: {
-            "Content-Type": `application/json`,
-            Authorization: `Bearer ${new_access_token}`,
-          },
-        });
+    try {
+      console.log("Call Strava to get Miles Logged");
+      const url = `https://www.strava.com/api/v3/athlete/activities?before=${challengeDetails.nextIntervalEpoch}&after=1688235075&page=1&per_page=30`;
+      const response = await axios.get(url, {
+        headers: {
+          accept: "application/json",
+          authorization: `Bearer ${new_access_token}`,
+        },
+      });
 
-        const data = stravaGetAtheleteResponse["data"];
-        const arrayOfRuns = data.filter(event => {
-          return event.workout_type == 0;
-        });
+      const data = response.data;
 
-        console.log("@@arrayOfRuns", arrayOfRuns);
+      const filteredActivities = data.map(activity => {
+        return {
+          name: activity.name,
+          distance: activity.distance,
+          moving_time: activity.moving_time,
+          total_elevation_gain: activity.total_elevation_gain,
+          type: activity.type,
+          start_date: activity.start_date,
+          start_date_local: activity.start_date_local,
+          workout_type: activity.workout_type,
+        };
+      });
 
-        const distanceLogged = arrayOfRuns.reduce((acc, event) => {
-          return acc + parseInt(event.distance);
-        }, 0);
+      const arrayOfRuns = filteredActivities.filter(event => {
+        return event.workout_type === 0;
+      });
 
-        distanceLogged / 100;
+      console.log("@@arrayOfRuns", arrayOfRuns);
 
-        console.log("meters logged:", distanceLogged);
-        return distanceLogged;
-      } catch (e) {
-        console.log(e);
-        return;
-      }
+      const distanceLogged = arrayOfRuns.reduce((acc, event) => {
+        return acc + parseInt(event.distance);
+      }, 0);
+
+      const distanceLoggedMiles = distanceLogged / 1609;
+
+      console.log("meters logged:", distanceLoggedMiles);
+      return distanceLoggedMiles;
+    } catch (e) {
+      console.error(e);
+      return 0;
     }
   }
 }
