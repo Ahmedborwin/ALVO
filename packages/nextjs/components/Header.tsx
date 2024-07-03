@@ -122,8 +122,8 @@ export const Header = () => {
                 <Image alt="ChainHabits logo" className="cursor-pointer" fill src="/logo.svg" />
               </div>
               <div className="flex flex-col">
-                <span className="font-bold text-white text-lg leading-tight">ChainHabits</span>
-                <span className="text-indigo-200 text-xs">Forge Your Path</span>
+                <span className="font-bold text-white text-lg leading-tight">ALVO</span>
+                <span className="text-indigo-200 text-xs">Dream.Persevere.Achieve.</span>
               </div>
             </Link>
           </div>

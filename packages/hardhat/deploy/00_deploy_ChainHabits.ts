@@ -43,7 +43,11 @@ const deployChainHabits: DeployFunction = async function (hre: HardhatRuntimeEnv
   await tx2.wait();
 
   //verfiy smart contract
-  if (hre.network.name !== "localhost" && hre.network.name !== "localFunctionsTestnet") {
+  if (
+    hre.network.name !== "localhost" &&
+    hre.network.name !== "localFunctionsTestnet" &&
+    hre.network.name !== "hardhat"
+  ) {
     console.log("-----------Verifying Contract-----------");
     await hre.run("verify:verify", {
       address: chainHabitsAddress,
