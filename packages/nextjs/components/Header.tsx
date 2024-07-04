@@ -25,11 +25,6 @@ export const menuLinks: HeaderMenuLink[] = [
     label: "Home",
     href: "/",
   },
-  // {
-  //   label: "Debug Contracts",
-  //   href: "/debug",
-  //   icon: <BugAntIcon className="h-4 w-4" />,
-  // },
   {
     label: "Challenge",
     href: "/challenge",
@@ -119,7 +114,7 @@ export const Header = () => {
           <div className="flex items-center">
             <Link href="/" passHref className="flex items-center gap-3">
               <div className="relative w-10 h-10">
-                <Image alt="ChainHabits logo" className="cursor-pointer" fill src="/logo.svg" />
+                <Image alt="ALVO logo" className="cursor-pointer" fill src="/logo.svg" />
               </div>
               <div className="flex flex-col">
                 <span className="font-bold text-white text-lg leading-tight">ALVO</span>

@@ -86,9 +86,15 @@ const LightningSVG = (
 );
 
 const ProfileSVG = (
-  <svg className="w-16 h-16 text-white" fill="currentColor" viewBox="0 0 20 20">
-    <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" />
   </svg>
 );
 
-export { MailSVG, MailSVG2, LargeMailSVG, ChainSVG, LightningSVG, SmallChainSVG, ProfileSVG };
+const CrossSVG = (
+  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+  </svg>
+);
+
+export { MailSVG, MailSVG2, LargeMailSVG, ChainSVG, LightningSVG, SmallChainSVG, ProfileSVG, CrossSVG };

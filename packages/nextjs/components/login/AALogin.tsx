@@ -36,15 +36,15 @@ export const LogInCard = ({ isAwaitingEmail }: { isAwaitingEmail: boolean }) => 
           <div className="text-center pt-16">
             <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">Check Your Email</h2>
             <p className="text-indigo-200 mb-6">
-              We&apos;ve sent you a magical link to continue your journey with ChainHabits.
+              We&apos;ve sent you a magical link to continue your journey with ALVO.
             </p>
             <div className="animate-bounce mt-8">{LargeMailSVG}</div>
           </div>
         ) : (
           <>
             <div className="text-center pt-16 mb-8">
-              <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">ChainHabits</h1>
-              <p className="text-indigo-200">Forge Your Path to Excellence</p>
+              <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">ALVO</h1>
+              <p className="text-indigo-200">Dream.Persevere.Achieve.</p>
             </div>
             <div className="space-y-6">
               <div className="relative">

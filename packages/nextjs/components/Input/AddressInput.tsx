@@ -18,7 +18,6 @@ export const AddressInput = ({ value, name, placeholder, onChange, disabled }: C
     query: { gcTime: 30_000, enabled: isDebouncedValueLive && isENS(debouncedValue) },
   });
 
-  const [enteredEnsName, setEnteredEnsName] = useState<string>();
   const [isHovered, setIsHovered] = useState<boolean>(false);
   const { data: ensName, isLoading: isEnsNameLoading } = useEnsName({
     address: settledValue as Address,
@@ -34,18 +33,17 @@ export const AddressInput = ({ value, name, placeholder, onChange, disabled }: C
 
   useEffect(() => {
     if (ensAddress) {
-      setEnteredEnsName(debouncedValue);
       onChange(ensAddress);
     }
   }, [ensAddress, onChange, debouncedValue]);
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      setEnteredEnsName(undefined);
       onChange(e.target.value as Address);
     },
     [onChange],
   );
+  const address = value?.slice(0, 6) + "..." + value?.slice(-4);
 
   return (
     <div className="relative">
@@ -62,17 +60,25 @@ export const AddressInput = ({ value, name, placeholder, onChange, disabled }: C
           ensAddress === null ? "border-red-500" : ""
         }`}
       />
-      {(ensName || isEnsNameLoading || isEnsAddressLoading) && !isHovered ? (
-        <div className="absolute left-2 top-1/2 transform -translate-y-1/2 flex items-center bg-base-300 rounded-full">
-          {isEnsAvatarLoading && <div className="w-[35px] h-[35px] rounded-full bg-base-200 animate-pulse"></div>}
-          {ensAvatar && <img className="w-[35px] h-[35px] rounded-full" src={ensAvatar} alt={`${ensAddress} avatar`} />}
-          <span className="text-accent px-2">
-            {enteredEnsName ?? ensName ?? (isEnsNameLoading || isEnsAddressLoading ? "Loading..." : "")}
-          </span>
+      {isAddress(value) && !isHovered ? (
+        <div className="absolute left-2 top-1/2 transform -translate-y-1/2">
+          <div className="flex items-center bg-gray-100 rounded-full shadow-sm overflow-hidden">
+            {isEnsAvatarLoading ? (
+              <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse"></div>
+            ) : ensAvatar ? (
+              <img className="w-8 h-8 rounded-full" src={ensAvatar} alt="ENS avatar" />
+            ) : (
+              <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-400 to-purple-500"></div>
+            )}
+            <span className="text-gray-800 font-medium px-3 py-1">
+              {isEnsNameLoading || isEnsAddressLoading ? "Loading..." : ensName ? ensName : address}
+            </span>
+          </div>
         </div>
       ) : (
         ""
       )}
+
       {value && (
         <img
           alt=""
