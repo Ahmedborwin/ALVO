@@ -1,144 +1,95 @@
 "use client";
 
-import React from "react";
-import { useTargetNetwork } from "../hooks/scaffold-eth/useTargetNetwork";
+import React, { useEffect, useState } from "react";
+import Link from "next/link";
 import { useAccount as useAlchemyAccount } from "@alchemy/aa-alchemy/react";
 import type { NextPage } from "next";
-import { formatEther } from "viem";
 import { useAccount } from "wagmi";
-import { SubmitButton } from "~~/components/buttons";
-import { ProfileSVG } from "~~/components/svg";
+import { ObjectiveCard } from "~~/components/cards";
+import { MoonSpinner } from "~~/components/loader";
 import { accountType } from "~~/config/AlchemyConfig";
 import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
-import { useStravaState } from "~~/services/store/store";
-import { ProfileStatProps } from "~~/types/utils";
 
-const ProfileStat: React.FC<ProfileStatProps> = ({ label, value }) => (
-  <div className="flex justify-between items-center">
-    <span className="text-indigo-200">{label}:</span>
-    <span className="text-white font-semibold">{value}</span>
-  </div>
-);
-
-const ObjectiveCard: React.FC<{ index: number }> = ({ index }) => (
-  <div
-    className={`rounded-lg p-6 transition-all shadow-lg flex flex-col justify-between
-            ${
-              index % 2 === 0
-                ? "bg-gradient-to-br from-green-400/30 to-green-600/30 hover:from-green-400/40 hover:to-green-600/40"
-                : "bg-gradient-to-br from-red-400/30 to-red-600/30 hover:from-red-400/40 hover:to-red-600/40"
-            }`}
-  >
-    <div>
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-semibold text-white">Week {index + 1}</h3>
-        <span
-          className={`text-sm px-2 py-1 rounded-full
-                ${index % 2 === 0 ? "bg-green-500/50 text-green-100" : "bg-red-500/50 text-red-100"}`}
-        >
-          {index % 2 === 0 ? "Success" : "Failed"}
-        </span>
-      </div>
-    </div>
+const ChallengeDetailItem = ({ label, value }: { label: string; value: string | number }) => (
+  <div className="flex flex-col items-start">
+    <span className="text-purple-300 text-sm">{label}</span>
+    <span className="text-white font-medium text-lg">{value}</span>
   </div>
 );
 
 const Home: NextPage = () => {
-  const { targetNetwork } = useTargetNetwork();
-  console.log("targetNetwork", targetNetwork);
   const { address } = useAccount();
   const { address: alchemyAddress } = useAlchemyAccount({ type: accountType });
-  const { bio, city, country, firstname, lastname, premium, sex, state, username } = useStravaState(state =>
-    state.getStravaProfile(),
-  );
-  const { data: userDetails } = useScaffoldReadContract({
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  const { data: challengeID } = useScaffoldReadContract({
     contractName: "ChainHabits",
-    functionName: "getUserDetails",
+    functionName: "getChallengeId",
     args: [address ?? alchemyAddress],
   });
 
-  const { challengeTally, SuccessfulChallenges, currenStaked, totalDonated } = userDetails ?? {};
+  const { data: challengeDetails } = useScaffoldReadContract({
+    contractName: "ChainHabits",
+    functionName: "getChallengeDetails",
+    args: [challengeID],
+  });
 
-  const handleApiCall = async () => {
-    const chainID = targetNetwork.id;
-
-    try {
-      const response = await fetch("api/StravaCall", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ chainID }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log("API call successful:", data);
-      } else {
-        console.error("API call failed:", response.statusText);
-      }
-    } catch (error) {
-      console.error("Error during API call:", error);
+  useEffect(() => {
+    if (!Number.isNaN(challengeID) && challengeDetails) {
+      setIsLoading(false);
     }
-  };
+  }, [challengeID, challengeDetails]);
+
+  if (isLoading) return <MoonSpinner />;
 
   return (
-    <div
-      className="flex items-center justify-center min-h-screen w-full bg-cover bg-center relative overflow-hidden px-4 py-6 sm:px-6 lg:px-8"
-      style={{
-        backgroundImage: "linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(88, 28, 135, 0.8))",
-      }}
-    >
-      <div className="w-full max-w-6xl space-y-12 sm:space-y-16">
-        <div className="mt-16 z-10 w-full p-6 md:p-8 backdrop-blur-md bg-white bg-opacity-10 rounded-2xl shadow-2xl border border-white border-opacity-20">
-          <div className="absolute -top-16 left-1/2 transform -translate-x-1/2">
-            <div className="w-32 h-32 bg-gradient-to-br from-purple-400 to-indigo-600 rounded-full flex items-center justify-center shadow-lg overflow-hidden">
-              {ProfileSVG}
-            </div>
-          </div>
-
-          <div className="text-center pt-20 mb-8">
-            <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">{username || "User Profile"}</h1>
-            <p className="text-indigo-200">{bio || "No bio available"}</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="space-y-6">
-              <h2 className="text-2xl font-semibold text-white mb-4">Challenge Stats</h2>
-              <div className="bg-white bg-opacity-20 rounded-lg p-4 space-y-3">
-                <ProfileStat label="Challenge Tally" value={String(challengeTally ?? 0n)} />
-                <ProfileStat label="Successful Challenges" value={String(SuccessfulChallenges ?? 0n)} />
-                <ProfileStat label="Current Staked" value={`${formatEther(currenStaked ?? 0n)} ETH`} />
-                <ProfileStat label="Total Donated" value={`${formatEther(totalDonated ?? 0n)} ETH`} />
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-purple-900 py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto">
+        <div className="backdrop-blur-md bg-white bg-opacity-10 rounded-2xl sm:rounded-3xl shadow-2xl border border-white border-opacity-20 overflow-hidden">
+          {challengeDetails?.isLive ? (
+            <div className="p-4 sm:p-6 md:p-10">
+              <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center">
+                <span className="mb-2 sm:mb-0">Active Challenge</span>
+                <span className="text-sm font-semibold px-3 py-1 bg-green-500 text-white rounded-full sm:ml-3 self-start sm:self-auto">
+                  Ongoing
+                </span>
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+                <ChallengeDetailItem label="Objective" value={challengeDetails.objective} />
+                <ChallengeDetailItem label="Target" value={`${challengeDetails?.targetMiles} miles`} />
+                <ChallengeDetailItem label="Duration" value={`${challengeDetails?.NoOfWeeks} weeks`} />
+                <ChallengeDetailItem label="Failed Weeks" value={challengeDetails.failedWeeks} />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+                {/* // @ts-ignore */}
+                {[...Array(challengeDetails.NoOfWeeks)].map((_, index) => (
+                  <ObjectiveCard key={index} index={index} />
+                ))}
               </div>
             </div>
-
-            <div className="space-y-6">
-              <h2 className="text-2xl font-semibold text-white mb-4">Personal Info</h2>
-              <div className="bg-white bg-opacity-20 rounded-lg p-4 space-y-3">
-                <ProfileStat label="Name" value={`${firstname || ""} ${lastname || ""}`} />
-                <ProfileStat label="Location" value={`${city || ""}, ${state || ""}, ${country || ""}`} />
-                <ProfileStat label="Gender" value={sex || "Not specified"} />
-                <ProfileStat label="Account Type" value={premium ? "Premium" : "Standard"} />
+          ) : (
+            <div className="min-h-screen bg-gradient-to-br from-slate-900 to-purple-900 py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
+              <div className="max-w-6xl mx-auto">
+                <div className="backdrop-blur-md bg-white bg-opacity-10 rounded-2xl sm:rounded-3xl shadow-2xl border border-white border-opacity-20 overflow-hidden">
+                  <div className="p-4 sm:p-6 md:p-10 text-center">
+                    <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6">No Active Challenges</h2>
+                    <p className="text-lg sm:text-xl text-indigo-200 mb-4 sm:mb-8">
+                      You don&apos;t have any active challenges at the moment. Ready to set a new goal?
+                    </p>
+                    <p className="text-base sm:text-lg text-indigo-300 mb-6 sm:mb-10">
+                      Every accomplishment starts with the decision to try. Set your goal, commit to it, and watch
+                      yourself transform.
+                    </p>
+                    <Link href="/challenge">
+                      <span className="w-full sm:w-auto px-6 sm:px-8 py-3 bg-gradient-to-r from-purple-500 to-indigo-600 text-white text-base sm:text-lg font-semibold rounded-full shadow-lg hover:from-purple-600 hover:to-indigo-700 transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50">
+                        Create New Challenge
+                      </span>
+                    </Link>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-          <div className="mt-8 flex justify-center">
-            <SubmitButton
-              onClick={handleApiCall}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-full"
-            />
-          </div>
-        </div>
-
-        <div className="w-full max-w-6xl space-y-12 sm:space-y-16">
-          <div className="z-10 w-full p-6 md:p-8 backdrop-blur-md bg-white bg-opacity-10 rounded-2xl shadow-2xl border border-white border-opacity-20">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {[...Array(4)].map((task, index) => (
-                <ObjectiveCard key={index} index={index} />
-              ))}
-            </div>
-          </div>
+          )}
         </div>
       </div>
     </div>

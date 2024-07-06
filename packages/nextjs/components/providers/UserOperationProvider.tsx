@@ -1,6 +1,7 @@
 "use client";
 
 import { ReactNode, useEffect } from "react";
+import { ProfileModal } from "../modal";
 import { AlchemyLightAccountClientConfig, AlchemySigner } from "@alchemy/aa-alchemy";
 import { useSendUserOperation, useSmartAccountClient } from "@alchemy/aa-alchemy/react";
 import { EntryPointRegistryBase, SendUserOperationParameters, SendUserOperationResult } from "@alchemy/aa-core";
@@ -73,6 +74,11 @@ const UserOperationProvider = ({ children }: { children: ReactNode }) => {
   getUserOperationResult = sendUserOperationResult;
   isSendUserOperationError = isSendingUserError;
   isUserOPPending = isSendingUserOperation;
-  return children;
+  return (
+    <span>
+      <ProfileModal />
+      {children}
+    </span>
+  );
 };
 export { UserOperationProvider, handleSentUserOP, getUserOperationResult, isSendUserOperationError, isUserOPPending };

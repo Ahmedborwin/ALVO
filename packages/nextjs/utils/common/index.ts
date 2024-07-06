@@ -1,7 +1,5 @@
-const isValidAddress = (address: string) => {
-  if (!/^0x[a-fA-F0-9]{40}$/.test(address)) return false;
+import { format, fromUnixTime, parseISO } from "date-fns";
 
-  return true;
-};
+const convertUnixToData = (date: number) => format(parseISO(fromUnixTime(date).toISOString()), "MMM d, yyyy");
 
-export { isValidAddress };
+export { convertUnixToData };

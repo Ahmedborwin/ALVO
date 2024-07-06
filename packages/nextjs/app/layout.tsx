@@ -7,7 +7,7 @@ import "~~/styles/globals.css";
 import { getMetadata } from "~~/utils/scaffold-eth/getMetadata";
 
 export const metadata = getMetadata({
-  title: "ChainHabits",
+  title: "ALVO",
   description: "Forge Your Path to Excellence",
 });
 
