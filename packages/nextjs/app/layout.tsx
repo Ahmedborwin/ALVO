@@ -8,7 +8,7 @@ import { getMetadata } from "~~/utils/scaffold-eth/getMetadata";
 
 export const metadata = getMetadata({
   title: "ALVO",
-  description: "Forge Your Path to Excellence",
+  description: "Dream.Persevere.Achieve.",
 });
 
 const ScaffoldEthApp = ({ children }: { children: React.ReactNode }) => {
