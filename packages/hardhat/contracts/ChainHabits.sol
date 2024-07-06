@@ -106,8 +106,8 @@ contract ChainHabits {
 		isUserRegistered(msg.sender)
 		returns (uint256 challengeId)
 	{
-		challengeId = challengeCounter;
 		challengeCounter++;
+		challengeId = challengeCounter;
 
 		challengeTable[challengeId] = ChallengeDetails(
 			_obj,
