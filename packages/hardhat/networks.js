@@ -35,7 +35,7 @@ if (PRIVATE_KEY_2) {
 
 const networks = {
   ethereum: {
-    url: process.env.ETHEREUM_RPC_URL || "UNSET",
+    url: `https://eth-sepolia.g.alchemy.com/v2/${ALCHEMY_KEY}`,
     gasPrice: undefined, // gas price for the functions request - default's to auto as per HH https://hardhat.org/hardhat-network/docs/reference#eth_gasprice
     nonce: undefined,
     accounts,
@@ -80,7 +80,7 @@ const networks = {
     gatewayUrls: ["https://01.functions-gateway.chain.link/", "https://02.functions-gateway.chain.link/"],
   },
   ethereumSepolia: {
-    url: process.env.ETHEREUM_SEPOLIA_RPC_URL || "UNSET",
+    url: `https://eth-sepolia.g.alchemy.com/v2/${ALCHEMY_KEY}`,
     gasPrice: undefined,
     nonce: undefined,
     accounts,
