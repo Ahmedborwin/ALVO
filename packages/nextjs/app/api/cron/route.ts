@@ -31,7 +31,7 @@ import chainHabits from "~~/contracts/deployedContracts";
 //   workout_type: number;
 // };
 
-export async function POST() {
+export async function GET() {
   try {
     // const { chainId } = await req.json();
     const response = await handleStravaLogic();
