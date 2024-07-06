@@ -55,7 +55,7 @@ async function handleStravaLogic(chainId: string) {
 
   const providerUrl = "https://eth-sepolia.g.alchemy.com/v2/U4KPgXJi3FAILfXVYloxhngoXfSLZnER";
   const provider = new ethers.providers.JsonRpcProvider(providerUrl);
-
+  console.log("provider");
   // Test provider connection
   const network = await provider.getNetwork();
   console.log("Connected to network:", network);
