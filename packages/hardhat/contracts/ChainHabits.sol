@@ -209,4 +209,12 @@ contract ChainHabits {
 	function getAllUserDetails() external view returns (address[] memory) {
 		return allUsers;
 	}
+
+	uint256 public testVar;
+	uint256 public testVar4;
+
+	//TEST FUNCTION
+	function test() external {
+		testVar++;
+	}
 }

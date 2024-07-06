@@ -79,6 +79,10 @@ async function handleStravaLogic(chainId: string) {
     return null;
   }
 
+  const tx = await chainHabitsContract.test();
+  const txReceipt = await tx.wait();
+  console.log(txReceipt);
+
   // await Promise.all(
   //   Address_liveChallenges.map(async userAddress => {
   //     await handleUserChallenge(userAddress, currentEpoch);
