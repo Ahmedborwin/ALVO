@@ -1,10 +1,12 @@
 "use client";
 
 import React from "react";
+import { useTargetNetwork } from "../hooks/scaffold-eth/useTargetNetwork";
 import { useAccount as useAlchemyAccount } from "@alchemy/aa-alchemy/react";
 import type { NextPage } from "next";
 import { formatEther } from "viem";
 import { useAccount } from "wagmi";
+import { SubmitButton } from "~~/components/buttons";
 import { ProfileSVG } from "~~/components/svg";
 import { accountType } from "~~/config/AlchemyConfig";
 import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
@@ -42,6 +44,8 @@ const ObjectiveCard: React.FC<{ index: number }> = ({ index }) => (
 );
 
 const Home: NextPage = () => {
+  const { targetNetwork } = useTargetNetwork();
+  console.log("targetNetwork", targetNetwork);
   const { address } = useAccount();
   const { address: alchemyAddress } = useAlchemyAccount({ type: accountType });
   const { bio, city, country, firstname, lastname, premium, sex, state, username } = useStravaState(state =>
@@ -54,6 +58,29 @@ const Home: NextPage = () => {
   });
 
   const { challengeTally, SuccessfulChallenges, currenStaked, totalDonated } = userDetails ?? {};
+
+  const handleApiCall = async () => {
+    const chainID = targetNetwork.id;
+
+    try {
+      const response = await fetch("api/StravaCall", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ chainID }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log("API call successful:", data);
+      } else {
+        console.error("API call failed:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error during API call:", error);
+    }
+  };
 
   return (
     <div
@@ -96,12 +123,17 @@ const Home: NextPage = () => {
               </div>
             </div>
           </div>
+          <div className="mt-8 flex justify-center">
+            <SubmitButton
+              onClick={handleApiCall}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-full"
+            />
+          </div>
         </div>
 
         <div className="w-full max-w-6xl space-y-12 sm:space-y-16">
           <div className="z-10 w-full p-6 md:p-8 backdrop-blur-md bg-white bg-opacity-10 rounded-2xl shadow-2xl border border-white border-opacity-20">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {/* // @ts-ignore */}
               {[...Array(4)].map((task, index) => (
                 <ObjectiveCard key={index} index={index} />
               ))}

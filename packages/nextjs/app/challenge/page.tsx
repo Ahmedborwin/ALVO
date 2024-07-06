@@ -23,7 +23,7 @@ const Challenge: NextPage = () => {
   const [stakeValue, setStakeValue] = useState<number | null>(40);
   const [startingMiles, setStartingMiles] = useState<number | null>(null);
 
-  const { writeContractAsync: writeYourContractAsync } = useScaffoldWriteContract("ChainHabits");
+  const { writeContractAsync: writeContract__CreateChallenge } = useScaffoldWriteContract("ChainHabits");
   const nativeCurrencyPrice = useGlobalState(state => state.nativeCurrency.price);
 
   const clearAll = () => {
@@ -49,7 +49,7 @@ const Challenge: NextPage = () => {
       }
 
       const ethAmount = stakeValue / nativeCurrencyPrice;
-      await writeYourContractAsync({
+      await writeContract__CreateChallenge({
         functionName: "createNewChallenge",
         args: [objective, startingMiles, noOfWeeks, forfeitAddress as Address],
         value: parseEther(ethAmount.toString()),
