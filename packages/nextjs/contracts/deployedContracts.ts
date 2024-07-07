@@ -856,7 +856,7 @@ const deployedContracts = {
   },
   31337: {
     ChainHabits: {
-      address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+      address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
       abi: [
         {
           inputs: [],
@@ -864,14 +864,13 @@ const deployedContracts = {
           type: "constructor",
         },
         {
-          inputs: [
-            {
-              internalType: "address",
-              name: "Caller",
-              type: "address",
-            },
-          ],
-          name: "CHAINHABITS__CallerNotAdmin",
+          inputs: [],
+          name: "CHAINHABITS__ChallengeStillActive",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "CHAINHABITS__InsufficientFunds",
           type: "error",
         },
         {
@@ -888,10 +887,60 @@ const deployedContracts = {
           anonymous: false,
           inputs: [
             {
-              indexed: false,
+              indexed: true,
               internalType: "uint256",
               name: "challengeId",
               type: "uint256",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "user",
+              type: "address",
+            },
+            {
+              indexed: true,
+              internalType: "uint8",
+              name: "stakeForfeited",
+              type: "uint8",
+            },
+          ],
+          name: "ChallengeCompleted",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "user",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "amount",
+              type: "uint256",
+            },
+          ],
+          name: "FundsWithdrawn",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "uint256",
+              name: "challengeId",
+              type: "uint256",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "user",
+              type: "address",
             },
             {
               indexed: false,
@@ -914,19 +963,7 @@ const deployedContracts = {
             {
               indexed: false,
               internalType: "uint48",
-              name: "competitionDeadline",
-              type: "uint48",
-            },
-            {
-              indexed: false,
-              internalType: "uint48",
-              name: "currentIntervalEpoch",
-              type: "uint48",
-            },
-            {
-              indexed: false,
-              internalType: "uint48",
-              name: "nextIntervalEpoch",
+              name: "challengeStartDate",
               type: "uint48",
             },
             {
@@ -950,6 +987,50 @@ const deployedContracts = {
             },
           ],
           name: "NewUserRegistered",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "previousOwner",
+              type: "address",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "newOwner",
+              type: "address",
+            },
+          ],
+          name: "OwnershipTransferred",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "uint256",
+              name: "challengeId",
+              type: "uint256",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "user",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "bool",
+              name: "success",
+              type: "bool",
+            },
+          ],
+          name: "intervalReviewCompleted",
           type: "event",
         },
         {
@@ -1044,11 +1125,6 @@ const deployedContracts = {
             {
               components: [
                 {
-                  internalType: "string",
-                  name: "objective",
-                  type: "string",
-                },
-                {
                   internalType: "uint8",
                   name: "targetMiles",
                   type: "uint8",
@@ -1070,17 +1146,7 @@ const deployedContracts = {
                 },
                 {
                   internalType: "uint48",
-                  name: "competitionDeadline",
-                  type: "uint48",
-                },
-                {
-                  internalType: "uint48",
-                  name: "currentIntervalEpoch",
-                  type: "uint48",
-                },
-                {
-                  internalType: "uint48",
-                  name: "nextIntervalEpoch",
+                  name: "challengeStartDate",
                   type: "uint48",
                 },
                 {
@@ -1129,24 +1195,9 @@ const deployedContracts = {
             {
               components: [
                 {
-                  internalType: "uint256",
-                  name: "challengeTally",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint256",
-                  name: "SuccessfulChallenges",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint256",
-                  name: "currenStaked",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint256",
-                  name: "totalDonated",
-                  type: "uint256",
+                  internalType: "uint48",
+                  name: "currentStaked",
+                  type: "uint48",
                 },
                 {
                   internalType: "uint256",
@@ -1175,9 +1226,14 @@ const deployedContracts = {
               type: "uint256",
             },
             {
-              internalType: "uint256",
-              name: "_amountToDefault",
-              type: "uint256",
+              internalType: "uint8",
+              name: "stakeForfeited",
+              type: "uint8",
+            },
+            {
+              internalType: "address",
+              name: "userAddress",
+              type: "address",
             },
           ],
           name: "handleCompleteChallenge",
@@ -1196,16 +1252,6 @@ const deployedContracts = {
               internalType: "bool",
               name: "failed",
               type: "bool",
-            },
-            {
-              internalType: "uint48",
-              name: "currentIntervalEpoch",
-              type: "uint48",
-            },
-            {
-              internalType: "uint48",
-              name: "nextIntervalEpoch",
-              type: "uint48",
             },
           ],
           name: "handleIntervalReview",
@@ -1233,6 +1279,19 @@ const deployedContracts = {
           type: "function",
         },
         {
+          inputs: [],
+          name: "owner",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
           inputs: [
             {
               internalType: "uint256",
@@ -1252,35 +1311,22 @@ const deployedContracts = {
         },
         {
           inputs: [],
-          name: "test",
+          name: "renounceOwnership",
           outputs: [],
           stateMutability: "nonpayable",
           type: "function",
         },
         {
-          inputs: [],
-          name: "testVar",
-          outputs: [
+          inputs: [
             {
-              internalType: "uint256",
-              name: "",
-              type: "uint256",
+              internalType: "address",
+              name: "newOwner",
+              type: "address",
             },
           ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "testVar4",
-          outputs: [
-            {
-              internalType: "uint256",
-              name: "",
-              type: "uint256",
-            },
-          ],
-          stateMutability: "view",
+          name: "transferOwnership",
+          outputs: [],
+          stateMutability: "nonpayable",
           type: "function",
         },
         {
@@ -1328,7 +1374,11 @@ const deployedContracts = {
           type: "function",
         },
       ],
-      inheritedFunctions: {},
+      inheritedFunctions: {
+        owner: "@openzeppelin/contracts/access/Ownable.sol",
+        renounceOwnership: "@openzeppelin/contracts/access/Ownable.sol",
+        transferOwnership: "@openzeppelin/contracts/access/Ownable.sol",
+      },
     },
   },
   84532: {
@@ -2213,7 +2263,483 @@ const deployedContracts = {
       inheritedFunctions: {},
     },
   },
-  11155111: {},
+  11155111: {
+    ChainHabits: {
+      address: "0x73F82105E6FF0841010331aE1109c87b6A3Ea5dc",
+      abi: [
+        {
+          inputs: [],
+          stateMutability: "nonpayable",
+          type: "constructor",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "Caller",
+              type: "address",
+            },
+          ],
+          name: "CHAINHABITS__CallerNotAdmin",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "CHAINHABITS__UserAlreadyRegistered",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "CHAINHABITS__UserNotYetRegistered",
+          type: "error",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "challengeId",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "string",
+              name: "Objective",
+              type: "string",
+            },
+            {
+              indexed: false,
+              internalType: "uint8",
+              name: "startingMiles",
+              type: "uint8",
+            },
+            {
+              indexed: false,
+              internalType: "uint8",
+              name: "NumberofWeeks",
+              type: "uint8",
+            },
+            {
+              indexed: false,
+              internalType: "uint48",
+              name: "competitionDeadline",
+              type: "uint48",
+            },
+            {
+              indexed: false,
+              internalType: "uint48",
+              name: "currentIntervalEpoch",
+              type: "uint48",
+            },
+            {
+              indexed: false,
+              internalType: "uint48",
+              name: "nextIntervalEpoch",
+              type: "uint48",
+            },
+            {
+              indexed: false,
+              internalType: "address",
+              name: "defaultAddress",
+              type: "address",
+            },
+          ],
+          name: "NewChallengeCreated",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: false,
+              internalType: "address",
+              name: "user",
+              type: "address",
+            },
+          ],
+          name: "NewUserRegistered",
+          type: "event",
+        },
+        {
+          inputs: [],
+          name: "admin",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          name: "allUsers",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "string",
+              name: "_obj",
+              type: "string",
+            },
+            {
+              internalType: "uint8",
+              name: "_targetMiles",
+              type: "uint8",
+            },
+            {
+              internalType: "uint8",
+              name: "_weeks",
+              type: "uint8",
+            },
+            {
+              internalType: "address",
+              name: "_defaultAddress",
+              type: "address",
+            },
+          ],
+          name: "createNewChallenge",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "challengeId",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "payable",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "getAllUserDetails",
+          outputs: [
+            {
+              internalType: "address[]",
+              name: "",
+              type: "address[]",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "_challengeId",
+              type: "uint256",
+            },
+          ],
+          name: "getChallengeDetails",
+          outputs: [
+            {
+              components: [
+                {
+                  internalType: "string",
+                  name: "objective",
+                  type: "string",
+                },
+                {
+                  internalType: "uint8",
+                  name: "targetMiles",
+                  type: "uint8",
+                },
+                {
+                  internalType: "uint8",
+                  name: "NoOfWeeks",
+                  type: "uint8",
+                },
+                {
+                  internalType: "uint8",
+                  name: "failedWeeks",
+                  type: "uint8",
+                },
+                {
+                  internalType: "bool",
+                  name: "isLive",
+                  type: "bool",
+                },
+                {
+                  internalType: "uint48",
+                  name: "competitionDeadline",
+                  type: "uint48",
+                },
+                {
+                  internalType: "uint48",
+                  name: "currentIntervalEpoch",
+                  type: "uint48",
+                },
+                {
+                  internalType: "uint48",
+                  name: "nextIntervalEpoch",
+                  type: "uint48",
+                },
+                {
+                  internalType: "address",
+                  name: "defaultAddress",
+                  type: "address",
+                },
+              ],
+              internalType: "struct ChainHabits.ChallengeDetails",
+              name: "",
+              type: "tuple",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "_userAddress",
+              type: "address",
+            },
+          ],
+          name: "getChallengeId",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "_user",
+              type: "address",
+            },
+          ],
+          name: "getUserDetails",
+          outputs: [
+            {
+              components: [
+                {
+                  internalType: "uint256",
+                  name: "challengeTally",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "SuccessfulChallenges",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "currenStaked",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "totalDonated",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "userID",
+                  type: "uint256",
+                },
+                {
+                  internalType: "string",
+                  name: "refreshToken",
+                  type: "string",
+                },
+              ],
+              internalType: "struct ChainHabits.UserDetails",
+              name: "",
+              type: "tuple",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "challengeId",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "_amountToDefault",
+              type: "uint256",
+            },
+          ],
+          name: "handleCompleteChallenge",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "_challengeId",
+              type: "uint256",
+            },
+            {
+              internalType: "bool",
+              name: "failed",
+              type: "bool",
+            },
+            {
+              internalType: "uint48",
+              name: "currentIntervalEpoch",
+              type: "uint48",
+            },
+            {
+              internalType: "uint48",
+              name: "nextIntervalEpoch",
+              type: "uint48",
+            },
+          ],
+          name: "handleIntervalReview",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          name: "isUserRegisteredTable",
+          outputs: [
+            {
+              internalType: "bool",
+              name: "",
+              type: "bool",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "userID",
+              type: "uint256",
+            },
+            {
+              internalType: "string",
+              name: "_refreshToken",
+              type: "string",
+            },
+          ],
+          name: "registerNewUser",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "test",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "testVar",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "testVar4",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "_user",
+              type: "address",
+            },
+            {
+              internalType: "string",
+              name: "_refreshToken",
+              type: "string",
+            },
+          ],
+          name: "updateRefreshToken",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          name: "userHasLiveChallenge",
+          outputs: [
+            {
+              internalType: "bool",
+              name: "",
+              type: "bool",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "withdrawFunds",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+      ],
+      inheritedFunctions: {},
+    },
+  },
 } as const;
 
 export default deployedContracts satisfies GenericContractsDeclaration;
