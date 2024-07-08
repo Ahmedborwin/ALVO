@@ -5,7 +5,7 @@ import scaffoldConfig from "~~/scaffold.config";
 import { useGlobalState } from "~~/services/store/store";
 import { fetchPriceFromUniswap } from "~~/utils/scaffold-eth";
 
-const enablePolling = false;
+const enablePolling = true;
 
 /**
  * Get the price of Native Currency based on Native Token/DAI trading pair from Uniswap SDK

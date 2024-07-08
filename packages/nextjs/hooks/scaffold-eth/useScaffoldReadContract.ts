@@ -46,7 +46,7 @@ export const useScaffoldReadContract = <
     functionName,
     address: deployedContract?.address,
     abi: deployedContract?.abi,
-    account: account ?? alchemyAddress ?? address,
+    account: account || alchemyAddress || address,
     args,
     ...(readContractConfig as any),
     query: {
