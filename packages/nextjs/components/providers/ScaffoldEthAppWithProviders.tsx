@@ -12,6 +12,7 @@ import { Footer } from "~~/components/Footer";
 import { Header } from "~~/components/Header";
 import { BlockieAvatar } from "~~/components/scaffold-eth";
 import { ProgressBar } from "~~/components/scaffold-eth/ProgressBar";
+import { NEXT_PUBLIC_SUBGRAPH_URI } from "~~/constants/EnvConsts";
 import { useInitializeNativeCurrencyPrice } from "~~/hooks/scaffold-eth";
 import { wagmiConfig } from "~~/services/web3/wagmiConfig";
 
@@ -48,9 +49,8 @@ export const ScaffoldEthAppWithProviders = ({ children }: { children: React.Reac
     setMounted(true);
   }, []);
 
-  const subgraphUri = "http://localhost:8000/subgraphs/name/scaffold-eth/your-contract";
   const apolloClient = new ApolloClient({
-    uri: subgraphUri,
+    uri: NEXT_PUBLIC_SUBGRAPH_URI,
     cache: new InMemoryCache(),
   });
 
