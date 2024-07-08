@@ -178,7 +178,7 @@ const Challenge: NextPage = () => {
               </span>
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-              <DetailCard title="Objective" value={challengeDetails?.objective} />
+              {/* <DetailCard title="Objective" value={challengeDetails?.objective} /> */}
               <DetailCard title="Target Miles" value={`${challengeDetails?.targetMiles} miles`} />
               <DetailCard title="Duration" value={`${challengeDetails?.NoOfWeeks} weeks`} />
               <DetailCard title="Failed Weeks" value={`${challengeDetails?.failedWeeks} weeks`} />
@@ -188,7 +188,7 @@ const Challenge: NextPage = () => {
                   -4,
                 )}`}
               />
-              <DetailCard title="Deadline" value={convertUnixToData(challengeDetails?.competitionDeadline)} />
+              {/* <DetailCard title="Deadline" value={convertUnixToData(challengeDetails?.competitionDeadline)} /> */}
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {/* // @ts-ignore */}

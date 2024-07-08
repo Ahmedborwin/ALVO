@@ -3,23 +3,24 @@ pragma solidity >=0.8.0 <0.9.0;
 
 // Useful for debugging. Remove when deploying to a live network.
 import "hardhat/console.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
 
 //TODO datatructure to record all active players
 
-error CHAINHABITS__UsernameTaken();
+// Errors
 error CHAINHABITS__UserAlreadyRegistered();
 error CHAINHABITS__UserNotYetRegistered();
-error CHAINHABITS__CallerNotAdmin(address Caller);
+error CHAINHABITS__NoActiveChallengeForUser();
+error CHAINHABITS__ChallengeStillActive();
+error CHAINHABITS__InsufficientFunds();
 
-contract ChainHabits {
+contract ChainHabits is ReentrancyGuard, Ownable {
+	using Counters for Counters.Counter;
+
 	//MODIFIERS
-	modifier onlyAdmin(address _caller) {
-		if (_caller != address(admin)) {
-			revert CHAINHABITS__CallerNotAdmin(_caller);
-		}
-		_;
-	}
+
 	modifier isUserNotRegistered(address _caller) {
 		if (isUserRegisteredTable[_caller]) {
 			revert CHAINHABITS__UserAlreadyRegistered();
@@ -32,29 +33,23 @@ contract ChainHabits {
 		}
 		_;
 	}
-	uint256 challengeCounter;
+	Counters.Counter private _challengeIdCounter;
 	address public admin;
 	address[] public allUsers;
 
 	// STRUCTS
 	struct UserDetails {
-		uint256 challengeTally;
-		uint256 SuccessfulChallenges;
-		uint256 currenStaked;
-		uint256 totalDonated;
+		uint48 currentStaked;
 		uint256 userID; //fromstrava
 		string refreshToken; //fromstrava
 	}
 
 	struct ChallengeDetails {
-		string objective;
 		uint8 targetMiles;
 		uint8 NoOfWeeks;
 		uint8 failedWeeks;
 		bool isLive;
-		uint48 competitionDeadline;
-		uint48 currentIntervalEpoch;
-		uint48 nextIntervalEpoch;
+		uint48 challengeStartDate;
 		address defaultAddress;
 	}
 
@@ -67,28 +62,35 @@ contract ChainHabits {
 
 	//EVENTS
 	event NewChallengeCreated(
-		uint256 challengeId,
-		string Objective,
+		uint256 indexed challengeId,
+		address indexed user,
+		string indexed Objective, // TODO -- restrict size of this
 		uint8 startingMiles,
 		uint8 NumberofWeeks,
-		uint48 competitionDeadline,
-		uint48 currentIntervalEpoch,
-		uint48 nextIntervalEpoch,
+		uint48 challengeStartDate,
 		address defaultAddress
 	);
-	event NewUserRegistered(address user);
+	event NewUserRegistered(address user); //TODO do we need more data in this event?
+	event intervalReviewCompleted(
+		uint256 indexed challengeId,
+		address indexed user,
+		bool success
+	);
+	event ChallengeCompleted(
+		uint256 indexed challengeId,
+		address indexed user,
+		uint8 stakeForfeited
+	);
+	event FundsWithdrawn(address indexed user, uint256 amount);
 
-	constructor() {
-		admin = msg.sender;
-		console.log(admin);
-	}
+	constructor() Ownable() {}
 
 	//Create New User Pofile
 	function registerNewUser(
 		uint256 userID,
 		string calldata _refreshToken
 	) external isUserNotRegistered(msg.sender) {
-		userTable[msg.sender] = UserDetails(0, 0, 0, 0, userID, _refreshToken);
+		userTable[msg.sender] = UserDetails(0, userID, _refreshToken);
 		isUserRegisteredTable[msg.sender] = true;
 		allUsers.push(msg.sender);
 		//emit New User Event
@@ -106,33 +108,29 @@ contract ChainHabits {
 		isUserRegistered(msg.sender)
 		returns (uint256 challengeId)
 	{
-		challengeCounter++;
-		challengeId = challengeCounter;
+		_challengeIdCounter.increment();
+		challengeId = _challengeIdCounter.current();
 
 		challengeTable[challengeId] = ChallengeDetails(
-			_obj,
 			_targetMiles,
 			_weeks,
 			0,
 			true,
-			uint48(block.timestamp) + (604800 * 4),
-			uint48(block.timestamp),
-			uint48(block.timestamp) + 604800,
+			uint48(block.timestamp), //initialy start date
 			_defaultAddress
 		);
 		usersCurrentChallenge[msg.sender] = challengeId; //record current challenge for user
-		userTable[msg.sender].currenStaked += msg.value; //record call.value as amount staked by user
+		userTable[msg.sender].currentStaked += uint48(msg.value); //record call.value as amount staked by user
 		userHasLiveChallenge[msg.sender] = true;
 
 		//emit new challenge events
 		emit NewChallengeCreated(
 			challengeId,
+			msg.sender,
 			_obj,
 			_targetMiles,
 			_weeks,
-			uint48(block.timestamp) + (604800 * 7),
-			uint48(block.timestamp),
-			uint48(block.timestamp) + 604800,
+			uint48(block.timestamp), //initialy start date
 			_defaultAddress
 		);
 	}
@@ -140,50 +138,76 @@ contract ChainHabits {
 	//handle challenge review logic
 	function handleIntervalReview(
 		uint256 _challengeId,
-		bool failed,
-		uint48 currentIntervalEpoch,
-		uint48 nextIntervalEpoch
-	) external onlyAdmin(msg.sender) {
-		//increment challengeDI with failure :(
+		bool failed
+	) external onlyOwner {
+		// uint48 currentIntervalEpoch,
+		// uint48 nextIntervalEpoch
+		ChallengeDetails memory challengeMemPointer;
 		if (failed) {
-			challengeTable[_challengeId].failedWeeks++;
+			challengeMemPointer.failedWeeks++;
 		}
-		console.log("failedweek", challengeTable[_challengeId].failedWeeks);
-		//update intervals
-		challengeTable[_challengeId]
-			.currentIntervalEpoch = currentIntervalEpoch;
-		challengeTable[_challengeId].nextIntervalEpoch = nextIntervalEpoch;
+		console.log("failedweek", challengeMemPointer.failedWeeks);
+		// //update intervals
+		// challengeMemPointer.currentIntervalEpoch = currentIntervalEpoch;
+		// challengeMemPointer.nextIntervalEpoch = nextIntervalEpoch;
+		challengeTable[_challengeId] = challengeMemPointer;
 	}
 
 	//handle close challenge
 	function handleCompleteChallenge(
 		uint256 challengeId,
-		uint256 _amountToDefault
-	) external onlyAdmin(msg.sender) {
+		uint8 stakeForfeited,
+		address userAddress
+	) external onlyOwner {
 		ChallengeDetails memory _challenge = challengeTable[challengeId];
 		//send eth to address's
-		if (_amountToDefault > 0) {
+		if (stakeForfeited > 0) {
 			(bool sent, ) = (_challenge.defaultAddress).call{
-				value: _amountToDefault
+				value: stakeForfeited
 			}("");
 			require(sent, "failed to send eth");
-			//event here?
+			//update address staked balance
+			UserDetails memory userDetails = userTable[userAddress];
+			userDetails.currentStaked -= stakeForfeited;
+			userTable[userAddress] = userDetails; //update userTable
+			emit ChallengeCompleted(challengeId, userAddress, stakeForfeited);
 		}
 		userHasLiveChallenge[msg.sender] = false; //set users challenge to false
-		_challenge.isLive = false;
+		_challenge.isLive = false; //TODO - could remove this
 		challengeTable[challengeId] = _challenge;
 	}
 
 	//withdraw funds
-	function withdrawFunds() external isUserRegistered(msg.sender) {
-		//only withdraw funds if no live challenge
+	function withdrawFunds()
+		external
+		nonReentrant
+		isUserRegistered(msg.sender)
+	{
+		UserDetails memory user = userTable[msg.sender];
+
+		if (userHasLiveChallenge[msg.sender]) {
+			revert CHAINHABITS__ChallengeStillActive();
+		}
+
+		uint48 amount = user.currentStaked;
+
+		if (amount == 0) {
+			revert CHAINHABITS__InsufficientFunds();
+		}
+
+		user.currentStaked = 0; //else set to amoutn staked to 0
+
+		(bool success, ) = msg.sender.call{ value: amount }("");
+		require(success, "Transfer failed");
+
+		emit FundsWithdrawn(msg.sender, amount);
 	}
 
 	//setter
 	function updateRefreshToken(
 		address _user,
 		string calldata _refreshToken
-	) external onlyAdmin(msg.sender) {
+	) external onlyOwner {
 		userTable[_user].refreshToken = _refreshToken;
 	}
 
@@ -208,13 +232,5 @@ contract ChainHabits {
 
 	function getAllUserDetails() external view returns (address[] memory) {
 		return allUsers;
-	}
-
-	uint256 public testVar;
-	uint256 public testVar4;
-
-	//TEST FUNCTION
-	function test() external {
-		testVar++;
 	}
 }

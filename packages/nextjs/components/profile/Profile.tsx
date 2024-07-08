@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { MoonSpinner } from "../loader";
 import { useAccount as useAlchemyAccount } from "@alchemy/aa-alchemy/react";
-import { formatEther } from "viem";
+// import { formatEther } from "viem";
 import { useAccount } from "wagmi";
 import { accountType } from "~~/config/AlchemyConfig";
 import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
@@ -18,7 +18,7 @@ const ProfileStat: React.FC<ProfileStatProps> = ({ label, value }) => (
 function Profile() {
   const { address } = useAccount();
   const { address: alchemyAddress } = useAlchemyAccount({ type: accountType });
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const { bio, city, country, firstname, lastname, premium, sex, state, username } = useStravaState(state =>
     state.getStravaProfile(),
@@ -30,16 +30,16 @@ function Profile() {
     args: [address ?? alchemyAddress],
   });
 
-  const { challengeTally, SuccessfulChallenges, currenStaked, totalDonated } = userDetails ?? {};
+  //   const { challengeTally, SuccessfulChallenges, currenStaked, totalDonated } = userDetails ?? {};
 
   const nativeCurrencyPrice = useGlobalState(state => state.nativeCurrency.price);
 
-  useEffect(() => {
-    const handleLoading = () => {
-      setIsLoading(false);
-    };
-    if (!Number.isNaN(challengeTally)) handleLoading();
-  }, [challengeTally]);
+  //   useEffect(() => {
+  //     const handleLoading = () => {
+  //       setIsLoading(false);
+  //     };
+  //     if (!Number.isNaN(challengeTally)) handleLoading();
+  //   }, [challengeTally]);
 
   return isLoading ? (
     <MoonSpinner />
@@ -57,13 +57,13 @@ function Profile() {
         <div className="space-y-4 sm:space-y-6">
           <h2 className="text-xl sm:text-2xl font-semibold text-white mb-2 sm:mb-4">User Stats</h2>
           <div className="bg-white bg-opacity-10 rounded-lg p-3 sm:p-4 space-y-2 sm:space-y-3">
-            <ProfileStat label="Challenge Tally" value={String(challengeTally ?? 0n)} />
+            {/* <ProfileStat label="Challenge Tally" value={String(challengeTally ?? 0n)} />
             <ProfileStat label="Successful Challenges" value={String(SuccessfulChallenges ?? 0n)} />
             <ProfileStat
               label="Current Staked"
               value={`${Number(formatEther(currenStaked ?? 0n)) * nativeCurrencyPrice} USD`}
             />
-            <ProfileStat label="Total Donated" value={`${formatEther(totalDonated ?? 0n)} ETH`} />
+            <ProfileStat label="Total Donated" value={`${formatEther(totalDonated ?? 0n)} ETH`} /> */}
           </div>
         </div>
 

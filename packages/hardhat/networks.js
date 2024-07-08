@@ -80,7 +80,7 @@ const networks = {
     gatewayUrls: ["https://01.functions-gateway.chain.link/", "https://02.functions-gateway.chain.link/"],
   },
   ethereumSepolia: {
-    url: `https://eth-sepolia.g.alchemy.com/v2/${ALCHEMY_KEY}`,
+    url: `https://sepolia.infura.io/v3/3ed018feca1543aca00776e3fdfe89dd`,
     gasPrice: undefined,
     nonce: undefined,
     accounts,
