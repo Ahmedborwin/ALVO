@@ -46,3 +46,30 @@ export type ProfileStatProps = {
   label: string;
   value: string | number;
 };
+
+export type ProfileChallengeData = {
+  challengeTally: number;
+  successChallenge: number;
+  failedChallenge: bigint;
+  user: null | { stakedAmount: bigint };
+};
+
+export interface Challenge {
+  challengeId: bigint;
+  objective: string;
+  startingMiles: number;
+  numberOfWeeks: number;
+  stakedAmount: bigint;
+  defaultAddress: string;
+  success: number;
+  status: boolean;
+  createdAt: bigint;
+  updatedAt: bigint;
+  transactionHash: string;
+  reviews: IntervalReviews[];
+}
+
+export interface IntervalReviews {
+  status: boolean;
+  createdAt: bigint;
+}

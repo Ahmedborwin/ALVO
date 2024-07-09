@@ -1,14 +1,16 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useMemo, useState } from "react";
 import Link from "next/link";
 import { useAccount as useAlchemyAccount } from "@alchemy/aa-alchemy/react";
+import { gql, useQuery } from "@apollo/client";
 import type { NextPage } from "next";
 import { useAccount } from "wagmi";
 import { ObjectiveCard } from "~~/components/cards";
 import { MoonSpinner } from "~~/components/loader";
 import { accountType } from "~~/config/AlchemyConfig";
-import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
+import { CREATE_CHALLENGES } from "~~/services/graphql/queries";
+import { Challenge, IntervalReviews } from "~~/types/utils";
 
 const ChallengeDetailItem = ({ label, value }: { label: string; value: string | number }) => (
   <div className="flex flex-col items-start">
@@ -22,23 +24,20 @@ const Home: NextPage = () => {
   const { address: alchemyAddress } = useAlchemyAccount({ type: accountType });
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  const { data: challengeID } = useScaffoldReadContract({
-    contractName: "ChainHabits",
-    functionName: "getChallengeId",
-    args: [address ?? alchemyAddress],
+  const GET_CHALLENGE_GQL = gql(CREATE_CHALLENGES);
+
+  const { data, loading } = useQuery(GET_CHALLENGE_GQL, {
+    variables: { address: address || alchemyAddress },
+    fetchPolicy: "network-only",
   });
 
-  const { data: challengeDetails } = useScaffoldReadContract({
-    contractName: "ChainHabits",
-    functionName: "getChallengeDetails",
-    args: [challengeID],
-  });
-
-  useEffect(() => {
-    if (!Number.isNaN(challengeID) && challengeDetails) {
+  const challengeDetails: Challenge = useMemo(() => {
+    if (data && !loading) {
       setIsLoading(false);
+      return data.challenge.length ? data.challenge[0] : {};
     }
-  }, [challengeID, challengeDetails]);
+    return {};
+  }, [data, loading]);
 
   if (isLoading) return <MoonSpinner />;
 
@@ -46,7 +45,7 @@ const Home: NextPage = () => {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 to-purple-900 py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">
         <div className="backdrop-blur-md bg-white bg-opacity-10 rounded-2xl sm:rounded-3xl shadow-2xl border border-white border-opacity-20 overflow-hidden">
-          {challengeDetails?.isLive ? (
+          {challengeDetails?.status ? (
             <div className="p-4 sm:p-6 md:p-10">
               <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center">
                 <span className="mb-2 sm:mb-0">Active Challenge</span>
@@ -56,14 +55,22 @@ const Home: NextPage = () => {
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
                 {/* <ChallengeDetailItem label="Objective" value={challengeDetails.objective} /> */}
-                <ChallengeDetailItem label="Target" value={`${challengeDetails?.targetMiles} miles`} />
-                <ChallengeDetailItem label="Duration" value={`${challengeDetails?.NoOfWeeks} weeks`} />
-                <ChallengeDetailItem label="Failed Weeks" value={challengeDetails.failedWeeks} />
+                <ChallengeDetailItem label="Target" value={`${challengeDetails?.startingMiles} miles`} />
+                <ChallengeDetailItem label="Duration" value={`${challengeDetails?.numberOfWeeks} weeks`} />
+                <ChallengeDetailItem
+                  label="Failed Weeks"
+                  value={(challengeDetails?.reviews.filter((item: IntervalReviews) => item.status === false)).length}
+                />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+                {challengeDetails?.reviews.length
+                  ? challengeDetails?.reviews.map((item, index) => (
+                      <ObjectiveCard key={index} status={item.status} index={index} />
+                    ))
+                  : ""}
                 {/* // @ts-ignore */}
-                {[...Array(challengeDetails.NoOfWeeks)].map((_, index) => (
-                  <ObjectiveCard key={index} index={index} />
+                {[...Array(challengeDetails?.numberOfWeeks - challengeDetails?.reviews.length)].map((_, index) => (
+                  <ObjectiveCard key={index} index={challengeDetails?.reviews.length + index} />
                 ))}
               </div>
             </div>

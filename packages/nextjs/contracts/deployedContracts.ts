@@ -856,7 +856,7 @@ const deployedContracts = {
   },
   31337: {
     ChainHabits: {
-      address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+      address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
       abi: [
         {
           inputs: [],
@@ -899,10 +899,10 @@ const deployedContracts = {
               type: "address",
             },
             {
-              indexed: true,
-              internalType: "uint8",
-              name: "stakeForfeited",
-              type: "uint8",
+              indexed: false,
+              internalType: "bool",
+              name: "status",
+              type: "bool",
             },
           ],
           name: "ChallengeCompleted",
@@ -962,15 +962,15 @@ const deployedContracts = {
             },
             {
               indexed: false,
-              internalType: "uint48",
-              name: "challengeStartDate",
-              type: "uint48",
-            },
-            {
-              indexed: false,
               internalType: "address",
               name: "defaultAddress",
               type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "amount",
+              type: "uint256",
             },
           ],
           name: "NewChallengeCreated",
@@ -980,7 +980,7 @@ const deployedContracts = {
           anonymous: false,
           inputs: [
             {
-              indexed: false,
+              indexed: true,
               internalType: "address",
               name: "user",
               type: "address",
@@ -1016,12 +1016,6 @@ const deployedContracts = {
               internalType: "uint256",
               name: "challengeId",
               type: "uint256",
-            },
-            {
-              indexed: true,
-              internalType: "address",
-              name: "user",
-              type: "address",
             },
             {
               indexed: false,

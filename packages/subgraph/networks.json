@@ -1,10 +1,28 @@
 {
   "localFunctionsTestnet": {
     "APIConsumer": {
-      "address": "0x268a077185D09d31eD20b098f65017477A06FFc2"
+      "address": "0x7EEdFb37B08696eB46CB229691444180cdA0c466"
     },
     "ChainHabits": {
-      "address": "0x52caE9c670B19d3612848B1aa8c587EC73EaC6A7"
+      "address": "0xe6695Eb4aF334688BB008b90147338B5886cB970"
+    }
+  },
+  "baseSepolia": {
+    "APIConsumer": {
+      "address": "0xE473e7c11eDf5fd9c5617Df24785DcACBcDE29Ca"
+    },
+    "ChainHabits": {
+      "address": "0x59da6dfe69b5bDc72BA43e43Dd405dc437bE1659"
+    }
+  },
+  "ethereumSepolia": {
+    "ChainHabits": {
+      "address": "0x73F82105E6FF0841010331aE1109c87b6A3Ea5dc"
+    }
+  },
+  "localhost": {
+    "ChainHabits": {
+      "address": "0x5FbDB2315678afecb367f032d93F642f64180aa3"
     }
   }
 }

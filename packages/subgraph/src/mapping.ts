@@ -1,35 +1,84 @@
-import { BigInt, Address } from "@graphprotocol/graph-ts";
+import { BigInt } from "@graphprotocol/graph-ts";
 import {
-  YourContract,
-  GreetingChange,
-} from "../generated/YourContract/YourContract";
-import { Greeting, Sender } from "../generated/schema";
+  NewUserRegistered,
+  NewChallengeCreated,
+  FundsWithdrawn,
+  ChallengeCompleted,
+  intervalReviewCompleted,
+} from "../generated/ChainHabits/ChainHabits";
+import { User, Challenge, IntervalReviews } from "../generated/schema";
 
-export function handleGreetingChange(event: GreetingChange): void {
-  let senderString = event.params.greetingSetter.toHexString();
+// function genIDFromParams(id: BigInt, address: Address): string {
+//   return id.toHexString() + "-" + address.toHexString();
+// }
 
-  let sender = Sender.load(senderString);
+export function handleUserRegistration(event: NewUserRegistered): void {
+  const userCreate = new User(event.params.user.toHexString());
+  userCreate.userAddress = event.params.user;
+  userCreate.stakedAmount = BigInt.zero();
+  userCreate.createdAt = event.block.timestamp;
+  userCreate.updatedAt = event.block.timestamp;
+  userCreate.status = true;
+  userCreate.transactionHash = event.transaction.hash.toHex();
+  userCreate.save();
+}
 
-  if (sender === null) {
-    sender = new Sender(senderString);
-    sender.address = event.params.greetingSetter;
-    sender.createdAt = event.block.timestamp;
-    sender.greetingCount = BigInt.fromI32(1);
-  } else {
-    sender.greetingCount = sender.greetingCount.plus(BigInt.fromI32(1));
-  }
+export function handleChallengeCreate(event: NewChallengeCreated): void {
+  const user = User.load(event.params.user.toHexString());
+  if (!user) return;
+  user.stakedAmount = user.stakedAmount.plus(event.params.amount);
+  user.updatedAt = event.block.timestamp;
 
-  let greeting = new Greeting(
-    event.transaction.hash.toHex() + "-" + event.logIndex.toString()
-  );
+  const challenge = new Challenge(event.params.challengeId.toHexString());
+  challenge.challengeId = event.params.challengeId;
+  challenge.userAddress = event.params.user;
+  challenge.user = event.params.user.toHexString();
+  challenge.objective = event.params.Objective;
+  challenge.startingMiles = event.params.startingMiles;
+  challenge.numberOfWeeks = event.params.NumberofWeeks;
+  challenge.defaultAddress = event.params.defaultAddress;
+  challenge.success = 2;
+  challenge.stakedAmount = event.params.amount;
+  challenge.createdAt = event.block.timestamp;
+  challenge.updatedAt = event.block.timestamp;
+  challenge.status = true;
+  challenge.transactionHash = event.transaction.hash.toHex();
+  challenge.save();
+  user.save();
+}
 
-  greeting.greeting = event.params.newGreeting;
-  greeting.sender = senderString;
-  greeting.premium = event.params.premium;
-  greeting.value = event.params.value;
-  greeting.createdAt = event.block.timestamp;
-  greeting.transactionHash = event.transaction.hash.toHex();
+export function handleUserWithdraw(event: FundsWithdrawn): void {
+  const user = User.load(event.params.user.toHexString());
+  if (!user) return;
+  user.stakedAmount = user.stakedAmount.minus(event.params.amount);
+  user.updatedAt = event.block.timestamp;
+  user.save();
+}
 
-  greeting.save();
-  sender.save();
+export function handleChallengeComplete(event: ChallengeCompleted): void {
+  const challenge = Challenge.load(event.params.challengeId.toHexString());
+  if (!challenge) return;
+  challenge.success = event.params.status ? 1 : 0;
+  challenge.status = false;
+  challenge.updatedAt = event.block.timestamp;
+  challenge.save();
+}
+
+export function handleIntervalReview(event: intervalReviewCompleted): void {
+  const id = event.transaction.hash
+    .toHexString()
+    .concat("-")
+    .concat(event.block.timestamp.toString())
+    .concat("-")
+    .concat(event.logIndex.toString())
+    .concat("-")
+    .concat(event.transactionLogIndex.toString());
+  const intervalReview = new IntervalReviews(id);
+  intervalReview.challengeId = event.params.challengeId;
+  intervalReview.challenge = event.params.challengeId.toHexString();
+  intervalReview.createdAt = event.block.timestamp;
+  intervalReview.updatedAt = event.block.timestamp;
+  intervalReview.status = true;
+  intervalReview.transactionHash = event.transaction.hash.toHex();
+  intervalReview.save();
 }

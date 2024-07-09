@@ -26,3 +26,7 @@ dist
 subgraph/build/*
 subgraph/generated/*
 subgraph/graph-node/data/*
+
+packages/subgraph/build/*
+packages/subgraph/generated/*
+packages/subgraph/graph-node/data/*

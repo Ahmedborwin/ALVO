@@ -130,12 +130,7 @@ export const StravaLogin = () => {
   return isLoading ? (
     <MoonSpinner />
   ) : (
-    <div
-      className="flex items-center justify-center min-h-screen w-full bg-cover bg-center relative overflow-hidden px-4 py-6 sm:px-6 lg:px-8"
-      style={{
-        backgroundImage: "linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(88, 28, 135, 0.8))",
-      }}
-    >
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-900 to-purple-900 w-full bg-cover bg-center relative overflow-hidden px-4 py-6 sm:px-6 lg:px-8">
       <div className="relative z-10 w-full max-w-md p-6 md:p-8 backdrop-blur-md bg-white bg-opacity-10 rounded-2xl shadow-2xl border border-white border-opacity-20">
         <div className="absolute -top-12 left-1/2 transform -translate-x-1/2">
           <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-purple-400 to-indigo-600 rounded-full flex items-center justify-center shadow-lg">

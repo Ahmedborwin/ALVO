@@ -4223,6 +4223,7 @@ __metadata:
     "@graphprotocol/graph-cli": ^0.55.0
     "@graphprotocol/graph-ts": ^0.31.0
     "@types/node": ^20.11.17
+    as-uuid: ^0.0.4
     matchstick-as: ^0.6.0
     ts-node: ^10.9.1
     typescript: ^5.1.6
@@ -7067,6 +7068,13 @@ __metadata:
   version: 1.0.1
   resolution: "arrify@npm:1.0.1"
   checksum: 745075dd4a4624ff0225c331dacb99be501a515d39bcb7c84d24660314a6ec28e68131b137e6f7e16318170842ce97538cd298fc4cd6b2cc798e0b957f2747e7
+  languageName: node
+  linkType: hard
+
+"as-uuid@npm:^0.0.4":
+  version: 0.0.4
+  resolution: "as-uuid@npm:0.0.4"
+  checksum: c77685355b949e6efde6bff441bde0c4906ffae22f2d1dc0ac0cbae1b81a518dd77d48568951c81179d4d5ad670581015102eca3c9a7f4453d1c457e6558b784
   languageName: node
   linkType: hard
 
