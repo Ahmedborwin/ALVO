@@ -50,6 +50,7 @@ const Challenge: NextPage = () => {
     }
     return {};
   }, [data, loading]);
+  console.log(data, loading);
 
   const clearAll = () => {
     setObjective("");
@@ -193,12 +194,6 @@ const Challenge: NextPage = () => {
                 value={`${challengeDetails?.defaultAddress.slice(0, 6)}...${challengeDetails?.defaultAddress.slice(
                   -4,
                 )}`}
-              />
-              <DetailCard
-                title="Staked"
-                value={`${Math.trunc(
-                  Number(formatEther(BigInt(challengeDetails?.stakedAmount ?? 0n))) * nativeCurrencyPrice,
-                )} USD`}
               />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">

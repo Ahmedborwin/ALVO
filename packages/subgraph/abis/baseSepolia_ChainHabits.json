@@ -5,13 +5,14 @@
     "type": "constructor"
   },
   {
-    "inputs": [],
-    "name": "CHAINHABITS__ChallengeStillActive",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "CHAINHABITS__InsufficientFunds",
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "Caller",
+        "type": "address"
+      }
+    ],
+    "name": "CHAINHABITS__CallerNotAdmin",
     "type": "error"
   },
   {
@@ -28,63 +29,13 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": true,
+        "indexed": false,
         "internalType": "uint256",
         "name": "challengeId",
         "type": "uint256"
       },
       {
-        "indexed": true,
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
-      },
-      {
         "indexed": false,
-        "internalType": "uint8",
-        "name": "stakeForfeited",
-        "type": "uint8"
-      }
-    ],
-    "name": "ChallengeCompleted",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      }
-    ],
-    "name": "FundsWithdrawn",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "uint256",
-        "name": "challengeId",
-        "type": "uint256"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
-      },
-      {
-        "indexed": true,
         "internalType": "string",
         "name": "Objective",
         "type": "string"
@@ -104,7 +55,19 @@
       {
         "indexed": false,
         "internalType": "uint48",
-        "name": "challengeStartDate",
+        "name": "competitionDeadline",
+        "type": "uint48"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint48",
+        "name": "currentIntervalEpoch",
+        "type": "uint48"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint48",
+        "name": "nextIntervalEpoch",
         "type": "uint48"
       },
       {
@@ -128,50 +91,6 @@
       }
     ],
     "name": "NewUserRegistered",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "previousOwner",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "newOwner",
-        "type": "address"
-      }
-    ],
-    "name": "OwnershipTransferred",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "uint256",
-        "name": "challengeId",
-        "type": "uint256"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "bool",
-        "name": "success",
-        "type": "bool"
-      }
-    ],
-    "name": "intervalReviewCompleted",
     "type": "event"
   },
   {
@@ -266,6 +185,11 @@
       {
         "components": [
           {
+            "internalType": "string",
+            "name": "objective",
+            "type": "string"
+          },
+          {
             "internalType": "uint8",
             "name": "targetMiles",
             "type": "uint8"
@@ -287,7 +211,17 @@
           },
           {
             "internalType": "uint48",
-            "name": "challengeStartDate",
+            "name": "competitionDeadline",
+            "type": "uint48"
+          },
+          {
+            "internalType": "uint48",
+            "name": "currentIntervalEpoch",
+            "type": "uint48"
+          },
+          {
+            "internalType": "uint48",
+            "name": "nextIntervalEpoch",
             "type": "uint48"
           },
           {
@@ -336,9 +270,24 @@
       {
         "components": [
           {
-            "internalType": "uint48",
-            "name": "currentStaked",
-            "type": "uint48"
+            "internalType": "uint256",
+            "name": "challengeTally",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "SuccessfulChallenges",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "currenStaked",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalDonated",
+            "type": "uint256"
           },
           {
             "internalType": "uint256",
@@ -367,14 +316,9 @@
         "type": "uint256"
       },
       {
-        "internalType": "uint8",
-        "name": "stakeForfeited",
-        "type": "uint8"
-      },
-      {
-        "internalType": "address",
-        "name": "userAddress",
-        "type": "address"
+        "internalType": "uint256",
+        "name": "_amountToDefault",
+        "type": "uint256"
       }
     ],
     "name": "handleCompleteChallenge",
@@ -393,6 +337,16 @@
         "internalType": "bool",
         "name": "failed",
         "type": "bool"
+      },
+      {
+        "internalType": "uint48",
+        "name": "currentIntervalEpoch",
+        "type": "uint48"
+      },
+      {
+        "internalType": "uint48",
+        "name": "nextIntervalEpoch",
+        "type": "uint48"
       }
     ],
     "name": "handleIntervalReview",
@@ -420,19 +374,6 @@
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "owner",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "inputs": [
       {
         "internalType": "uint256",
@@ -452,22 +393,35 @@
   },
   {
     "inputs": [],
-    "name": "renounceOwnership",
+    "name": "test",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
-    "inputs": [
+    "inputs": [],
+    "name": "testVar",
+    "outputs": [
       {
-        "internalType": "address",
-        "name": "newOwner",
-        "type": "address"
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
       }
     ],
-    "name": "transferOwnership",
-    "outputs": [],
-    "stateMutability": "nonpayable",
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "testVar4",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {
