@@ -35,6 +35,7 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 	}
 	Counters.Counter private _challengeIdCounter;
 	address public admin;
+	// as we are using subgraph do we need this array ?
 	address[] public allUsers;
 
 	// STRUCTS
@@ -61,25 +62,25 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 	mapping(address user => uint256 challengeId) usersCurrentChallenge;
 
 	//EVENTS
+	// removed indexed from the Objective as it's a string and removed starting date from the event as we can get the timestamp for the event from the subgraph
+	// added amount also
 	event NewChallengeCreated(
 		uint256 indexed challengeId,
 		address indexed user,
-		string indexed Objective, // TODO -- restrict size of this
+		string Objective, // TODO -- restrict size of this
 		uint8 startingMiles,
 		uint8 NumberofWeeks,
-		uint48 challengeStartDate,
-		address defaultAddress
+		address defaultAddress,
+		uint256 amount
 	);
-	event NewUserRegistered(address user); //TODO do we need more data in this event?
-	event intervalReviewCompleted(
-		uint256 indexed challengeId,
-		address indexed user,
-		bool success
-	);
+	// indexed user
+	event NewUserRegistered(address indexed user); //TODO do we need more data in this event?
+	event intervalReviewCompleted(uint256 indexed challengeId, bool success);
+	// indexed stakeForfeited added status
 	event ChallengeCompleted(
 		uint256 indexed challengeId,
 		address indexed user,
-		uint8 stakeForfeited
+		bool status
 	);
 	event FundsWithdrawn(address indexed user, uint256 amount);
 
@@ -130,12 +131,12 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 			_obj,
 			_targetMiles,
 			_weeks,
-			uint48(block.timestamp), //initialy start date
-			_defaultAddress
+			_defaultAddress,
+			msg.value
 		);
 	}
 
-	//handle challenge review logic
+	//handle challenge review logic what about passing args as arr of objs and iteration of it instead of calling individualy will that reduce the excecution gas. 
 	function handleIntervalReview(
 		uint256 _challengeId,
 		bool failed
@@ -151,6 +152,7 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 		// challengeMemPointer.currentIntervalEpoch = currentIntervalEpoch;
 		// challengeMemPointer.nextIntervalEpoch = nextIntervalEpoch;
 		challengeTable[_challengeId] = challengeMemPointer;
+		emit intervalReviewCompleted(_challengeId, failed);
 	}
 
 	//handle close challenge
@@ -161,6 +163,7 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 	) external onlyOwner {
 		ChallengeDetails memory _challenge = challengeTable[challengeId];
 		//send eth to address's
+		bool success = false;
 		if (stakeForfeited > 0) {
 			(bool sent, ) = (_challenge.defaultAddress).call{
 				value: stakeForfeited
@@ -170,11 +173,11 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 			UserDetails memory userDetails = userTable[userAddress];
 			userDetails.currentStaked -= stakeForfeited;
 			userTable[userAddress] = userDetails; //update userTable
-			emit ChallengeCompleted(challengeId, userAddress, stakeForfeited);
-		}
-		userHasLiveChallenge[msg.sender] = false; //set users challenge to false
+			success = true;
+		} else userHasLiveChallenge[msg.sender] = false; //set users challenge to false
 		_challenge.isLive = false; //TODO - could remove this
 		challengeTable[challengeId] = _challenge;
+		emit ChallengeCompleted(challengeId, userAddress, success);
 	}
 
 	//withdraw funds
@@ -196,6 +199,7 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 		}
 
 		user.currentStaked = 0; //else set to amoutn staked to 0
+		// userTable[msg.sender] = 0;
 
 		(bool success, ) = msg.sender.call{ value: amount }("");
 		require(success, "Transfer failed");

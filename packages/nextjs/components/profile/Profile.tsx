@@ -1,12 +1,13 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { MoonSpinner } from "../loader";
 import { useAccount as useAlchemyAccount } from "@alchemy/aa-alchemy/react";
-// import { formatEther } from "viem";
+import { gql, useQuery } from "@apollo/client";
+import { formatEther } from "viem";
 import { useAccount } from "wagmi";
 import { accountType } from "~~/config/AlchemyConfig";
-import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
+import { PROFILE_CHALLENGES } from "~~/services/graphql/queries";
 import { useGlobalState, useStravaState } from "~~/services/store/store";
-import { ProfileStatProps } from "~~/types/utils";
+import { ProfileChallengeData, ProfileStatProps } from "~~/types/utils";
 
 const ProfileStat: React.FC<ProfileStatProps> = ({ label, value }) => (
   <div className="flex justify-between items-center">
@@ -18,28 +19,43 @@ const ProfileStat: React.FC<ProfileStatProps> = ({ label, value }) => (
 function Profile() {
   const { address } = useAccount();
   const { address: alchemyAddress } = useAlchemyAccount({ type: accountType });
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const { bio, city, country, firstname, lastname, premium, sex, state, username } = useStravaState(state =>
     state.getStravaProfile(),
   );
 
-  const { data: userDetails } = useScaffoldReadContract({
-    contractName: "ChainHabits",
-    functionName: "getUserDetails",
-    args: [address ?? alchemyAddress],
+  const GET_CHALLENGE_GQL = gql(PROFILE_CHALLENGES);
+
+  const { data, loading } = useQuery(GET_CHALLENGE_GQL, {
+    variables: { address: address || alchemyAddress },
+    fetchPolicy: "network-only",
   });
 
-  //   const { challengeTally, SuccessfulChallenges, currenStaked, totalDonated } = userDetails ?? {};
+  const challengeData = useMemo(() => {
+    const obj: ProfileChallengeData = {
+      challengeTally: 0,
+      successChallenge: 0,
+      failedChallenge: 0n,
+      user: null,
+    };
+    if (data && !loading) {
+      setIsLoading(false);
+
+      const { challengeTally, successChallenge, failedChallenge, user } = data;
+      const failedAmount: bigint = failedChallenge.reduce((prev: bigint, item: { stakedAmount: bigint }): bigint => {
+        prev += item.stakedAmount;
+        return prev;
+      }, 0n);
+      obj.challengeTally = challengeTally.length;
+      obj.successChallenge = successChallenge.length;
+      obj.failedChallenge = failedAmount;
+      obj.user = user.length ? user[0] : {};
+    }
+    return obj;
+  }, [data, loading]);
 
   const nativeCurrencyPrice = useGlobalState(state => state.nativeCurrency.price);
-
-  //   useEffect(() => {
-  //     const handleLoading = () => {
-  //       setIsLoading(false);
-  //     };
-  //     if (!Number.isNaN(challengeTally)) handleLoading();
-  //   }, [challengeTally]);
 
   return isLoading ? (
     <MoonSpinner />
@@ -57,13 +73,16 @@ function Profile() {
         <div className="space-y-4 sm:space-y-6">
           <h2 className="text-xl sm:text-2xl font-semibold text-white mb-2 sm:mb-4">User Stats</h2>
           <div className="bg-white bg-opacity-10 rounded-lg p-3 sm:p-4 space-y-2 sm:space-y-3">
-            {/* <ProfileStat label="Challenge Tally" value={String(challengeTally ?? 0n)} />
-            <ProfileStat label="Successful Challenges" value={String(SuccessfulChallenges ?? 0n)} />
+            <ProfileStat label="Challenge Tally" value={challengeData.challengeTally} />
+            <ProfileStat label="Successful Challenges" value={challengeData.successChallenge} />
             <ProfileStat
               label="Current Staked"
-              value={`${Number(formatEther(currenStaked ?? 0n)) * nativeCurrencyPrice} USD`}
+              value={`${Number(formatEther(BigInt(challengeData.user?.stakedAmount ?? 0n))) * nativeCurrencyPrice} USD`}
             />
-            <ProfileStat label="Total Donated" value={`${formatEther(totalDonated ?? 0n)} ETH`} /> */}
+            <ProfileStat
+              label="Total Donated"
+              value={`${Number(formatEther(BigInt(challengeData.failedChallenge ?? 0n)))} USD`}
+            />
           </div>
         </div>
 

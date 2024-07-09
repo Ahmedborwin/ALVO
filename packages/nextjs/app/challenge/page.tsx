@@ -1,7 +1,8 @@
 "use client";
 
-import { SetStateAction, useCallback, useEffect, useState } from "react";
+import { SetStateAction, useCallback, useMemo, useState } from "react";
 import { useAccount as useAlchemyAccount } from "@alchemy/aa-alchemy/react";
+import { gql, useQuery } from "@apollo/client";
 import { NextPage } from "next";
 import { Address, isAddress, parseEther } from "viem";
 import { useAccount } from "wagmi";
@@ -10,9 +11,10 @@ import { CancelButton, SubmitButton } from "~~/components/buttons";
 import { DetailCard, ObjectiveCard } from "~~/components/cards";
 import { MoonSpinner } from "~~/components/loader";
 import { accountType } from "~~/config/AlchemyConfig";
-import { useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
+import { useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
+import { CREATE_CHALLENGES } from "~~/services/graphql/queries";
 import { useGlobalState } from "~~/services/store/store";
-import { convertUnixToData } from "~~/utils/common";
+import { Challenge as ChallengeType, IntervalReviews } from "~~/types/utils";
 import { notification } from "~~/utils/scaffold-eth";
 
 const Label = ({ label }: { label: string }) => (
@@ -34,23 +36,21 @@ const Challenge: NextPage = () => {
   const { address } = useAccount();
   const { address: alchemyAddress } = useAlchemyAccount({ type: accountType });
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const { data: challengeID } = useScaffoldReadContract({
-    contractName: "ChainHabits",
-    functionName: "getChallengeId",
-    args: [address ?? alchemyAddress],
+  const GET_CHALLENGE_GQL = gql(CREATE_CHALLENGES);
+
+  const { data, loading } = useQuery(GET_CHALLENGE_GQL, {
+    variables: { address: address || alchemyAddress },
+    fetchPolicy: "network-only",
   });
 
-  const { data: challengeDetails } = useScaffoldReadContract({
-    contractName: "ChainHabits",
-    functionName: "getChallengeDetails",
-    args: [challengeID],
-  });
-
-  useEffect(() => {
-    if (!Number.isNaN(challengeID) && challengeDetails) {
+  const challengeDetails: ChallengeType = useMemo(() => {
+    if (data && !loading) {
       setIsLoading(false);
+      return data.challenge.length ? data.challenge[0] : {};
     }
-  }, [challengeID, challengeDetails]);
+    return {};
+  }, [data, loading]);
+  console.log(data, loading);
 
   const clearAll = () => {
     setObjective("");
@@ -100,7 +100,7 @@ const Challenge: NextPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 to-purple-900 py-12 px-4 sm:px-6 lg:px-8">
-      {!challengeDetails?.isLive ? (
+      {!challengeDetails?.status ? (
         <div className="max-w-md mx-auto">
           <div className="backdrop-blur-md bg-white bg-opacity-10 rounded-3xl shadow-2xl border border-white border-opacity-20 p-8">
             <h2 className="text-3xl font-bold text-white mb-8 text-center">Create Challenge</h2>
@@ -109,7 +109,9 @@ const Challenge: NextPage = () => {
                 <Label label="Objective" />
                 <CustomInput
                   className="w-full px-4 py-3 bg-white bg-opacity-20 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 text-white placeholder-indigo-200"
-                  onChange={value => setObjective(value)}
+                  onChange={value => {
+                    if (value.length < 100) setObjective(value);
+                  }}
                   value={objective}
                   placeholder="What is Your Objective? e.g. Run Marathon"
                   type="text"
@@ -171,29 +173,38 @@ const Challenge: NextPage = () => {
               Challenge Details
               <span
                 className={`text-lg font-semibold px-4 py-1 rounded-full ${
-                  challengeDetails?.isLive ? "bg-green-500" : "bg-red-500"
+                  challengeDetails?.status ? "bg-green-500" : "bg-red-500"
                 }`}
               >
-                {challengeDetails?.isLive ? "Active" : "Inactive"}
+                {challengeDetails?.status ? "Active" : "Inactive"}
               </span>
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-              {/* <DetailCard title="Objective" value={challengeDetails?.objective} /> */}
-              <DetailCard title="Target Miles" value={`${challengeDetails?.targetMiles} miles`} />
-              <DetailCard title="Duration" value={`${challengeDetails?.NoOfWeeks} weeks`} />
-              <DetailCard title="Failed Weeks" value={`${challengeDetails?.failedWeeks} weeks`} />
+              <DetailCard title="Objective" value={challengeDetails?.objective} />
+              <DetailCard title="Target Miles" value={`${challengeDetails?.startingMiles} miles`} />
+              <DetailCard title="Duration" value={`${challengeDetails?.numberOfWeeks} weeks`} />
+              <DetailCard
+                title="Failed Weeks"
+                value={`${
+                  (challengeDetails?.reviews.filter((item: IntervalReviews) => item.status === false)).length
+                } weeks`}
+              />
               <DetailCard
                 title="Forfeit Address"
                 value={`${challengeDetails?.defaultAddress.slice(0, 6)}...${challengeDetails?.defaultAddress.slice(
                   -4,
                 )}`}
               />
-              {/* <DetailCard title="Deadline" value={convertUnixToData(challengeDetails?.competitionDeadline)} /> */}
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {challengeDetails?.reviews.length
+                ? challengeDetails?.reviews.map((item, index) => (
+                    <ObjectiveCard key={index} status={item.status} index={index} />
+                  ))
+                : ""}
               {/* // @ts-ignore */}
-              {[...Array(challengeDetails?.NoOfWeeks)].map((_, index) => (
-                <ObjectiveCard key={index} index={index} />
+              {[...Array(challengeDetails?.numberOfWeeks - challengeDetails?.reviews.length)].map((_, index) => (
+                <ObjectiveCard key={index} index={challengeDetails?.reviews.length + index} />
               ))}
             </div>
           </div>
