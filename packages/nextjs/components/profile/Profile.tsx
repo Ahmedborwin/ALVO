@@ -77,11 +77,15 @@ function Profile() {
             <ProfileStat label="Successful Challenges" value={challengeData.successChallenge} />
             <ProfileStat
               label="Current Staked"
-              value={`${Number(formatEther(BigInt(challengeData.user?.stakedAmount ?? 0n))) * nativeCurrencyPrice} USD`}
+              value={`${Math.trunc(
+                Number(formatEther(BigInt(challengeData.user?.stakedAmount ?? 0n))) * nativeCurrencyPrice,
+              )} USD`}
             />
             <ProfileStat
               label="Total Donated"
-              value={`${Number(formatEther(BigInt(challengeData.failedChallenge ?? 0n)))} USD`}
+              value={`${Math.trunc(
+                Number(formatEther(BigInt(challengeData.failedChallenge ?? 0n))) * nativeCurrencyPrice,
+              )} USD`}
             />
           </div>
         </div>

@@ -4,7 +4,7 @@ import { SetStateAction, useCallback, useMemo, useState } from "react";
 import { useAccount as useAlchemyAccount } from "@alchemy/aa-alchemy/react";
 import { gql, useQuery } from "@apollo/client";
 import { NextPage } from "next";
-import { Address, isAddress, parseEther } from "viem";
+import { Address, formatEther, isAddress, parseEther } from "viem";
 import { useAccount } from "wagmi";
 import { AddressInput, CustomInput } from "~~/components/Input";
 import { CancelButton, SubmitButton } from "~~/components/buttons";
@@ -50,7 +50,6 @@ const Challenge: NextPage = () => {
     }
     return {};
   }, [data, loading]);
-  console.log(data, loading);
 
   const clearAll = () => {
     setObjective("");
@@ -194,6 +193,12 @@ const Challenge: NextPage = () => {
                 value={`${challengeDetails?.defaultAddress.slice(0, 6)}...${challengeDetails?.defaultAddress.slice(
                   -4,
                 )}`}
+              />
+              <DetailCard
+                title="Staked"
+                value={`${Math.trunc(
+                  Number(formatEther(BigInt(challengeDetails?.stakedAmount ?? 0n))) * nativeCurrencyPrice,
+                )} USD`}
               />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
