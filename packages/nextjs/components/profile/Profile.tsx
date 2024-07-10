@@ -2,11 +2,11 @@ import React, { useMemo, useState } from "react";
 import { MoonSpinner } from "../loader";
 import { useAccount as useAlchemyAccount } from "@alchemy/aa-alchemy/react";
 import { gql, useQuery } from "@apollo/client";
-import { formatEther } from "viem";
 import { useAccount } from "wagmi";
 import { accountType } from "~~/config/AlchemyConfig";
+import { useWeiToUSD } from "~~/hooks/common";
 import { PROFILE_CHALLENGES } from "~~/services/graphql/queries";
-import { useGlobalState, useStravaState } from "~~/services/store/store";
+import { useStravaState } from "~~/services/store/store";
 import { ProfileChallengeData, ProfileStatProps } from "~~/types/utils";
 
 const ProfileStat: React.FC<ProfileStatProps> = ({ label, value }) => (
@@ -55,7 +55,8 @@ function Profile() {
     return obj;
   }, [data, loading]);
 
-  const nativeCurrencyPrice = useGlobalState(state => state.nativeCurrency.price);
+  const stakedAmount = useWeiToUSD(challengeData.user?.stakedAmount);
+  const failedChallenge = useWeiToUSD(challengeData.failedChallenge);
 
   return isLoading ? (
     <MoonSpinner />
@@ -75,14 +76,8 @@ function Profile() {
           <div className="bg-white bg-opacity-10 rounded-lg p-3 sm:p-4 space-y-2 sm:space-y-3">
             <ProfileStat label="Challenge Tally" value={challengeData.challengeTally} />
             <ProfileStat label="Successful Challenges" value={challengeData.successChallenge} />
-            <ProfileStat
-              label="Current Staked"
-              value={`${Number(formatEther(BigInt(challengeData.user?.stakedAmount ?? 0n))) * nativeCurrencyPrice} USD`}
-            />
-            <ProfileStat
-              label="Total Donated"
-              value={`${Number(formatEther(BigInt(challengeData.failedChallenge ?? 0n)))} USD`}
-            />
+            <ProfileStat label="Current Staked" value={`${stakedAmount} USD`} />
+            <ProfileStat label="Total Donated" value={`${failedChallenge} USD`} />
           </div>
         </div>
 

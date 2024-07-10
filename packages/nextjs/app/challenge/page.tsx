@@ -4,13 +4,14 @@ import { SetStateAction, useCallback, useMemo, useState } from "react";
 import { useAccount as useAlchemyAccount } from "@alchemy/aa-alchemy/react";
 import { gql, useQuery } from "@apollo/client";
 import { NextPage } from "next";
-import { Address, formatEther, isAddress, parseEther } from "viem";
+import { Address, isAddress, parseEther } from "viem";
 import { useAccount } from "wagmi";
 import { AddressInput, CustomInput } from "~~/components/Input";
 import { CancelButton, SubmitButton } from "~~/components/buttons";
 import { DetailCard, ObjectiveCard } from "~~/components/cards";
 import { MoonSpinner } from "~~/components/loader";
 import { accountType } from "~~/config/AlchemyConfig";
+import { useWeiToUSD } from "~~/hooks/common";
 import { useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 import { CREATE_CHALLENGES } from "~~/services/graphql/queries";
 import { useGlobalState } from "~~/services/store/store";
@@ -51,6 +52,8 @@ const Challenge: NextPage = () => {
     return {};
   }, [data, loading]);
   console.log(data, loading);
+
+  const stakedAmount = useWeiToUSD(challengeDetails?.stakedAmount);
 
   const clearAll = () => {
     setObjective("");
@@ -195,6 +198,7 @@ const Challenge: NextPage = () => {
                   -4,
                 )}`}
               />
+              <DetailCard title="Staked" value={`${stakedAmount} USD`} />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {challengeDetails?.reviews.length
