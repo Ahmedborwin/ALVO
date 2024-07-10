@@ -12,7 +12,7 @@ import { DetailCard, ObjectiveCard } from "~~/components/cards";
 import { MoonSpinner } from "~~/components/loader";
 import { accountType } from "~~/config/AlchemyConfig";
 import { useWeiToUSD } from "~~/hooks/common";
-import { useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
+import { useScaffoldWatchContractEvent, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 import { CREATE_CHALLENGES } from "~~/services/graphql/queries";
 import { useGlobalState } from "~~/services/store/store";
 import { Challenge as ChallengeType, IntervalReviews } from "~~/types/utils";
@@ -39,7 +39,7 @@ const Challenge: NextPage = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const GET_CHALLENGE_GQL = gql(CREATE_CHALLENGES);
 
-  const { data, loading } = useQuery(GET_CHALLENGE_GQL, {
+  const { data, loading, refetch } = useQuery(GET_CHALLENGE_GQL, {
     variables: { address: address || alchemyAddress },
     fetchPolicy: "network-only",
   });
@@ -54,6 +54,20 @@ const Challenge: NextPage = () => {
   console.log(data, loading);
 
   const stakedAmount = useWeiToUSD(challengeDetails?.stakedAmount);
+
+  useScaffoldWatchContractEvent({
+    contractName: "ChainHabits",
+    eventName: "NewChallengeCreated",
+    onLogs: logs => {
+      logs.map(log => {
+        const { user } = log.args;
+        const fetchAgain = async () => {
+          await refetch();
+        };
+        if (user === address || user === alchemyAddress) fetchAgain();
+      });
+    },
+  });
 
   const clearAll = () => {
     setObjective("");
