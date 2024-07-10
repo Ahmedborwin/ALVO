@@ -138,19 +138,14 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 	//handle challenge review logic
 	function handleIntervalReview(
 		uint256 _challengeId,
+		address _user,
 		bool failed
 	) external onlyOwner {
-		// uint48 currentIntervalEpoch,
-		// uint48 nextIntervalEpoch
-		ChallengeDetails memory challengeMemPointer;
 		if (failed) {
-			challengeMemPointer.failedWeeks++;
+			challengeTable[_challengeId].failedWeeks++;
 		}
-		console.log("failedweek", challengeMemPointer.failedWeeks);
 		// //update intervals
-		// challengeMemPointer.currentIntervalEpoch = currentIntervalEpoch;
-		// challengeMemPointer.nextIntervalEpoch = nextIntervalEpoch;
-		challengeTable[_challengeId] = challengeMemPointer;
+		emit intervalReviewCompleted(_challengeId, _user, failed);
 	}
 
 	//handle close challenge

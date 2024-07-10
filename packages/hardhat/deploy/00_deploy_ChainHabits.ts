@@ -1,6 +1,5 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
-// import { Contract, ZeroAddress } from "ethers";
 import { Contract } from "ethers";
 
 /**
@@ -33,8 +32,13 @@ const deployChainHabits: DeployFunction = async function (hre: HardhatRuntimeEnv
   const tx = await chainHabits.registerNewUser(62612170, "0ac2f45bea762e3f0c7abbc1d2e6b78ee8f2a7fd");
   await tx.wait();
 
-  // const tx2 = await await chainHabits.createNewChallenge("Run marathon", 200, 4, ZeroAddress);
-  // await tx2.wait();
+  const tx2 = await await chainHabits.createNewChallenge(
+    "Run marathon",
+    200,
+    4,
+    "0x5f2AF68dF96F3e58e1a243F4f83aD4f5D0Ca6029",
+  );
+  await tx2.wait();
 
   //verfiy smart contract
   if (
