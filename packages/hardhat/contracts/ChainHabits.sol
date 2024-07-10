@@ -149,7 +149,6 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 		if (failed) {
 			challengeTable[_challengeId].failedWeeks++;
 		}
-		// //update intervals
 		emit intervalReviewCompleted(_challengeId, _user, failed);
 	}
 
