@@ -75,7 +75,11 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 	);
 	// indexed user
 	event NewUserRegistered(address indexed user); //TODO do we need more data in this event?
-	event intervalReviewCompleted(uint256 indexed challengeId, bool success);
+	event intervalReviewCompleted(
+		uint256 indexed challengeId,
+		address userAddress,
+		bool success
+	);
 	// indexed stakeForfeited added status
 	event ChallengeCompleted(
 		uint256 indexed challengeId,
@@ -136,23 +140,17 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 		);
 	}
 
-	//handle challenge review logic what about passing args as arr of objs and iteration of it instead of calling individualy will that reduce the excecution gas. 
+	//handle challenge review logic what about passing args as arr of objs and iteration of it instead of calling individualy will that reduce the excecution gas.
 	function handleIntervalReview(
 		uint256 _challengeId,
+		address _user,
 		bool failed
 	) external onlyOwner {
-		// uint48 currentIntervalEpoch,
-		// uint48 nextIntervalEpoch
-		ChallengeDetails memory challengeMemPointer;
 		if (failed) {
-			challengeMemPointer.failedWeeks++;
+			challengeTable[_challengeId].failedWeeks++;
 		}
-		console.log("failedweek", challengeMemPointer.failedWeeks);
 		// //update intervals
-		// challengeMemPointer.currentIntervalEpoch = currentIntervalEpoch;
-		// challengeMemPointer.nextIntervalEpoch = nextIntervalEpoch;
-		challengeTable[_challengeId] = challengeMemPointer;
-		emit intervalReviewCompleted(_challengeId, failed);
+		emit intervalReviewCompleted(_challengeId, _user, failed);
 	}
 
 	//handle close challenge
