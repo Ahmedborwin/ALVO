@@ -18,7 +18,7 @@ dataSources:
         - User
       abis:
         - name: ChainHabits
-          file: ChainHabits\abis\localhost_ChainHabits.json
+          file: ChainHabits/abis/localhost_ChainHabits.json
       eventHandlers:
         - event: NewUserRegistered(indexed address)
           handler: handleUserRegistration
@@ -31,4 +31,4 @@ dataSources:
           handler: handleChallengeComplete
         - event: intervalReviewCompleted(indexed uint256,bool)
           handler: handleIntervalReview
-      file: ChainHabits\ChainHabits.wasm
+      file: ChainHabits/ChainHabits.wasm
