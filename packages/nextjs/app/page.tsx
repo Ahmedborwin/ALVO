@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useAccount as useAlchemyAccount } from "@alchemy/aa-alchemy/react";
 import { gql, useQuery } from "@apollo/client";
 import type { NextPage } from "next";
-import { formatEther } from "viem";
 import { useAccount } from "wagmi";
 import { ObjectiveCard } from "~~/components/cards";
 import { MoonSpinner } from "~~/components/loader";
