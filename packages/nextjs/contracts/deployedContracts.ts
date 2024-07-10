@@ -1019,6 +1019,12 @@ const deployedContracts = {
             },
             {
               indexed: false,
+              internalType: "address",
+              name: "userAddress",
+              type: "address",
+            },
+            {
+              indexed: false,
               internalType: "bool",
               name: "success",
               type: "bool",
@@ -1241,6 +1247,11 @@ const deployedContracts = {
               internalType: "uint256",
               name: "_challengeId",
               type: "uint256",
+            },
+            {
+              internalType: "address",
+              name: "_user",
+              type: "address",
             },
             {
               internalType: "bool",
