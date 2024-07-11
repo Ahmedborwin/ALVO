@@ -78,7 +78,7 @@ export function handleIntervalReview(event: intervalReviewCompleted): void {
   intervalReview.challenge = event.params.challengeId.toHexString();
   intervalReview.createdAt = event.block.timestamp;
   intervalReview.updatedAt = event.block.timestamp;
-  intervalReview.status = true;
+  intervalReview.status = event.params.success;
   intervalReview.transactionHash = event.transaction.hash.toHex();
   intervalReview.save();
 }
