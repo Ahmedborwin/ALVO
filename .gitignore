@@ -1,13 +1,13 @@
 # dependencies
-node_modules
+node_modules/
 
 # yarn
 .yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/sdks
-!.yarn/versions
+!.yarn/patches/
+!.yarn/plugins/
+!.yarn/releases/
+!.yarn/sdks/
+!.yarn/versions/
 # eslint
 .eslintcache
 yarn.lock
@@ -16,17 +16,17 @@ yarn copy.lock
 .DS_Store
 
 # IDE
-.vscode
-.idea
+.vscode/
+.idea/
 
 # cli
-dist
+dist/
 
 # subgraph
-subgraph/build/*
-subgraph/generated/*
-subgraph/graph-node/data/*
+subgraph/build/
+subgraph/generated/
+subgraph/graph-node/data/
 
-packages/subgraph/build/*
-packages/subgraph/generated/*
-packages/subgraph/graph-node/data/*
+packages/subgraph/build/
+packages/subgraph/generated/
+packages/subgraph/graph-node/data/
