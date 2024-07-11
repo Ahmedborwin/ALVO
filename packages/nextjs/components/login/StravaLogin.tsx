@@ -81,6 +81,7 @@ export const StravaLogin = () => {
 
     const handleOnLoad = async () => {
       try {
+        setIsLoading(true);
         const urlParams = new URLSearchParams(window.location.search);
         if (isRegistered && userDetails?.refreshToken.length) {
           const { data: athleteData } = await callStravaApi(async () => {
@@ -96,15 +97,15 @@ export const StravaLogin = () => {
             const data: any = await requestToken(authorizationCode);
             if (data) setTokenData(data);
           } else if (rejected === "access_denied" && authorizationCode === null) {
+            setIsLoading(false);
             toast.remove();
             notification.info("Can't go further without strava access");
           }
-        }
+        } else if (isRegistered === false) setIsLoading(false);
       } catch (error) {
         notification.error("Something went wrong");
-        console.error(error);
-      } finally {
         setIsLoading(false);
+        console.error(error);
       }
     };
     handleOnLoad();

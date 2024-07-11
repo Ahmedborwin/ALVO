@@ -23,6 +23,7 @@ yarn copy.lock
 dist/
 
 # subgraph
+
 subgraph/build/
 subgraph/generated/
 subgraph/graph-node/data/

@@ -51,7 +51,6 @@ const Challenge: NextPage = () => {
     }
     return {};
   }, [data, loading]);
-  console.log(data, loading);
 
   const stakedAmount = useWeiToUSD(challengeDetails?.stakedAmount);
 
@@ -89,6 +88,7 @@ const Challenge: NextPage = () => {
         notification.info("Please fill all fields");
         return;
       }
+      setIsLoading(true);
 
       const ethAmount = stakeValue / nativeCurrencyPrice;
       await writeYourContractAsync({
@@ -98,9 +98,11 @@ const Challenge: NextPage = () => {
       });
       notification.success("Successfully created");
       clearAll();
+      setIsLoading(false);
     } catch (error) {
       console.error(error);
       notification.error("Failed to create challenge");
+      setIsLoading(false);
     }
   };
 
