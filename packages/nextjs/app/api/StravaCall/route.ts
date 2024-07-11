@@ -1,16 +1,16 @@
 import { NextResponse } from "next/server";
 import { NEXT_PUBLIC_STRAVA_CLIENT_ID, NEXT_PUBLIC_STRAVA_CLIENT_SECRET } from "../../../constants/index";
+import { log } from "./logger";
 import axios, { AxiosResponse } from "axios";
 import { ethers } from "ethers";
+import fs from "fs";
+import path from "path";
 import chainHabits from "~~/contracts/deployedContracts";
 
 // Types
 type UserDetails = {
-  challengeTally: bigint;
-  SuccessfulChallenges: bigint;
-  currenStaked: bigint;
-  totalForeited: bigint;
-  userID: bigint;
+  currenStaked: number;
+  userID: ethers.BigNumber;
   refreshToken: string;
 };
 
@@ -26,6 +26,35 @@ type ChallengeDetails = {
   defaultAddress: string;
 };
 
+type ChallengeLogEntry = {
+  user: string;
+  totalWeeks: number;
+  startDate: Date;
+  endDate: Date;
+  currentWeek: number;
+  isCompleted: boolean;
+  intervalReviews: { week: number; success: boolean }[];
+  lastProcessedBlock: number; // Add this new field
+};
+
+interface NewChallengeCreatedEvent {
+  challengeId: ethers.BigNumber;
+  user: string;
+  NumberofWeeks: number;
+  challengeStartDate: ethers.BigNumber;
+}
+
+interface IntervalReviewCompletedEvent {
+  challengeId: ethers.BigNumber;
+  userAddress: string;
+  success: boolean;
+}
+
+interface ChallengeCompletedEvent {
+  challengeId: ethers.BigNumber;
+  userAddress: string;
+  stakeForfeited: ethers.BigNumber;
+}
 // Constants
 const CHAIN_ID = "84532";
 const PROVIDER_URL = "https://base-sepolia.g.alchemy.com/v2/ZgfRDpN01Ven-A0XTYAmn9xclMbxV0ba";
@@ -34,6 +63,7 @@ const PRIVATE_KEY = "bf0c60264942544c1ecb566e558207f5d84d08bd66d524bbc7df9b92b9d
 // Global variables
 let provider: ethers.providers.JsonRpcProvider;
 let chainHabitsContract: ethers.Contract;
+let challengeLog: Map<string, ChallengeLogEntry>;
 
 // Main function
 export async function GET() {
@@ -64,8 +94,11 @@ async function setupProviderAndContract() {
 
   const abi = chainHabits[CHAIN_ID]["ChainHabits"].abi;
   const address = chainHabits[CHAIN_ID]["ChainHabits"].address;
+  console.log("@address", address);
 
   chainHabitsContract = new ethers.Contract(address, abi, signer);
+
+  log("Provider and contract setup completed.");
 }
 
 // Main logic function
@@ -76,22 +109,33 @@ async function handleStravaLogic() {
   const userAddressList = await chainHabitsContract.getAllUserDetails();
 
   if (!userAddressList || userAddressList.length === 0) {
+    log("No users found.");
     return null;
   }
-
+  log(`Found ${userAddressList.length} users.`);
   console.log("userAddressList", userAddressList);
 
   const addressLiveChallenges = await getLiveChallenges(userAddressList);
 
   if (addressLiveChallenges.length === 0) {
+    log("No live challenges found.");
     return null;
   }
-
+  log(`Found ${addressLiveChallenges.length} live challenges.`);
   console.log("addressLiveChallenges", addressLiveChallenges);
+
+  // Build the challenge log
+  challengeLog = await buildEventsLog();
+  console.log("@@@Here");
 
   for (const userAddress of addressLiveChallenges) {
     await handleUserChallenge(userAddress, currentEpoch);
   }
+
+  console.log("@@@Here2");
+
+  // Save the updated challenge log
+  saveEventsLog(challengeLog);
 
   return { success: true };
 }
@@ -109,19 +153,29 @@ async function getLiveChallenges(userAddressList: string[]): Promise<string[]> {
 }
 
 async function handleUserChallenge(userAddress: string, currentEpoch: number) {
-  const _userDetails = await chainHabitsContract.getUserDetails(userAddress);
+  const _userDetails: [number, ethers.BigNumber, string, number, ethers.BigNumber, string] =
+    await chainHabitsContract.getUserDetails(userAddress);
 
   if (!_userDetails) {
-    return;
+    log("user details not found for");
+    return "userDetails not found";
   }
 
+  console.log("@@@@_userDetails", _userDetails);
+
+  const [currentStaked, userID, refreshToken, , ,] = _userDetails as [
+    number,
+    ethers.BigNumber,
+    string,
+    number,
+    ethers.BigNumber,
+    string,
+  ];
+
   const userDetails: UserDetails = {
-    challengeTally: _userDetails.challengeTally,
-    SuccessfulChallenges: _userDetails.SuccessfulChallenges,
-    currenStaked: _userDetails.currenStaked,
-    totalForeited: _userDetails.totalDonated,
-    userID: _userDetails.userID,
-    refreshToken: _userDetails.refreshToken,
+    currenStaked: currentStaked,
+    userID: userID,
+    refreshToken: refreshToken,
   };
 
   const stravaCallData = {
@@ -134,6 +188,7 @@ async function handleUserChallenge(userAddress: string, currentEpoch: number) {
   try {
     const response: AxiosResponse = await axios.post("https://www.strava.com/oauth/token", stravaCallData);
     const { access_token: new_access_token, refresh_token: new_refresh_token } = response.data;
+    console.log("access_token", new_access_token);
 
     const challengeId = await chainHabitsContract.getChallengeId(userAddress);
     const _challengeDetails = await chainHabitsContract.getChallengeDetails(challengeId);
@@ -153,21 +208,30 @@ async function handleUserChallenge(userAddress: string, currentEpoch: number) {
       nextIntervalEpoch: _challengeDetails?.nextIntervalEpoch,
       defaultAddress: _challengeDetails?.defaultAddress,
     };
-    console.log("@@@challengeDetails", challengeDetails);
 
     if (new_refresh_token !== userDetails.refreshToken) {
       await updateRefreshToken(userAddress, new_refresh_token);
     }
 
-    if (currentEpoch >= challengeDetails.nextIntervalEpoch) {
-      await _handleIntervalReview(challengeId, challengeDetails, new_access_token);
-    }
+    const challengeLogEntry = challengeLog.get(challengeId.toString());
+    console.log("@@review if review interval is due");
+    console.log("@@challengeLogEntry", challengeLogEntry);
+    console.log("@@intervalreviewlength", challengeLogEntry?.intervalReviews.length);
+    // if (challengeLogEntry && challengeLogEntry.currentWeek > challengeLogEntry.intervalReviews.length + 1) {
+    //   await _handleIntervalReview(challengeId, challengeDetails, new_access_token);
+    // }
+
+    //TESTING PURPPOSES ONLY
+    await _handleIntervalReview(challengeId, challengeDetails, new_access_token);
 
     if (challengeDetails.competitionDeadline <= currentEpoch) {
       console.log("handle complete challenge logic");
       await handleCompleteChallenge(challengeId, userDetails, challengeDetails, userAddress);
+
+      log(`Successfully handled challenge for user ${userAddress}`);
     }
   } catch (e) {
+    log(`Error handling challenge for user ${userAddress}: ${e}`);
     console.error(e);
   }
 }
@@ -177,17 +241,26 @@ async function _handleIntervalReview(
   challengeDetails: ChallengeDetails,
   new_access_token: string,
 ) {
-  let distanceLogged = await getAthletesStravaData(challengeDetails, new_access_token);
-  distanceLogged += 15;
-  // const nextIntervalEpoch: bigint = challengeDetails.currentIntervalEpoch + BigInt(60);
+  try {
+    let distanceLogged = await getAthletesStravaData(challengeDetails, new_access_token);
+    distanceLogged += 15;
 
-  const isTargetMet: boolean = distanceLogged < challengeDetails.targetMiles; //bool
+    const isTargetMet: boolean = distanceLogged >= challengeDetails.targetMiles;
 
-  const tx = await chainHabitsContract.handleIntervalReview(challengeId, isTargetMet);
+    const tx = await chainHabitsContract.handleIntervalReview(challengeId, isTargetMet);
 
-  await tx.wait();
+    await tx.wait();
 
-  challengeDetails.failedWeeks += isTargetMet ? 1 : 0;
+    // Update the challenge log
+    const challengeLogEntry = challengeLog.get(challengeId);
+    if (challengeLogEntry) {
+      challengeLogEntry.intervalReviews.push({ week: challengeLogEntry.currentWeek, success: isTargetMet });
+      challengeLogEntry.currentWeek++;
+    }
+    log(`Successfully handled interval review for challenge ${challengeId}`);
+  } catch (e) {
+    log(`Error handling interval review for challenge ${challengeId}: ${e}`);
+  }
 }
 
 async function handleCompleteChallenge(
@@ -196,17 +269,33 @@ async function handleCompleteChallenge(
   challengeDetails: ChallengeDetails,
   userAddress: string,
 ) {
-  const ethToDefault =
-    (userDetails.currenStaked / BigInt(challengeDetails.NoOfWeeks)) * BigInt(challengeDetails.failedWeeks);
-  if (ethToDefault > userDetails.currenStaked) {
-    //TODO - how can I better handle errors?
-    return "logic error";
+  try {
+    const ethToDefault =
+      (BigInt(userDetails.currenStaked) / BigInt(challengeDetails.NoOfWeeks)) * BigInt(challengeDetails.failedWeeks);
+    if (ethToDefault > userDetails.currenStaked) {
+      return "logic error - Cannot send more Eth to default than what is staked";
+    }
+    console.log("@@@currentstaked", userDetails.currenStaked);
+    await chainHabitsContract.handleCompleteChallenge(challengeId, ethToDefault, userAddress);
+
+    // Update the challenge log
+    const challengeLogEntry = challengeLog.get(challengeId);
+    if (challengeLogEntry) {
+      challengeLogEntry.isCompleted = true;
+    }
+    log(`Successfully completed challenge ${challengeId} for user ${userAddress}`);
+  } catch (e) {
+    log(`Error completing challenge ${challengeId} for user ${userAddress}: ${e}`);
   }
-  await chainHabitsContract.handleCompleteChallenge(challengeId, ethToDefault, userAddress);
 }
 
 async function updateRefreshToken(userAddress: string, new_refresh_token: string) {
-  await chainHabitsContract.updateRefreshToken(userAddress, new_refresh_token);
+  try {
+    await chainHabitsContract.updateRefreshToken(userAddress, new_refresh_token);
+    log(`Successfully updated refresh token for user ${userAddress}`);
+  } catch (e) {
+    log(`Error updating refresh token for user ${userAddress}: ${e}`);
+  }
 }
 
 async function getAthletesStravaData(challengeDetails: ChallengeDetails, new_access_token: string) {
@@ -218,15 +307,184 @@ async function getAthletesStravaData(challengeDetails: ChallengeDetails, new_acc
         authorization: `Bearer ${new_access_token}`,
       },
     });
+    log(`Successfully retrieved Strava data for challenge`);
+
     const distanceLogged = 0;
     return distanceLogged;
-    // const data = response.data;
-    // const filteredActivities = data.filter(activity => activity.workout_type === 0);
-    // const distanceLogged = filteredActivities.reduce((acc: number, event) => acc + event.distance, 0);
-    // console.log("@@@@distanceLogged", distanceLogged);
-    // return distanceLogged / 1609;
   } catch (e) {
     console.error(e);
+    log(`Error retrieving Strava data: ${e}`);
     return 0;
   }
+}
+
+// Improved event logging functions
+
+async function buildEventsLog(): Promise<Map<string, ChallengeLogEntry>> {
+  const logPath = path.join(process.cwd(), "logs", "events_log.json");
+  let challengeLog: Map<string, ChallengeLogEntry>;
+
+  if (fs.existsSync(logPath)) {
+    console.log;
+    // Load existing log
+    const logData = fs.readFileSync(logPath, "utf8");
+    const parsedData = JSON.parse(logData);
+    challengeLog = new Map(Object.entries(parsedData));
+
+    // Get the latest processed block from the existing log
+    const startBlock = (await provider.getBlockNumber()) - 10000;
+
+    // Fetch and process new events since the last processed block
+    const newEvents = await fetchNewEvents(startBlock);
+    challengeLog = processNewEvents(challengeLog, newEvents);
+  } else {
+    // If no log exists, build from scratch
+    challengeLog = await handleBuildLogs();
+  }
+
+  return challengeLog;
+}
+
+async function fetchNewEvents(fromBlock: number): Promise<ethers.Event[]> {
+  const latestBlock = await provider.getBlockNumber();
+  // const eventNames = ["NewChallengeCreated", "intervalReviewCompleted", "ChallengeCompleted"];
+  const events: ethers.Event[] = await chainHabitsContract.queryFilter("*", fromBlock + 1, latestBlock);
+  // let allEvents: ethers.Event[] = [];
+  // for (const event in eventNames) {
+  //   const events = await chainHabitsContract.queryFilter(event, resolvedFromBlock + 1, latestBlock);
+  //   allEvents = allEvents.concat(events);
+  // }
+  // console.log("@@@@fetchNewEvents", fetchNewEvents);
+  return events;
+}
+
+function processNewEvents(
+  challengeLog: Map<string, ChallengeLogEntry>,
+  newEvents: ethers.Event[],
+): Map<string, ChallengeLogEntry> {
+  for (const event of newEvents) {
+    if (event.event === "NewChallengeCreated" && event.args) {
+      const args = event.args as unknown as NewChallengeCreatedEvent;
+
+      const [challengeId, user, , NumberofWeeks, , challengeStartDate, forfeitAddress] = event.args as [
+        ethers.BigNumber,
+        string,
+        any,
+        number,
+        any,
+        number,
+        string,
+      ];
+      const endDateEpoch = challengeStartDate * 604800;
+
+      challengeLog.set(challengeId.toString(), {
+        user: user,
+        totalWeeks: NumberofWeeks,
+        startDate: new Date(challengeStartDate * 1000),
+        endDate: new Date(endDateEpoch * 1000),
+        currentWeek: 1,
+        isCompleted: false,
+        intervalReviews: [],
+        lastProcessedBlock: event.blockNumber,
+      });
+    } else if (event.event === "intervalReviewCompleted" && event.args) {
+      const [challengeId, success] = event.args as [ethers.BigNumber, boolean];
+      const challenge = challengeLog.get(challengeId.toString());
+      if (challenge) {
+        challenge.intervalReviews.push({ week: challenge.currentWeek, success: success });
+        challenge.currentWeek++;
+        challenge.lastProcessedBlock = event.blockNumber;
+      }
+    } else if (event.event === "ChallengeCompleted" && event.args) {
+      const [challengeId] = event.args as [ethers.BigNumber];
+      const challenge = challengeLog.get(challengeId.toString());
+      if (challenge) {
+        challenge.isCompleted = true;
+        challenge.lastProcessedBlock = event.blockNumber;
+      }
+    }
+  }
+
+  return challengeLog;
+}
+
+//Build the logs first time this code is triggered or when there is no events_log.json found
+async function handleBuildLogs(): Promise<Map<string, ChallengeLogEntry>> {
+  const eventNames = ["NewChallengeCreated", "intervalReviewCompleted", "ChallengeCompleted"];
+  const latestBlock = await provider.getBlockNumber();
+  const fromBlock = Math.max(0, latestBlock - 10000);
+
+  const allEvents = await chainHabitsContract.queryFilter("*", fromBlock, latestBlock);
+
+  const relevantEvents = allEvents
+    .filter((event): event is ethers.Event => typeof event.event === "string" && eventNames.includes(event.event))
+    .sort((a, b) => a.blockNumber - b.blockNumber);
+
+  const challengeLog: Map<string, ChallengeLogEntry> = new Map();
+
+  for (const event of relevantEvents) {
+    if (event.event === "NewChallengeCreated" && event.args) {
+      const args = event.args as unknown as NewChallengeCreatedEvent;
+      const [challengeId, user, , NumberofWeeks, , challengeStartDate, forfeitAddress] = event.args as [
+        ethers.BigNumber,
+        string,
+        any,
+        number,
+        any,
+        number,
+        string,
+      ];
+
+      const endDateEpoch = challengeStartDate * 604800;
+
+      challengeLog.set(challengeId.toString(), {
+        user: user,
+        totalWeeks: NumberofWeeks,
+        startDate: new Date(challengeStartDate * 1000),
+        endDate: new Date(endDateEpoch * 1000),
+        currentWeek: 1,
+        isCompleted: false,
+        intervalReviews: [],
+        lastProcessedBlock: event.blockNumber,
+      });
+    } else if (event.event === "intervalReviewCompleted" && event.args) {
+      const [challengeId, success] = event.args as [ethers.BigNumber, boolean];
+      const challenge = challengeLog.get(challengeId.toString());
+      if (challenge) {
+        challenge.intervalReviews.push({ week: challenge.currentWeek, success: success });
+        challenge.currentWeek++;
+        challenge.lastProcessedBlock = event.blockNumber;
+      }
+    } else if (event.event === "ChallengeCompleted" && event.args) {
+      const [challengeId] = event.args as [ethers.BigNumber];
+      const challenge = challengeLog.get(challengeId.toString());
+      if (challenge) {
+        challenge.isCompleted = true;
+        challenge.lastProcessedBlock = event.blockNumber;
+      }
+    }
+  }
+
+  // Calculate current week for active challenges
+  const currentTimestamp = Math.floor(Date.now() / 1000);
+  for (const challenge of challengeLog.values()) {
+    if (!challenge.isCompleted) {
+      const elapsedWeeks = Math.floor((currentTimestamp - challenge.startDate.getTime() / 1000) / (7 * 24 * 60 * 60));
+      challenge.currentWeek = Math.min(elapsedWeeks + 1, challenge.totalWeeks);
+    }
+  }
+
+  return challengeLog;
+}
+
+function saveEventsLog(challengeLog: Map<string, ChallengeLogEntry>) {
+  const logDir = path.join(process.cwd(), "logs");
+  if (!fs.existsSync(logDir)) {
+    fs.mkdirSync(logDir);
+  }
+
+  const logPath = path.join(logDir, "events_log.json");
+  const logData = JSON.stringify(Object.fromEntries(challengeLog), null, 2);
+
+  fs.writeFileSync(logPath, logData);
 }

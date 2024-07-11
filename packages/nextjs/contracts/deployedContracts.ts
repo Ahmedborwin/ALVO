@@ -1793,7 +1793,7 @@ const deployedContracts = {
       },
     },
     ChainHabits: {
-      address: "0x59da6dfe69b5bDc72BA43e43Dd405dc437bE1659",
+      address: "0xD83E502fb420494A130d934B0586A94Ee2C10471",
       abi: [
         {
           inputs: [],
@@ -1801,14 +1801,13 @@ const deployedContracts = {
           type: "constructor",
         },
         {
-          inputs: [
-            {
-              internalType: "address",
-              name: "Caller",
-              type: "address",
-            },
-          ],
-          name: "CHAINHABITS__CallerNotAdmin",
+          inputs: [],
+          name: "CHAINHABITS__ChallengeStillActive",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "CHAINHABITS__InsufficientFunds",
           type: "error",
         },
         {
@@ -1825,13 +1824,63 @@ const deployedContracts = {
           anonymous: false,
           inputs: [
             {
-              indexed: false,
+              indexed: true,
               internalType: "uint256",
               name: "challengeId",
               type: "uint256",
             },
             {
+              indexed: true,
+              internalType: "address",
+              name: "user",
+              type: "address",
+            },
+            {
               indexed: false,
+              internalType: "uint8",
+              name: "stakeForfeited",
+              type: "uint8",
+            },
+          ],
+          name: "ChallengeCompleted",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "user",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "amount",
+              type: "uint256",
+            },
+          ],
+          name: "FundsWithdrawn",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "uint256",
+              name: "challengeId",
+              type: "uint256",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "user",
+              type: "address",
+            },
+            {
+              indexed: true,
               internalType: "string",
               name: "Objective",
               type: "string",
@@ -1851,19 +1900,7 @@ const deployedContracts = {
             {
               indexed: false,
               internalType: "uint48",
-              name: "competitionDeadline",
-              type: "uint48",
-            },
-            {
-              indexed: false,
-              internalType: "uint48",
-              name: "currentIntervalEpoch",
-              type: "uint48",
-            },
-            {
-              indexed: false,
-              internalType: "uint48",
-              name: "nextIntervalEpoch",
+              name: "challengeStartDate",
               type: "uint48",
             },
             {
@@ -1887,6 +1924,50 @@ const deployedContracts = {
             },
           ],
           name: "NewUserRegistered",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "previousOwner",
+              type: "address",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "newOwner",
+              type: "address",
+            },
+          ],
+          name: "OwnershipTransferred",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "uint256",
+              name: "challengeId",
+              type: "uint256",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "user",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "bool",
+              name: "success",
+              type: "bool",
+            },
+          ],
+          name: "intervalReviewCompleted",
           type: "event",
         },
         {
@@ -1981,11 +2062,6 @@ const deployedContracts = {
             {
               components: [
                 {
-                  internalType: "string",
-                  name: "objective",
-                  type: "string",
-                },
-                {
                   internalType: "uint8",
                   name: "targetMiles",
                   type: "uint8",
@@ -2007,17 +2083,7 @@ const deployedContracts = {
                 },
                 {
                   internalType: "uint48",
-                  name: "competitionDeadline",
-                  type: "uint48",
-                },
-                {
-                  internalType: "uint48",
-                  name: "currentIntervalEpoch",
-                  type: "uint48",
-                },
-                {
-                  internalType: "uint48",
-                  name: "nextIntervalEpoch",
+                  name: "challengeStartDate",
                   type: "uint48",
                 },
                 {
@@ -2066,24 +2132,9 @@ const deployedContracts = {
             {
               components: [
                 {
-                  internalType: "uint256",
-                  name: "challengeTally",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint256",
-                  name: "SuccessfulChallenges",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint256",
-                  name: "currenStaked",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint256",
-                  name: "totalDonated",
-                  type: "uint256",
+                  internalType: "uint48",
+                  name: "currentStaked",
+                  type: "uint48",
                 },
                 {
                   internalType: "uint256",
@@ -2112,9 +2163,14 @@ const deployedContracts = {
               type: "uint256",
             },
             {
-              internalType: "uint256",
-              name: "_amountToDefault",
-              type: "uint256",
+              internalType: "uint8",
+              name: "stakeForfeited",
+              type: "uint8",
+            },
+            {
+              internalType: "address",
+              name: "userAddress",
+              type: "address",
             },
           ],
           name: "handleCompleteChallenge",
@@ -2133,16 +2189,6 @@ const deployedContracts = {
               internalType: "bool",
               name: "failed",
               type: "bool",
-            },
-            {
-              internalType: "uint48",
-              name: "currentIntervalEpoch",
-              type: "uint48",
-            },
-            {
-              internalType: "uint48",
-              name: "nextIntervalEpoch",
-              type: "uint48",
             },
           ],
           name: "handleIntervalReview",
@@ -2170,6 +2216,19 @@ const deployedContracts = {
           type: "function",
         },
         {
+          inputs: [],
+          name: "owner",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
           inputs: [
             {
               internalType: "uint256",
@@ -2189,35 +2248,22 @@ const deployedContracts = {
         },
         {
           inputs: [],
-          name: "test",
+          name: "renounceOwnership",
           outputs: [],
           stateMutability: "nonpayable",
           type: "function",
         },
         {
-          inputs: [],
-          name: "testVar",
-          outputs: [
+          inputs: [
             {
-              internalType: "uint256",
-              name: "",
-              type: "uint256",
+              internalType: "address",
+              name: "newOwner",
+              type: "address",
             },
           ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "testVar4",
-          outputs: [
-            {
-              internalType: "uint256",
-              name: "",
-              type: "uint256",
-            },
-          ],
-          stateMutability: "view",
+          name: "transferOwnership",
+          outputs: [],
+          stateMutability: "nonpayable",
           type: "function",
         },
         {
@@ -2265,7 +2311,11 @@ const deployedContracts = {
           type: "function",
         },
       ],
-      inheritedFunctions: {},
+      inheritedFunctions: {
+        owner: "@openzeppelin/contracts/access/Ownable.sol",
+        renounceOwnership: "@openzeppelin/contracts/access/Ownable.sol",
+        transferOwnership: "@openzeppelin/contracts/access/Ownable.sol",
+      },
     },
   },
   11155111: {
