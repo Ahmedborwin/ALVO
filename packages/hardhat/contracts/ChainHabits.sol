@@ -15,6 +15,7 @@ error CHAINHABITS__UserNotYetRegistered();
 error CHAINHABITS__NoActiveChallengeForUser();
 error CHAINHABITS__ChallengeStillActive();
 error CHAINHABITS__InsufficientFunds();
+error CHAINHABITS__UserHasLiveObjective();
 
 contract ChainHabits is ReentrancyGuard, Ownable {
 	using Counters for Counters.Counter;
@@ -60,6 +61,7 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 	mapping(address player => UserDetails) userTable;
 	mapping(uint256 challengeId => ChallengeDetails) challengeTable;
 	mapping(address user => uint256 challengeId) usersCurrentChallenge;
+	mapping(address => uint256) ForfeitedFundsToBeCollected;
 
 	//EVENTS
 	// removed indexed from the Objective as it's a string and removed starting date from the event as we can get the timestamp for the event from the subgraph
@@ -70,12 +72,13 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 		string Objective, // TODO -- restrict size of this
 		uint8 startingMiles,
 		uint8 NumberofWeeks,
+		uint8 PercentageIncrease,
 		address defaultAddress,
 		uint256 amount
 	);
 	// indexed user
 	event NewUserRegistered(address indexed user); //TODO do we need more data in this event?
-	event intervalReviewCompleted(
+	event IntervalReviewCompleted(
 		uint256 indexed challengeId,
 		address userAddress,
 		bool success
@@ -87,6 +90,7 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 		bool status
 	);
 	event FundsWithdrawn(address indexed user, uint256 amount);
+	event ForfeitedFundsFailedToSend(address indexed user, uint256 amount);
 
 	constructor() Ownable() {}
 
@@ -106,13 +110,19 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 		string calldata _obj,
 		uint8 _targetMiles,
 		uint8 _weeks,
-		address _defaultAddress
+		address _defaultAddress,
+		uint8 PercentageIncrease
 	)
 		external
 		payable
 		isUserRegistered(msg.sender)
 		returns (uint256 challengeId)
 	{
+		//one challenge at a time only
+		if (userHasLiveChallenge[msg.sender]) {
+			revert CHAINHABITS__UserHasLiveObjective();
+		}
+
 		_challengeIdCounter.increment();
 		challengeId = _challengeIdCounter.current();
 
@@ -135,6 +145,7 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 			_obj,
 			_targetMiles,
 			_weeks,
+			PercentageIncrease,
 			_defaultAddress,
 			msg.value
 		);
@@ -149,7 +160,22 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 		if (failed) {
 			challengeTable[_challengeId].failedWeeks++;
 		}
-		emit intervalReviewCompleted(_challengeId, _user, failed);
+		emit IntervalReviewCompleted(_challengeId, _user, failed);
+	}
+
+	//TODO - testing a bulk interval review function
+	//Is this actually cheaper?
+	function handleBulkIntervalReview(
+		uint256[] calldata _challengeId,
+		address[] calldata _user,
+		bool[] calldata failed
+	) external onlyOwner {
+		for (uint16 i = 0; i < _challengeId.length; i++) {
+			if (failed[i]) {
+				challengeTable[_challengeId[i]].failedWeeks++;
+			}
+			emit IntervalReviewCompleted(_challengeId[i], _user[i], failed[i]);
+		}
 	}
 
 	//handle close challenge
@@ -157,25 +183,31 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 		uint256 challengeId,
 		uint8 stakeForfeited,
 		address userAddress
-	) external onlyOwner {
-		ChallengeDetails memory _challenge = challengeTable[challengeId];
-		//send eth to address's
-		bool success = false;
+	) external onlyOwner nonReentrant {
 		if (stakeForfeited > 0) {
-			(bool sent, ) = (_challenge.defaultAddress).call{
+			(bool sent, ) = (challengeTable[challengeId].defaultAddress).call{
 				value: stakeForfeited
 			}("");
-			require(sent, "failed to send eth");
+			if (!sent) {
+				ForfeitedFundsToBeCollected[
+					challengeTable[challengeId].defaultAddress
+				] += stakeForfeited;
+				//TODO to subgraph && have front end recognise if address has funds it can withdraw
+				emit ForfeitedFundsFailedToSend(
+					challengeTable[challengeId].defaultAddress,
+					stakeForfeited
+				);
+			}
 			//update address staked balance
-			UserDetails memory userDetails = userTable[userAddress];
-			userDetails.currentStaked -= stakeForfeited;
-			userTable[userAddress] = userDetails; //update userTable
-			success = true;
-		} else userHasLiveChallenge[msg.sender] = false; //set users challenge to false
-		_challenge.isLive = false; //TODO - could remove this
-		challengeTable[challengeId] = _challenge;
-		emit ChallengeCompleted(challengeId, userAddress, success);
+			userTable[userAddress].currentStaked -= stakeForfeited;
+		} else {
+			usersCurrentChallenge[msg.sender] = 0; //set current ChallengeId to 0 TODO is this neneeded?
+			userHasLiveChallenge[msg.sender] = false; //set users challenge to false
+		}
+		emit ChallengeCompleted(challengeId, userAddress, true);
 	}
+
+	//TODO: Bulk handleCompleteChallenge
 
 	//withdraw funds
 	function withdrawFunds()
@@ -196,7 +228,6 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 		}
 
 		user.currentStaked = 0; //else set to amoutn staked to 0
-		// userTable[msg.sender] = 0;
 
 		(bool success, ) = msg.sender.call{ value: amount }("");
 		require(success, "Transfer failed");
@@ -204,7 +235,7 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 		emit FundsWithdrawn(msg.sender, amount);
 	}
 
-	//setter
+	//setter - TODO this needs to be removed when we incorporate the encrypted database
 	function updateRefreshToken(
 		address _user,
 		string calldata _refreshToken
