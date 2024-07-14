@@ -1,6 +1,6 @@
 "use client";
 
-import { SetStateAction, useCallback, useMemo, useState } from "react";
+import { SetStateAction, useCallback, useEffect, useMemo, useState } from "react";
 import { useAccount as useAlchemyAccount } from "@alchemy/aa-alchemy/react";
 import { gql, useQuery } from "@apollo/client";
 import { NextPage } from "next";
@@ -18,9 +18,10 @@ import { useGlobalState } from "~~/services/store/store";
 import { Challenge as ChallengeType, IntervalReviews } from "~~/types/utils";
 import { notification } from "~~/utils/scaffold-eth";
 
-const Label = ({ label }: { label: string }) => (
-  <label htmlFor={label} className="block text-sm font-medium text-indigo-200 mb-2">
+const Label = ({ label, children }: { label: string; children?: React.ReactNode }) => (
+  <label htmlFor={label} className="flex items-center text-sm font-medium text-indigo-200 mb-2">
     {label}
+    {children}
   </label>
 );
 
@@ -30,6 +31,7 @@ const Challenge: NextPage = () => {
   const [noOfWeeks, setNoOfWeeks] = useState<number | null>(4);
   const [stakeValue, setStakeValue] = useState<number | null>(40);
   const [startingMiles, setStartingMiles] = useState<number | null>(null);
+  const [targetIncrease, setTargetIncrease] = useState<number | null>(0);
 
   const { writeContractAsync: writeYourContractAsync } = useScaffoldWriteContract("ChainHabits");
   const nativeCurrencyPrice = useGlobalState(state => state.nativeCurrency.price);
@@ -73,6 +75,7 @@ const Challenge: NextPage = () => {
     setForfeitAddress("");
     setNoOfWeeks(4);
     setStakeValue(40);
+    setTargetIncrease(0);
     setStartingMiles(null);
   };
 
@@ -83,7 +86,8 @@ const Challenge: NextPage = () => {
         noOfWeeks === null ||
         stakeValue === null ||
         startingMiles === null ||
-        !isAddress(forfeitAddress)
+        !isAddress(forfeitAddress) ||
+        targetIncrease === null
       ) {
         notification.info("Please fill all fields");
         return;
@@ -93,7 +97,7 @@ const Challenge: NextPage = () => {
       const ethAmount = stakeValue / nativeCurrencyPrice;
       await writeYourContractAsync({
         functionName: "createNewChallenge",
-        args: [objective, startingMiles, noOfWeeks, forfeitAddress as Address],
+        args: [objective, startingMiles, noOfWeeks, forfeitAddress as Address, Number(targetIncrease)],
         value: parseEther(ethAmount.toString()),
       });
       notification.success("Successfully created");
@@ -153,6 +157,27 @@ const Challenge: NextPage = () => {
                   onChange={value => assignValue(value, setStartingMiles)}
                   value={startingMiles ?? ""}
                   placeholder="Target weekly distance in miles (e.g. 10 miles)"
+                  type="number"
+                />
+              </div>
+              <div>
+                <Label label="Target Increase %">
+                  <span
+                    className="ml-2 text-gray-400 cursor-pointer"
+                    title="If set to more than 0, the weekly target will increase by this percentage every week"
+                  >
+                    ℹ️
+                  </span>
+                </Label>
+                <CustomInput
+                  className="w-full px-4 py-3 bg-white bg-opacity-20 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 text-white placeholder-indigo-200"
+                  onChange={value => {
+                    const castValue = Number(value);
+                    if ((Number.isNaN(castValue) || castValue < 0 || castValue > 100) && castValue) return;
+                    setTargetIncrease(castValue);
+                  }}
+                  value={targetIncrease ?? ""}
+                  placeholder="Weekly target increase percentage (e.g. 5)"
                   type="number"
                 />
               </div>
