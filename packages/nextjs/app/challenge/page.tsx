@@ -1,6 +1,6 @@
 "use client";
 
-import { SetStateAction, useCallback, useEffect, useMemo, useState } from "react";
+import { SetStateAction, useCallback, useMemo, useState } from "react";
 import { useAccount as useAlchemyAccount } from "@alchemy/aa-alchemy/react";
 import { gql, useQuery } from "@apollo/client";
 import { NextPage } from "next";
@@ -97,7 +97,7 @@ const Challenge: NextPage = () => {
       const ethAmount = stakeValue / nativeCurrencyPrice;
       await writeYourContractAsync({
         functionName: "createNewChallenge",
-        args: [objective, startingMiles, noOfWeeks, forfeitAddress as Address, Number(targetIncrease)],
+        args: [objective, startingMiles, noOfWeeks, forfeitAddress as Address, targetIncrease],
         value: parseEther(ethAmount.toString()),
       });
       notification.success("Successfully created");
@@ -117,6 +117,16 @@ const Challenge: NextPage = () => {
       return;
     }
     if (!Number.isNaN(data) && data >= 1) setState(data);
+  }, []);
+
+  const assignPercentage = useCallback((value: string): void => {
+    const castValue = Number(value);
+    if (!castValue || Number.isNaN(castValue)) {
+      setTargetIncrease(0);
+      return;
+    }
+    if (castValue < 0 || castValue > 100) return;
+    setTargetIncrease(castValue);
   }, []);
 
   if (isLoading) return <MoonSpinner />;
@@ -147,7 +157,7 @@ const Challenge: NextPage = () => {
                   onChange={value => assignValue(value, setNoOfWeeks)}
                   value={noOfWeeks ?? ""}
                   placeholder="What is Your Training Period?"
-                  type="number"
+                  type="string"
                 />
               </div>
               <div>
@@ -157,7 +167,7 @@ const Challenge: NextPage = () => {
                   onChange={value => assignValue(value, setStartingMiles)}
                   value={startingMiles ?? ""}
                   placeholder="Target weekly distance in miles (e.g. 10 miles)"
-                  type="number"
+                  type="string"
                 />
               </div>
               <div>
@@ -171,14 +181,10 @@ const Challenge: NextPage = () => {
                 </Label>
                 <CustomInput
                   className="w-full px-4 py-3 bg-white bg-opacity-20 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 text-white placeholder-indigo-200"
-                  onChange={value => {
-                    const castValue = Number(value);
-                    if ((Number.isNaN(castValue) || castValue < 0 || castValue > 100) && castValue) return;
-                    setTargetIncrease(castValue);
-                  }}
+                  onChange={value => assignPercentage(value)}
                   value={targetIncrease ?? ""}
                   placeholder="Weekly target increase percentage (e.g. 5)"
-                  type="number"
+                  type="string"
                 />
               </div>
               <div>
@@ -197,7 +203,7 @@ const Challenge: NextPage = () => {
                   onChange={value => assignValue(value, setStakeValue)}
                   value={stakeValue ?? ""}
                   placeholder="Enter stake value (USD)"
-                  type="number"
+                  type="string"
                 />
               </div>
               <div className="flex space-x-4 pt-4">
