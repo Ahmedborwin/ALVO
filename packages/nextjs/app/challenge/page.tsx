@@ -93,7 +93,7 @@ const Challenge: NextPage = () => {
       const ethAmount = stakeValue / nativeCurrencyPrice;
       await writeYourContractAsync({
         functionName: "createNewChallenge",
-        args: [objective, startingMiles, noOfWeeks, forfeitAddress as Address],
+        args: [objective, startingMiles, noOfWeeks, forfeitAddress as Address, 12], //the 12 is a hardcode version of the _percentageIncrease
         value: parseEther(ethAmount.toString()),
       });
       notification.success("Successfully created");

@@ -865,7 +865,22 @@ const deployedContracts = {
         },
         {
           inputs: [],
+          name: "CHAINHABITS__ChallengeNotLive",
+          type: "error",
+        },
+        {
+          inputs: [],
           name: "CHAINHABITS__ChallengeStillActive",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "CHAINHABITS__ForfeitAddressIs0Address",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "CHAINHABITS__IncorrectAddressORChallengeId",
           type: "error",
         },
         {
@@ -875,7 +890,17 @@ const deployedContracts = {
         },
         {
           inputs: [],
+          name: "CHAINHABITS__StakeAmountisZero",
+          type: "error",
+        },
+        {
+          inputs: [],
           name: "CHAINHABITS__UserAlreadyRegistered",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "CHAINHABITS__UserHasLiveObjective",
           type: "error",
         },
         {
@@ -924,7 +949,51 @@ const deployedContracts = {
               type: "uint256",
             },
           ],
+          name: "ForfeitedFundsFailedToSend",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "user",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "amount",
+              type: "uint256",
+            },
+          ],
           name: "FundsWithdrawn",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "uint256",
+              name: "challengeId",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "address",
+              name: "userAddress",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "bool",
+              name: "success",
+              type: "bool",
+            },
+          ],
+          name: "IntervalReviewCompleted",
           type: "event",
         },
         {
@@ -958,6 +1027,12 @@ const deployedContracts = {
               indexed: false,
               internalType: "uint8",
               name: "NumberofWeeks",
+              type: "uint8",
+            },
+            {
+              indexed: false,
+              internalType: "uint8",
+              name: "PercentageIncrease",
               type: "uint8",
             },
             {
@@ -1006,31 +1081,6 @@ const deployedContracts = {
             },
           ],
           name: "OwnershipTransferred",
-          type: "event",
-        },
-        {
-          anonymous: false,
-          inputs: [
-            {
-              indexed: true,
-              internalType: "uint256",
-              name: "challengeId",
-              type: "uint256",
-            },
-            {
-              indexed: false,
-              internalType: "address",
-              name: "userAddress",
-              type: "address",
-            },
-            {
-              indexed: false,
-              internalType: "bool",
-              name: "success",
-              type: "bool",
-            },
-          ],
-          name: "intervalReviewCompleted",
           type: "event",
         },
         {
@@ -1084,8 +1134,13 @@ const deployedContracts = {
             },
             {
               internalType: "address",
-              name: "_defaultAddress",
+              name: "_forfeitAddress",
               type: "address",
+            },
+            {
+              internalType: "uint8",
+              name: "_percentageIncrease",
+              type: "uint8",
             },
           ],
           name: "createNewChallenge",
@@ -1195,9 +1250,9 @@ const deployedContracts = {
             {
               components: [
                 {
-                  internalType: "uint48",
+                  internalType: "uint256",
                   name: "currentStaked",
-                  type: "uint48",
+                  type: "uint256",
                 },
                 {
                   internalType: "uint256",
@@ -1216,6 +1271,29 @@ const deployedContracts = {
             },
           ],
           stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256[]",
+              name: "_challengeId",
+              type: "uint256[]",
+            },
+            {
+              internalType: "address[]",
+              name: "_user",
+              type: "address[]",
+            },
+            {
+              internalType: "bool[]",
+              name: "failed",
+              type: "bool[]",
+            },
+          ],
+          name: "handleBulkIntervalReview",
+          outputs: [],
+          stateMutability: "nonpayable",
           type: "function",
         },
         {

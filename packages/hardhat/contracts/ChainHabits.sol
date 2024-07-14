@@ -16,6 +16,10 @@ error CHAINHABITS__NoActiveChallengeForUser();
 error CHAINHABITS__ChallengeStillActive();
 error CHAINHABITS__InsufficientFunds();
 error CHAINHABITS__UserHasLiveObjective();
+error CHAINHABITS__StakeAmountisZero();
+error CHAINHABITS__ForfeitAddressIs0Address();
+error CHAINHABITS__ChallengeNotLive();
+error CHAINHABITS__IncorrectAddressORChallengeId();
 
 contract ChainHabits is ReentrancyGuard, Ownable {
 	using Counters for Counters.Counter;
@@ -41,7 +45,7 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 
 	// STRUCTS
 	struct UserDetails {
-		uint48 currentStaked;
+		uint256 currentStaked;
 		uint256 userID; //fromstrava
 		string refreshToken; //fromstrava
 	}
@@ -110,8 +114,8 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 		string calldata _obj,
 		uint8 _targetMiles,
 		uint8 _weeks,
-		address _defaultAddress,
-		uint8 PercentageIncrease
+		address _forfeitAddress,
+		uint8 _percentageIncrease
 	)
 		external
 		payable
@@ -121,6 +125,12 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 		//one challenge at a time only
 		if (userHasLiveChallenge[msg.sender]) {
 			revert CHAINHABITS__UserHasLiveObjective();
+		}
+		if (msg.value == 0) {
+			revert CHAINHABITS__StakeAmountisZero();
+		}
+		if (_forfeitAddress == address(0)) {
+			revert CHAINHABITS__ForfeitAddressIs0Address();
 		}
 
 		_challengeIdCounter.increment();
@@ -132,10 +142,11 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 			0,
 			true,
 			uint48(block.timestamp), //initialy start date
-			_defaultAddress
+			_forfeitAddress
 		);
 		usersCurrentChallenge[msg.sender] = challengeId; //record current challenge for user
-		userTable[msg.sender].currentStaked += uint48(msg.value); //record call.value as amount staked by user
+
+		userTable[msg.sender].currentStaked += (msg.value); //record call.value as amount staked by user
 		userHasLiveChallenge[msg.sender] = true;
 
 		//emit new challenge events
@@ -145,8 +156,8 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 			_obj,
 			_targetMiles,
 			_weeks,
-			PercentageIncrease,
-			_defaultAddress,
+			_percentageIncrease,
+			_forfeitAddress,
 			msg.value
 		);
 	}
@@ -157,6 +168,14 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 		address _user,
 		bool failed
 	) external onlyOwner {
+		//Could check if challengeId is live
+		if (!_isChallengeLive(_challengeId)) {
+			revert CHAINHABITS__ChallengeNotLive();
+		}
+		//if user is owner of challenge
+		if (_getChallengeId(_user) != _challengeId) {
+			revert CHAINHABITS__IncorrectAddressORChallengeId();
+		}
 		if (failed) {
 			challengeTable[_challengeId].failedWeeks++;
 		}
@@ -208,7 +227,6 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 	}
 
 	//TODO: Bulk handleCompleteChallenge
-
 	//withdraw funds
 	function withdrawFunds()
 		external
@@ -221,7 +239,7 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 			revert CHAINHABITS__ChallengeStillActive();
 		}
 
-		uint48 amount = user.currentStaked;
+		uint256 amount = user.currentStaked;
 
 		if (amount == 0) {
 			revert CHAINHABITS__InsufficientFunds();
@@ -241,6 +259,19 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 		string calldata _refreshToken
 	) external onlyOwner {
 		userTable[_user].refreshToken = _refreshToken;
+	}
+
+	//Helper - Internal
+	function _isChallengeLive(
+		uint256 _challengeId
+	) internal view returns (bool) {
+		return challengeTable[_challengeId].isLive;
+	}
+
+	function _getChallengeId(
+		address _userAddress
+	) internal view returns (uint256) {
+		return usersCurrentChallenge[_userAddress];
 	}
 
 	//GETTER FUNCTIONS

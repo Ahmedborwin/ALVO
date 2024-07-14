@@ -1,6 +1,6 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
-import { Contract } from "ethers";
+import { Contract, ethers } from "ethers";
 
 /**
  * Deploys a contract named "YourContract" using the deployer account and
@@ -37,6 +37,10 @@ const deployChainHabits: DeployFunction = async function (hre: HardhatRuntimeEnv
     200,
     4,
     "0x5f2AF68dF96F3e58e1a243F4f83aD4f5D0Ca6029",
+    12,
+    {
+      value: ethers.parseEther("0.01"),
+    },
   );
   await tx2.wait();
 
