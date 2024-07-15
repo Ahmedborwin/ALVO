@@ -21,9 +21,14 @@ type Challenge @entity {
   defaultAddress: Bytes!
   success: Int!
   status: Boolean!
+  failedWeeks: BigInt!
   createdAt: BigInt!
   updatedAt: BigInt!
   transactionHash: String!
+  competitionDeadline: BigInt!  
+  nextIntervalReviewEpoch: BigInt!  
+  intervalReviewTally: Int!      
+  weeklyTargetIncreasePercentage: Int!   
   reviews: [IntervalReviews!] @derivedFrom(field: "challenge")
 }
 

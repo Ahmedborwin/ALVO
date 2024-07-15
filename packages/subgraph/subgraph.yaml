@@ -29,6 +29,6 @@ dataSources:
           handler: handleUserWithdraw
         - event: ChallengeCompleted(indexed uint256,indexed address,bool)
           handler: handleChallengeComplete
-        - event: intervalReviewCompleted(indexed uint256,address,bool)
+        - event: IntervalReviewCompleted(indexed uint256,address,bool)
           handler: handleIntervalReview
       file: ./src/mapping.ts
