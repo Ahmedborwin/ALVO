@@ -116,8 +116,9 @@ export function handleIntervalReview(event: IntervalReviewCompleted): void {
   if (challenge.weeklyTargetIncreasePercentage > 0) {
     challenge.startingMiles =
       challenge.startingMiles +
-      challenge.startingMiles * challenge.weeklyTargetIncreasePercentage;
+      (challenge.startingMiles * challenge.weeklyTargetIncreasePercentage) /
+        100;
   }
-  challenge.startingMiles = challenge.updatedAt = event.block.timestamp;
+  challenge.updatedAt = event.block.timestamp;
   challenge.save();
 }

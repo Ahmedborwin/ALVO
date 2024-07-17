@@ -6,6 +6,7 @@ import "hardhat/console.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 //TODO datatructure to record all active players
 
@@ -39,9 +40,9 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 		_;
 	}
 	Counters.Counter private _challengeIdCounter;
-	address public admin;
+
 	// as we are using subgraph do we need this array ?
-	address[] public allUsers;
+	// address[] public allUsers;
 
 	// STRUCTS
 	struct UserDetails {
@@ -68,7 +69,6 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 	mapping(address => uint256) ForfeitedFundsToBeCollected;
 
 	//EVENTS
-	// removed indexed from the Objective as it's a string and removed starting date from the event as we can get the timestamp for the event from the subgraph
 	// added amount also
 	event NewChallengeCreated(
 		uint256 indexed challengeId,
@@ -105,8 +105,7 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 	) external isUserNotRegistered(msg.sender) {
 		userTable[msg.sender] = UserDetails(0, userID, _refreshToken);
 		isUserRegisteredTable[msg.sender] = true;
-		allUsers.push(msg.sender);
-		//emit New User Event
+		// allUsers.push(msg.sender);
 		emit NewUserRegistered(msg.sender);
 	}
 
@@ -115,7 +114,8 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 		uint8 _targetMiles,
 		uint8 _weeks,
 		address _forfeitAddress,
-		uint8 _percentageIncrease
+		uint8 _percentageIncrease,
+		address erc20Address
 	)
 		external
 		payable
@@ -126,9 +126,20 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 		if (userHasLiveChallenge[msg.sender]) {
 			revert CHAINHABITS__UserHasLiveObjective();
 		}
+
+		//TODO need mapping of erc20address => address => uint256
+		if (erc20Address != address(0)) {
+			//check allowance and balanceof then transferFrom erc20 token contract to this contract
+			IERC20 tokenInterface = IERC20(erc20Address);
+			//check balance
+			tokenInterface.balanceOf(msg.sender);
+			//check allowance
+			tokenInterface.allowance(msg.sender, address(this));
+		}
 		if (msg.value == 0) {
 			revert CHAINHABITS__StakeAmountisZero();
 		}
+
 		if (_forfeitAddress == address(0)) {
 			revert CHAINHABITS__ForfeitAddressIs0Address();
 		}
@@ -293,7 +304,7 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 		return usersCurrentChallenge[_userAddress];
 	}
 
-	function getAllUserDetails() external view returns (address[] memory) {
-		return allUsers;
-	}
+	// function getAllUserDetails() external view returns (address[] memory) {
+	// 	return allUsers;
+	// }
 }

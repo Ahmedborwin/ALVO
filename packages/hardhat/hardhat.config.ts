@@ -96,7 +96,7 @@ const config: HardhatUserConfig = {
   },
   gasReporter: {
     enabled: REPORT_GAS,
-    currency: "GBP",
+    currency: "USD",
     outputFile: "gas-report.txt",
     noColors: true,
   },
