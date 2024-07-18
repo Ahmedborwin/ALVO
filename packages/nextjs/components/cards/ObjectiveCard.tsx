@@ -17,9 +17,7 @@ function ObjectiveCard({ index, status }: { index: number; status?: boolean }) {
     >
       <div>
         <div className="flex justify-between items-center mb-4">
-          <h3 className={`text-lg font-semibold text-white ${index === 0 ? "text-black" : "text-white"}`}>
-            Week {index + 1}
-          </h3>
+          <h3 className={`text-lg font-semibold text-white`}>Week {index + 1}</h3>
           <span
             className={` px-2 py-1 rounded-full ml-2 text-xs font-bold 
             ${
