@@ -25,7 +25,7 @@ type Challenge @entity {
   createdAt: BigInt!
   updatedAt: BigInt!
   transactionHash: String!
-  competitionDeadline: BigInt!  
+  competitionDeadline: BigInt!
   nextIntervalReviewEpoch: BigInt!  
   intervalReviewTally: Int!      
   weeklyTargetIncreasePercentage: Int!   

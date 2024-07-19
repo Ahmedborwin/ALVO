@@ -95,11 +95,11 @@ const Challenge: NextPage = () => {
       setIsLoading(true);
 
       const ethAmount = stakeValue / nativeCurrencyPrice;
-      await writeYourContractAsync({
-        functionName: "createNewChallenge",
-        args: [objective, startingMiles, noOfWeeks, forfeitAddress as Address, targetIncrease],
-        value: parseEther(ethAmount.toString()),
-      });
+      // await writeYourContractAsync({
+      //   functionName: "createNewChallenge",
+      //   args: [objective, startingMiles, noOfWeeks, forfeitAddress as Address, targetIncrease],
+      //   value: parseEther(ethAmount.toString()),
+      // });
       notification.success("Successfully created");
       clearAll();
       setIsLoading(false);
