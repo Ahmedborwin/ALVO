@@ -60,6 +60,7 @@ export interface Challenge {
   startingMiles: number;
   numberOfWeeks: number;
   stakedAmount: bigint;
+  nextIntervalReviewEpoch: string;
   defaultAddress: string;
   success: number;
   status: boolean;

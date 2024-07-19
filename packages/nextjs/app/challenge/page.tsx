@@ -1,6 +1,6 @@
 "use client";
 
-import { SetStateAction, useCallback, useMemo, useState } from "react";
+import { SetStateAction, useCallback, useEffect, useMemo, useState } from "react";
 import { useAccount as useAlchemyAccount } from "@alchemy/aa-alchemy/react";
 import { gql, useQuery } from "@apollo/client";
 import { NextPage } from "next";
@@ -11,8 +11,14 @@ import { CancelButton, SubmitButton } from "~~/components/buttons";
 import { DetailCard, ObjectiveCard } from "~~/components/cards";
 import { MoonSpinner } from "~~/components/loader";
 import { accountType } from "~~/config/AlchemyConfig";
+import AxiosInstance from "~~/config/AxiosConfig";
 import { useWeiToUSD } from "~~/hooks/common";
-import { useScaffoldWatchContractEvent, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
+import {
+  useScaffoldReadContract,
+  useScaffoldWatchContractEvent,
+  useScaffoldWriteContract,
+} from "~~/hooks/scaffold-eth";
+import { useStrava } from "~~/hooks/strava";
 import { CREATE_CHALLENGES } from "~~/services/graphql/queries";
 import { useGlobalState } from "~~/services/store/store";
 import { Challenge as ChallengeType, IntervalReviews } from "~~/types/utils";
@@ -32,6 +38,9 @@ const Challenge: NextPage = () => {
   const [stakeValue, setStakeValue] = useState<number | null>(40);
   const [startingMiles, setStartingMiles] = useState<number | null>(null);
   const [targetIncrease, setTargetIncrease] = useState<number | null>(0);
+  const [ranMiles, setRanMiles] = useState<string | null>(null);
+
+  const { callStravaApi } = useStrava();
 
   const { writeContractAsync: writeYourContractAsync } = useScaffoldWriteContract("ChainHabits");
   const nativeCurrencyPrice = useGlobalState(state => state.nativeCurrency.price);
@@ -46,6 +55,40 @@ const Challenge: NextPage = () => {
     fetchPolicy: "network-only",
   });
 
+  const { data: userDetails } = useScaffoldReadContract({
+    contractName: "ChainHabits",
+    functionName: "getUserDetails",
+    args: [address ?? alchemyAddress],
+  });
+
+  const fetchRanData = useCallback(
+    async (nextIntervalReviewEpoch: string) => {
+      const beforeEpoch = nextIntervalReviewEpoch;
+      const afterEpoch = Number(nextIntervalReviewEpoch) - 6048000;
+      try {
+        const { data } = await callStravaApi(async () => {
+          return await AxiosInstance.get(
+            `/athlete/activities?before=${beforeEpoch}&after=${afterEpoch}&page=1&per_page=30`,
+          );
+        }, userDetails?.refreshToken);
+
+        const allActivity: any[] = data;
+        const OnlyRuns = allActivity.filter((activity: any) => activity.type === "Run");
+        const distanceLogged = OnlyRuns.reduce(
+          (accDistance: number, activity: any) => accDistance + activity.distance,
+          0,
+        );
+
+        return String(Number(distanceLogged / 1609.34)).substring(0, 4) || "0.00";
+      } catch (e) {
+        console.error(`Error retrieving Strava data: ${e}`);
+        notification.error("Something went wrong while fetching latest week running report");
+        return "0.00";
+      }
+    },
+    [userDetails],
+  );
+
   const challengeDetails: ChallengeType = useMemo(() => {
     if (data && !loading) {
       setIsLoading(false);
@@ -53,6 +96,19 @@ const Challenge: NextPage = () => {
     }
     return {};
   }, [data, loading]);
+
+  useEffect(() => {
+    if (data && !loading && userDetails && challengeDetails) {
+      const handleMount = async () => {
+        const objectiveDetails = data.challenge.length ? data.challenge[0] : {};
+        const value = await fetchRanData(objectiveDetails?.nextIntervalReviewEpoch);
+        setRanMiles(value);
+        setIsLoading(false);
+      };
+      handleMount();
+    }
+    setRanMiles(null);
+  }, [data, loading, userDetails, fetchRanData, challengeDetails, setRanMiles]);
 
   const stakedAmount = useWeiToUSD(challengeDetails?.stakedAmount);
 
@@ -220,7 +276,7 @@ const Challenge: NextPage = () => {
         <div className="max-w-6xl mx-auto">
           <div className="backdrop-blur-md bg-white bg-opacity-10 rounded-3xl shadow-2xl border border-white border-opacity-20 p-8">
             <h2 className="text-3xl font-bold text-white mb-6 flex items-center justify-between">
-              Challenge Details
+              Objective Details
               <span
                 className={`text-lg font-semibold px-4 py-1 rounded-full ${
                   challengeDetails?.status ? "bg-green-500" : "bg-red-500"
@@ -232,7 +288,7 @@ const Challenge: NextPage = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
               <DetailCard title="Objective" value={challengeDetails?.objective} />
               <DetailCard title="Target Miles" value={`${challengeDetails?.startingMiles} miles`} />
-              <DetailCard title="Duration" value={`${challengeDetails?.numberOfWeeks} weeks`} />
+              <DetailCard title="Miles recorded this week" value={`${ranMiles} `} loading={ranMiles === null} />
               <DetailCard
                 title="Failed Weeks"
                 value={`${

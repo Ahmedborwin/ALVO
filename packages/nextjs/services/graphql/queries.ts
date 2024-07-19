@@ -23,6 +23,7 @@ query MyQuery($address: String!) {
   numberOfWeeks
   stakedAmount
   defaultAddress
+  nextIntervalReviewEpoch
   success
   status
   createdAt
