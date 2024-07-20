@@ -10,6 +10,7 @@ import "@nomicfoundation/hardhat-verify";
 import "hardhat-deploy";
 import "hardhat-deploy-ethers";
 import { networks } from "../hardhat/networks.js";
+import "@nomicfoundation/hardhat-toolbox/network-helpers";
 
 // If not set, it uses ours Etherscan default API key.
 const etherscanApiKey = process.env.ETHERSCAN_API_KEY || "DNXJA8RX2Q3VZ4URQIWP7Z68CJXQZSC6AW";
@@ -40,14 +41,14 @@ const config: HardhatUserConfig = {
       },
     ],
   },
-  defaultNetwork: "localhost",
+  defaultNetwork: "hardhat",
   namedAccounts: {
     deployer: {
       // By default, it will take the first Hardhat account as the deployer
       default: 0,
     },
   },
-  // networks: { ...networks },
+  networks: { ...networks },
   // configuration for harhdat-verify plugin
   etherscan: {
     apiKey: {
@@ -96,9 +97,10 @@ const config: HardhatUserConfig = {
   },
   gasReporter: {
     enabled: REPORT_GAS,
-    currency: "GBP",
+    currency: "USD",
     outputFile: "gas-report.txt",
     noColors: true,
+    coinmarketcap: process.env.COIN_MARKET_CAP,
   },
   sourcify: {
     enabled: false,

@@ -216,7 +216,6 @@ const networks = {
     functionsRouter: "0x80fd802CdbCfF693a6d45E6b4f710fA6Ff2445d1",
     donId: "local-functions-testnet",
   },
-
   localhost: {
     url: "http://localhost:8545/",
     accounts,
@@ -225,6 +224,14 @@ const networks = {
     linkToken: "0x2a8dF1E1A9d7ED2DC5e5204209fd788930AD3a1f",
     functionsRouter: "0x165de7Ce4D0254DC7756498640aA79458302bFC0",
     donId: "local-functions-testnet",
+  },
+  hardhat: {
+    forking: {
+      // eslint-disable-next-line
+      enabled: true,
+      url: `https://eth-mainnet.g.alchemy.com/v2/U4KPgXJi3FAILfXVYloxhngoXfSLZnER`,
+      blockNumber:20339020,
+    },
   },
 };
 

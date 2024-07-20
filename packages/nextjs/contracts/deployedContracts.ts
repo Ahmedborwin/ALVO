@@ -856,7 +856,7 @@ const deployedContracts = {
   },
   31337: {
     ChainHabits: {
-      address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+      address: "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853",
       abi: [
         {
           inputs: [],
@@ -875,12 +875,37 @@ const deployedContracts = {
         },
         {
           inputs: [],
-          name: "CHAINHABITS__ForfeitAddressIs0Address",
+          name: "CHAINHABITS__ERC20DepositAmountIs0",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "CHAINHABITS__ERC20TokenNotSupported",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "CHAINHABITS__ERC20TransferFailed",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "CHAINHABITS__ForfeitAddressInvalid",
           type: "error",
         },
         {
           inputs: [],
           name: "CHAINHABITS__IncorrectAddressORChallengeId",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "CHAINHABITS__InsufficientERC20Allowance",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "CHAINHABITS__InsufficientERC20Balance",
           type: "error",
         },
         {
@@ -1047,6 +1072,12 @@ const deployedContracts = {
               name: "amount",
               type: "uint256",
             },
+            {
+              indexed: false,
+              internalType: "address",
+              name: "erc20Address",
+              type: "address",
+            },
           ],
           name: "NewChallengeCreated",
           type: "event",
@@ -1084,35 +1115,21 @@ const deployedContracts = {
           type: "event",
         },
         {
-          inputs: [],
-          name: "admin",
-          outputs: [
-            {
-              internalType: "address",
-              name: "",
-              type: "address",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
           inputs: [
             {
-              internalType: "uint256",
-              name: "",
-              type: "uint256",
+              internalType: "address",
+              name: "erc20Address",
+              type: "address",
             },
-          ],
-          name: "allUsers",
-          outputs: [
             {
               internalType: "address",
-              name: "",
+              name: "_priceFeedAddress",
               type: "address",
             },
           ],
-          stateMutability: "view",
+          name: "addPriceFeedAddress",
+          outputs: [],
+          stateMutability: "nonpayable",
           type: "function",
         },
         {
@@ -1142,6 +1159,16 @@ const deployedContracts = {
               name: "_percentageIncrease",
               type: "uint8",
             },
+            {
+              internalType: "address",
+              name: "_erc20Address",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "_depositAmount",
+              type: "uint256",
+            },
           ],
           name: "createNewChallenge",
           outputs: [
@@ -1152,19 +1179,6 @@ const deployedContracts = {
             },
           ],
           stateMutability: "payable",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "getAllUserDetails",
-          outputs: [
-            {
-              internalType: "address[]",
-              name: "",
-              type: "address[]",
-            },
-          ],
-          stateMutability: "view",
           type: "function",
         },
         {

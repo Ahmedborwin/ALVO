@@ -1,6 +1,6 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
-import { Contract, ethers } from "ethers";
+import { Contract, ethers, ZeroAddress } from "ethers";
 
 /**
  * Deploys a contract named "YourContract" using the deployer account and
@@ -29,6 +29,8 @@ const deployChainHabits: DeployFunction = async function (hre: HardhatRuntimeEnv
   const chainHabits = await hre.ethers.getContract<Contract>("ChainHabits", signer);
   const chainHabitsAddress = await chainHabits.getAddress();
 
+  //add priceFeed address's - for now add sepolia and basesepolia USDC.
+
   const tx = await chainHabits.registerNewUser(62612170, "0ac2f45bea762e3f0c7abbc1d2e6b78ee8f2a7fd");
   await tx.wait();
 
@@ -38,6 +40,8 @@ const deployChainHabits: DeployFunction = async function (hre: HardhatRuntimeEnv
     4,
     "0x5f2AF68dF96F3e58e1a243F4f83aD4f5D0Ca6029",
     12,
+    ZeroAddress,
+    0,
     {
       value: ethers.parseEther("0.01"),
     },

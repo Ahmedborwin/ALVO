@@ -6,7 +6,22 @@
   },
   {
     "inputs": [],
+    "name": "CHAINHABITS__ChallengeNotLive",
+    "type": "error"
+  },
+  {
+    "inputs": [],
     "name": "CHAINHABITS__ChallengeStillActive",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "CHAINHABITS__ForfeitAddressIs0Address",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "CHAINHABITS__IncorrectAddressORChallengeId",
     "type": "error"
   },
   {
@@ -16,7 +31,17 @@
   },
   {
     "inputs": [],
+    "name": "CHAINHABITS__StakeAmountisZero",
+    "type": "error"
+  },
+  {
+    "inputs": [],
     "name": "CHAINHABITS__UserAlreadyRegistered",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "CHAINHABITS__UserHasLiveObjective",
     "type": "error"
   },
   {
@@ -47,6 +72,25 @@
       }
     ],
     "name": "ChallengeCompleted",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "ForfeitedFundsFailedToSend",
     "type": "event"
   },
   {
@@ -124,6 +168,12 @@
         "indexed": false,
         "internalType": "uint8",
         "name": "NumberofWeeks",
+        "type": "uint8"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint8",
+        "name": "PercentageIncrease",
         "type": "uint8"
       },
       {
@@ -225,8 +275,13 @@
       },
       {
         "internalType": "address",
-        "name": "_defaultAddress",
+        "name": "_forfeitAddress",
         "type": "address"
+      },
+      {
+        "internalType": "uint8",
+        "name": "_percentageIncrease",
+        "type": "uint8"
       }
     ],
     "name": "createNewChallenge",
@@ -336,9 +391,9 @@
       {
         "components": [
           {
-            "internalType": "uint48",
+            "internalType": "uint256",
             "name": "currentStaked",
-            "type": "uint48"
+            "type": "uint256"
           },
           {
             "internalType": "uint256",
@@ -357,6 +412,29 @@
       }
     ],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256[]",
+        "name": "_challengeId",
+        "type": "uint256[]"
+      },
+      {
+        "internalType": "address[]",
+        "name": "_user",
+        "type": "address[]"
+      },
+      {
+        "internalType": "bool[]",
+        "name": "failed",
+        "type": "bool[]"
+      }
+    ],
+    "name": "handleBulkIntervalReview",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {

@@ -6,6 +6,8 @@ import "hardhat/console.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
 
 //TODO datatructure to record all active players
 
@@ -17,9 +19,16 @@ error CHAINHABITS__ChallengeStillActive();
 error CHAINHABITS__InsufficientFunds();
 error CHAINHABITS__UserHasLiveObjective();
 error CHAINHABITS__StakeAmountisZero();
-error CHAINHABITS__ForfeitAddressIs0Address();
+error CHAINHABITS__ForfeitAddressInvalid();
 error CHAINHABITS__ChallengeNotLive();
 error CHAINHABITS__IncorrectAddressORChallengeId();
+error CHAINHABITS__InsufficientERC20Balance();
+error CHAINHABITS__InsufficientERC20Allowance();
+error CHAINHABITS__ERC20TransferFailed();
+error CHAINHABITS__ERC20TokenNotSupported();
+error CHAINHABITS__ERC20DepositAmountIs0();
+error CHAINHABITS__PrivateInformation();
+error CHAINHABITS__ForfeitExceedsStake();
 
 contract ChainHabits is ReentrancyGuard, Ownable {
 	using Counters for Counters.Counter;
@@ -39,13 +48,16 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 		_;
 	}
 	Counters.Counter private _challengeIdCounter;
-	address public admin;
+
 	// as we are using subgraph do we need this array ?
-	address[] public allUsers;
+	// address[] public allUsers;
+
+	//datafeed
+	AggregatorV3Interface internal dataFeed;
 
 	// STRUCTS
 	struct UserDetails {
-		uint256 currentStaked;
+		// uint256 currentStaked;
 		uint256 userID; //fromstrava
 		string refreshToken; //fromstrava
 	}
@@ -62,13 +74,14 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 	//create user profile
 	mapping(address => bool) public isUserRegisteredTable;
 	mapping(address => bool) public userHasLiveChallenge;
-	mapping(address player => UserDetails) userTable;
+	mapping(address player => UserDetails) private userTable;
 	mapping(uint256 challengeId => ChallengeDetails) challengeTable;
 	mapping(address user => uint256 challengeId) usersCurrentChallenge;
 	mapping(address => uint256) ForfeitedFundsToBeCollected;
+	mapping(address => address) priceFeedAddress;
+	mapping(address => mapping(address => uint256)) currentStakedByUser;
 
 	//EVENTS
-	// removed indexed from the Objective as it's a string and removed starting date from the event as we can get the timestamp for the event from the subgraph
 	// added amount also
 	event NewChallengeCreated(
 		uint256 indexed challengeId,
@@ -78,7 +91,8 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 		uint8 NumberofWeeks,
 		uint8 PercentageIncrease,
 		address defaultAddress,
-		uint256 amount
+		uint256 amount,
+		address erc20Address
 	);
 	// indexed user
 	event NewUserRegistered(address indexed user); //TODO do we need more data in this event?
@@ -103,10 +117,9 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 		uint256 userID,
 		string calldata _refreshToken
 	) external isUserNotRegistered(msg.sender) {
-		userTable[msg.sender] = UserDetails(0, userID, _refreshToken);
+		userTable[msg.sender] = UserDetails(userID, _refreshToken);
 		isUserRegisteredTable[msg.sender] = true;
-		allUsers.push(msg.sender);
-		//emit New User Event
+		// allUsers.push(msg.sender);
 		emit NewUserRegistered(msg.sender);
 	}
 
@@ -115,7 +128,9 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 		uint8 _targetMiles,
 		uint8 _weeks,
 		address _forfeitAddress,
-		uint8 _percentageIncrease
+		uint8 _percentageIncrease,
+		address _erc20Address,
+		uint256 _depositAmount
 	)
 		external
 		payable
@@ -126,11 +141,63 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 		if (userHasLiveChallenge[msg.sender]) {
 			revert CHAINHABITS__UserHasLiveObjective();
 		}
-		if (msg.value == 0) {
-			revert CHAINHABITS__StakeAmountisZero();
+
+		if (_forfeitAddress == address(0) || _forfeitAddress == msg.sender) {
+			revert CHAINHABITS__ForfeitAddressInvalid();
 		}
-		if (_forfeitAddress == address(0)) {
-			revert CHAINHABITS__ForfeitAddressIs0Address();
+
+		uint256 requiredTokenAmount;
+		uint256 depositAmount;
+
+		//TODO : Cannot send token and msg.value? or can?
+		if (_erc20Address != address(0)) {
+			if (_depositAmount == 0) {
+				revert CHAINHABITS__ERC20DepositAmountIs0();
+			}
+			address _priceFeedAddress = priceFeedAddress[_erc20Address];
+
+			if (_priceFeedAddress == address(0)) {
+				revert CHAINHABITS__ERC20TokenNotSupported();
+			}
+
+			uint256 erc20Price = uint256(
+				getChainlinkDataFeedLatestAnswer(_priceFeedAddress)
+			);
+
+			requiredTokenAmount =
+				(_depositAmount * 1 ether) /
+				(erc20Price * 1e10);
+
+			IERC20 usdcToken = IERC20(_erc20Address);
+			if (usdcToken.balanceOf(msg.sender) < requiredTokenAmount) {
+				revert CHAINHABITS__InsufficientERC20Balance();
+			}
+
+			if (
+				usdcToken.allowance(msg.sender, address(this)) <
+				requiredTokenAmount
+			) {
+				revert CHAINHABITS__InsufficientERC20Allowance();
+			}
+
+			if (
+				!usdcToken.transferFrom(
+					msg.sender,
+					address(this),
+					requiredTokenAmount
+				)
+			) {
+				revert CHAINHABITS__ERC20TransferFailed();
+			}
+
+			depositAmount = _depositAmount;
+			currentStakedByUser[msg.sender][
+				_erc20Address
+			] += requiredTokenAmount;
+		} else {
+			if (msg.value == 0) {
+				revert CHAINHABITS__StakeAmountisZero();
+			}
 		}
 
 		_challengeIdCounter.increment();
@@ -144,9 +211,14 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 			uint48(block.timestamp), //initialy start date
 			_forfeitAddress
 		);
+
 		usersCurrentChallenge[msg.sender] = challengeId; //record current challenge for user
 
-		userTable[msg.sender].currentStaked += (msg.value); //record call.value as amount staked by user
+		if (_erc20Address == address(0)) {
+			depositAmount = msg.value;
+			currentStakedByUser[msg.sender][address(0)] += (msg.value);
+		}
+
 		userHasLiveChallenge[msg.sender] = true;
 
 		//emit new challenge events
@@ -158,7 +230,8 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 			_weeks,
 			_percentageIncrease,
 			_forfeitAddress,
-			msg.value
+			depositAmount,
+			_erc20Address
 		);
 	}
 
@@ -183,7 +256,6 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 	}
 
 	//TODO - testing a bulk interval review function
-	//Is this actually cheaper?
 	function handleBulkIntervalReview(
 		uint256[] calldata _challengeId,
 		address[] calldata _user,
@@ -199,58 +271,88 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 
 	//handle close challenge
 	function handleCompleteChallenge(
-		uint256 challengeId,
-		uint8 stakeForfeited,
-		address userAddress
+		uint256 _challengeID,
+		uint256 _stakeForfeited,
+		address _userAddress,
+		address _erc20Address
 	) external onlyOwner nonReentrant {
-		if (stakeForfeited > 0) {
-			(bool sent, ) = (challengeTable[challengeId].defaultAddress).call{
-				value: stakeForfeited
-			}("");
-			if (!sent) {
-				ForfeitedFundsToBeCollected[
-					challengeTable[challengeId].defaultAddress
-				] += stakeForfeited;
-				//TODO to subgraph && have front end recognise if address has funds it can withdraw
+		bool forfeitTransactionFailed;
+		if (_stakeForfeited > 0) {
+			address forfeitAddress = challengeTable[_challengeID]
+				.defaultAddress;
+			//check that _stakeForfeit is less than amount staked by user
+			if (
+				_stakeForfeited >
+				currentStakedByUser[_userAddress][_erc20Address]
+			) {
+				revert CHAINHABITS__ForfeitExceedsStake();
+			}
+
+			currentStakedByUser[_userAddress][_erc20Address] -= _stakeForfeited;
+
+			//IF ETH Deposit
+			if (_erc20Address == address(0)) {
+				(bool sent, ) = forfeitAddress.call{ value: _stakeForfeited }(
+					""
+				);
+
+				if (!sent) {
+					console.log("forfeitTransactionFailed");
+					forfeitTransactionFailed = true;
+				}
+			}
+			//IF ERC20 Deposit
+			else {
+				IERC20 usdcToken = IERC20(_erc20Address);
+				bool success = usdcToken.transfer(
+					forfeitAddress,
+					_stakeForfeited
+				);
+				if (!success) {
+					forfeitTransactionFailed = true;
+				}
+			}
+
+			if (forfeitTransactionFailed) {
+				ForfeitedFundsToBeCollected[forfeitAddress] += _stakeForfeited;
+				console.log("forfeitTransactionFailed");
 				emit ForfeitedFundsFailedToSend(
-					challengeTable[challengeId].defaultAddress,
-					stakeForfeited
+					forfeitAddress,
+					_stakeForfeited
 				);
 			}
-			//update address staked balance
-			userTable[userAddress].currentStaked -= stakeForfeited;
-		} else {
-			usersCurrentChallenge[msg.sender] = 0; //set current ChallengeId to 0 TODO is this neneeded?
-			userHasLiveChallenge[msg.sender] = false; //set users challenge to false
 		}
-		emit ChallengeCompleted(challengeId, userAddress, true);
+
+		usersCurrentChallenge[_userAddress] = 0;
+		userHasLiveChallenge[_userAddress] = false;
+		emit ChallengeCompleted(_challengeID, _userAddress, true);
 	}
 
-	//TODO: Bulk handleCompleteChallenge
 	//withdraw funds
-	function withdrawFunds()
-		external
-		nonReentrant
-		isUserRegistered(msg.sender)
-	{
-		UserDetails memory user = userTable[msg.sender];
-
+	function withdrawFunds(
+		address _erc20Address
+	) external nonReentrant isUserRegistered(msg.sender) {
 		if (userHasLiveChallenge[msg.sender]) {
 			revert CHAINHABITS__ChallengeStillActive();
 		}
 
-		uint256 amount = user.currentStaked;
+		uint256 withdrawAmount = currentStakedByUser[msg.sender][_erc20Address];
 
-		if (amount == 0) {
+		if (withdrawAmount == 0) {
 			revert CHAINHABITS__InsufficientFunds();
 		}
 
-		user.currentStaked = 0; //else set to amoutn staked to 0
+		currentStakedByUser[msg.sender][_erc20Address] = 0; //else set to amount staked to 0
 
-		(bool success, ) = msg.sender.call{ value: amount }("");
-		require(success, "Transfer failed");
+		if (_erc20Address == address(0)) {
+			(bool success, ) = msg.sender.call{ value: withdrawAmount }("");
+			require(success, "Transfer failed");
+		} else {
+			IERC20 usdcToken = IERC20(_erc20Address);
+			usdcToken.transfer(msg.sender, withdrawAmount);
+		}
 
-		emit FundsWithdrawn(msg.sender, amount);
+		emit FundsWithdrawn(msg.sender, withdrawAmount);
 	}
 
 	//setter - TODO this needs to be removed when we incorporate the encrypted database
@@ -259,6 +361,14 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 		string calldata _refreshToken
 	) external onlyOwner {
 		userTable[_user].refreshToken = _refreshToken;
+	}
+
+	//
+	function addPriceFeedAddress(
+		address erc20Address,
+		address _priceFeedAddress
+	) external onlyOwner {
+		priceFeedAddress[erc20Address] = _priceFeedAddress;
 	}
 
 	//Helper - Internal
@@ -274,11 +384,37 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 		return usersCurrentChallenge[_userAddress];
 	}
 
+	//get priceFeed data
+	function getChainlinkDataFeedLatestAnswer(
+		address _priceFeedAddress
+	) internal returns (int) {
+		dataFeed = AggregatorV3Interface(_priceFeedAddress);
+		(
+			,
+			/* uint80 roundID */ int answer /*uint startedAt*/ /*uint timeStamp*/ /*uint80 answeredInRound*/,
+			,
+			,
+
+		) = dataFeed.latestRoundData();
+		return answer;
+	}
+
 	//GETTER FUNCTIONS
 	function getUserDetails(
 		address _user
 	) external view returns (UserDetails memory) {
 		return userTable[_user];
+	}
+
+	//GETTER FUNCTIONS
+	function getUserStake(
+		address _user,
+		address _token
+	) public view returns (uint256) {
+		if (msg.sender != owner() && msg.sender != _user) {
+			revert CHAINHABITS__PrivateInformation();
+		}
+		return currentStakedByUser[_user][_token]; // address(0) is expected for the eth balance
 	}
 
 	function getChallengeDetails(
@@ -293,7 +429,7 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 		return usersCurrentChallenge[_userAddress];
 	}
 
-	function getAllUserDetails() external view returns (address[] memory) {
-		return allUsers;
-	}
+	// function getAllUserDetails() external view returns (address[] memory) {
+	// 	return allUsers;
+	// }
 }
