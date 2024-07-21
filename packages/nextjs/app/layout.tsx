@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
 import { cookieToInitialState } from "@alchemy/aa-alchemy/config";
 import "@rainbow-me/rainbowkit/styles.css";
-import { AlchemyProvider, ScaffoldEthAppWithProviders, ThemeProvider } from "~~/components/providers";
+import { AlchemyProvider, ScaffoldEthAppWithProviders } from "~~/components/providers";
 import { config } from "~~/config/AlchemyConfig";
 import "~~/styles/globals.css";
 import { getMetadata } from "~~/utils/scaffold-eth/getMetadata";
@@ -17,11 +17,9 @@ const ScaffoldEthApp = ({ children }: { children: React.ReactNode }) => {
   return (
     <html suppressHydrationWarning>
       <body>
-        <ThemeProvider enableSystem>
-          <AlchemyProvider initialState={initialState}>
-            <ScaffoldEthAppWithProviders>{children}</ScaffoldEthAppWithProviders>
-          </AlchemyProvider>
-        </ThemeProvider>
+        <AlchemyProvider initialState={initialState}>
+          <ScaffoldEthAppWithProviders>{children}</ScaffoldEthAppWithProviders>
+        </AlchemyProvider>
       </body>
     </html>
   );

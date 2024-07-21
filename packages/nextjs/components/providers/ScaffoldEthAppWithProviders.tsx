@@ -1,11 +1,10 @@
 "use client";
 
-import { Fragment, useEffect, useState } from "react";
+import { Fragment } from "react";
 import { GlobalWrapper } from "../wrappers";
 import { ApolloClient, ApolloProvider, InMemoryCache } from "@apollo/client";
-import { RainbowKitProvider, darkTheme, lightTheme } from "@rainbow-me/rainbowkit";
+import { RainbowKitProvider, lightTheme } from "@rainbow-me/rainbowkit";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useTheme } from "next-themes";
 import { Toaster } from "react-hot-toast";
 import { WagmiProvider } from "wagmi";
 import { Footer } from "~~/components/Footer";
@@ -41,14 +40,6 @@ export const queryClient = new QueryClient({
 });
 
 export const ScaffoldEthAppWithProviders = ({ children }: { children: React.ReactNode }) => {
-  const { resolvedTheme } = useTheme();
-  const isDarkMode = resolvedTheme === "dark";
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
   const apolloClient = new ApolloClient({
     uri: NEXT_PUBLIC_SUBGRAPH_URI,
     cache: new InMemoryCache(),
@@ -59,10 +50,7 @@ export const ScaffoldEthAppWithProviders = ({ children }: { children: React.Reac
       <WagmiProvider config={wagmiConfig}>
         <QueryClientProvider client={queryClient}>
           <ProgressBar />
-          <RainbowKitProvider
-            avatar={BlockieAvatar}
-            theme={mounted ? (isDarkMode ? darkTheme() : lightTheme()) : lightTheme()}
-          >
+          <RainbowKitProvider avatar={BlockieAvatar} theme={lightTheme()}>
             <ScaffoldEthApp>{children}</ScaffoldEthApp>
           </RainbowKitProvider>
         </QueryClientProvider>
