@@ -25,7 +25,6 @@ type Challenge @entity {
   createdAt: BigInt!
   updatedAt: BigInt!
   transactionHash: String!
-  stakeValue: BigInt!
   ERC20Address: Bytes!
   competitionDeadline: BigInt!
   nextIntervalReviewEpoch: BigInt!  
