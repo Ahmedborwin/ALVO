@@ -75,18 +75,17 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 	mapping(address => bool) public isUserRegisteredTable;
 	mapping(address => bool) public userHasLiveChallenge;
 	mapping(address player => UserDetails) private userTable;
-	mapping(uint256 challengeId => ChallengeDetails) challengeTable;
+	mapping(uint256 challengeId => ChallengeDetails) public challengeTable;
 	mapping(address user => uint256 challengeId) usersCurrentChallenge;
-	mapping(address => uint256) ForfeitedFundsToBeCollected;
+	mapping(address => uint256) public ForfeitedFundsToBeCollected;
 	mapping(address => address) priceFeedAddress;
 	mapping(address => mapping(address => uint256)) currentStakedByUser;
 
 	//EVENTS
-	// added amount also
 	event NewChallengeCreated(
 		uint256 indexed challengeId,
 		address indexed user,
-		string Objective, // TODO -- restrict size of this
+		string Objective,
 		uint8 startingMiles,
 		uint8 NumberofWeeks,
 		uint8 PercentageIncrease,
@@ -95,7 +94,7 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 		address erc20Address
 	);
 	// indexed user
-	event NewUserRegistered(address indexed user); //TODO do we need more data in this event?
+	event NewUserRegistered(address indexed user);
 	event IntervalReviewCompleted(
 		uint256 indexed challengeId,
 		address userAddress,
@@ -270,13 +269,12 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 	}
 
 	//handle close challenge
-	function handleCompleteChallenge(
+	function handleCompleteChallengeETH(
 		uint256 _challengeID,
 		uint256 _stakeForfeited,
 		address _userAddress,
 		address _erc20Address
 	) external onlyOwner nonReentrant {
-		bool forfeitTransactionFailed;
 		if (_stakeForfeited > 0) {
 			address forfeitAddress = challengeTable[_challengeID]
 				.defaultAddress;
@@ -289,31 +287,48 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 			}
 
 			currentStakedByUser[_userAddress][_erc20Address] -= _stakeForfeited;
-
+			challengeTable[_challengeID].isLive = false;
+			
 			//IF ETH Deposit
-			if (_erc20Address == address(0)) {
-				(bool sent, ) = forfeitAddress.call{ value: _stakeForfeited }(
-					""
-				);
+			(bool sent, ) = forfeitAddress.call{ value: _stakeForfeited }("");
 
-				if (!sent) {
-					console.log("forfeitTransactionFailed");
-					forfeitTransactionFailed = true;
-				}
-			}
-			//IF ERC20 Deposit
-			else {
-				IERC20 usdcToken = IERC20(_erc20Address);
-				bool success = usdcToken.transfer(
+			if (!sent) {
+				ForfeitedFundsToBeCollected[forfeitAddress] += _stakeForfeited;
+				emit ForfeitedFundsFailedToSend(
 					forfeitAddress,
 					_stakeForfeited
 				);
-				if (!success) {
-					forfeitTransactionFailed = true;
-				}
+			}
+		}
+
+		usersCurrentChallenge[_userAddress] = 0;
+		userHasLiveChallenge[_userAddress] = false;
+		emit ChallengeCompleted(_challengeID, _userAddress, true);
+	}
+
+	function handleCompleteChallengeERC20(
+		uint256 _challengeID,
+		uint256 _stakeForfeited,
+		address _userAddress,
+		address _erc20Address
+	) external onlyOwner nonReentrant {
+		if (_stakeForfeited > 0) {
+			address forfeitAddress = challengeTable[_challengeID]
+				.defaultAddress;
+			//check that _stakeForfeit is less than amount staked by user
+			if (
+				_stakeForfeited >
+				currentStakedByUser[_userAddress][_erc20Address]
+			) {
+				revert CHAINHABITS__ForfeitExceedsStake();
 			}
 
-			if (forfeitTransactionFailed) {
+			currentStakedByUser[_userAddress][_erc20Address] -= _stakeForfeited;
+			challengeTable[_challengeID].isLive = false;
+
+			IERC20 usdcToken = IERC20(_erc20Address);
+			bool success = usdcToken.transfer(forfeitAddress, _stakeForfeited);
+			if (!success) {
 				ForfeitedFundsToBeCollected[forfeitAddress] += _stakeForfeited;
 				console.log("forfeitTransactionFailed");
 				emit ForfeitedFundsFailedToSend(
@@ -349,7 +364,10 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 			require(success, "Transfer failed");
 		} else {
 			IERC20 usdcToken = IERC20(_erc20Address);
-			usdcToken.transfer(msg.sender, withdrawAmount);
+			require(
+				usdcToken.transfer(msg.sender, withdrawAmount),
+				"transferFailed"
+			);
 		}
 
 		emit FundsWithdrawn(msg.sender, withdrawAmount);
@@ -372,9 +390,7 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 	}
 
 	//Helper - Internal
-	function _isChallengeLive(
-		uint256 _challengeId
-	) internal view returns (bool) {
+	function _isChallengeLive(uint256 _challengeId) public view returns (bool) {
 		return challengeTable[_challengeId].isLive;
 	}
 
@@ -428,8 +444,4 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 	) external view returns (uint256) {
 		return usersCurrentChallenge[_userAddress];
 	}
-
-	// function getAllUserDetails() external view returns (address[] memory) {
-	// 	return allUsers;
-	// }
 }

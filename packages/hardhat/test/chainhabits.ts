@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { ChainHabits } from "../typechain-types";
+import { ChainHabits, FailingRecipient } from "../typechain-types";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import { ZeroAddress } from "ethers";
 // import axios from "axios";
@@ -13,12 +13,11 @@ describe("ChainHabits", async function () {
   let usdcAddress: string, tokenAmount: bigint;
   const startingMiles = 10n;
   const durationInWeeks = 8n;
-  const provider = ethers.provider;
+  // const provider = ethers.provider;
   //-------------------------------------------------
   // async function getEthToUsdcPrice() {
   //   try {
   //     const response = await axios.get("https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd");
-  //     console.log(response.data.ethereum.usd);
   //     return response.data.ethereum.usd;
   //   } catch (error) {
   //     console.error("Error fetching ETH/USDC price:", error);
@@ -26,7 +25,7 @@ describe("ChainHabits", async function () {
   //   }
   // }
 
-  // Function to convert ETH to USDC
+  // // Function to convert ETH to USDC
   // async function convertEthToUsdc(ethAmountWei) {
   //   const ethPrice = await getEthToUsdcPrice();
   //   const ethAmount = Number(ethers.formatEther(ethAmountWei));
@@ -163,7 +162,6 @@ describe("ChainHabits", async function () {
           ),
         ).emit(chainHabits, "NewChallengeCreated");
       });
-
       it("check amount staked", async function () {
         const tx = await chainHabits.createNewChallenge(
           "Marathon",
@@ -315,14 +313,11 @@ describe("ChainHabits", async function () {
         );
 
         const AlvoTokenBalanceAfter = await usdcContract.balanceOf(chainHabitsAddress);
-        console.log("@@@@AlvoTokenBalanceBefore", AlvoTokenBalanceBefore);
-        console.log("@@@@AlvoTokenBalanceAfter", AlvoTokenBalanceAfter);
 
         expect(AlvoTokenBalanceBefore).lessThan(AlvoTokenBalanceAfter);
       });
       it("expects balance of owners tokens to decrease by the amount of tokens transferred to the ALVO contract", async function () {
-        const TokenBalanceBefore = await usdcContract.balanceOf(owner.address);
-        await chainHabits.createNewChallenge(
+        const tx = await chainHabits.createNewChallenge(
           "Marathon",
           startingMiles,
           durationInWeeks,
@@ -332,11 +327,9 @@ describe("ChainHabits", async function () {
           tokenAmount,
         );
 
-        const TokenBalanceAfter = await usdcContract.balanceOf(owner.address);
-        console.log("@@@@TokenBalanceBefore", TokenBalanceBefore);
-        console.log("@@@@TokenBalanceAfter", TokenBalanceAfter);
+        await tx.wait();
 
-        // expect(AlvoTokenBalanceBefore).higher(AlvoTokenBalanceAfter);
+        expect(tx).changeTokenBalances(usdcContract, [owner.address, chainHabits.target], [tokenAmount, -tokenAmount]);
       });
       it("emits new challenge created event", async function () {
         await expect(
@@ -351,33 +344,6 @@ describe("ChainHabits", async function () {
           ),
         ).emit(chainHabits, "NewChallengeCreated");
       });
-      //TODO: amount staked test not working. fix this
-      // it("check amount staked erc20", async function () {
-      //   const tx = await chainHabits.createNewChallenge(
-      //     "Marathon",
-      //     startingMiles,
-      //     durationInWeeks,
-      //     forfeitAddress.address,
-      //     12,
-      //     usdcAddress,
-      //     tokenAmount,
-      //   );
-      //   await tx.wait();
-      //   const userStakeInUSDC = await chainHabits.getUserStake(owner.address ,usdcAddress );
-
-      //   //Convert stakeAmount (in ETH) to USDC
-      //   const expectedStakeInUSDC = await convertEthToUsdc(stakeAmount);
-
-      //   console.log("Expected USDC (with 6 decimals):", expectedStakeInUSDC.toString());
-      //   console.log("Actual USDC from contract:", userStakeInUSDC.toString());
-
-      // // Calculate the difference as a percentage
-      // const difference = Math.abs(Number(expectedStakeInUSDC - userStakeInUSDC)) / Number(userStakeInUSDC) * 100;
-      // console.log("Difference: " + difference.toFixed(2) + "%");
-
-      // // Check if the difference is within 3%
-      // expect(difference).to.be.lessThan(1);
-      // });
     });
     describe("failure", function () {
       //rejects call if user has a live objective
@@ -541,7 +507,7 @@ describe("ChainHabits", async function () {
             usdcContract,
             tokenAmount,
           );
-        console.log("@@@challenge created");
+
         await expect(chainHabits.handleIntervalReview(2, owner.address, true)).revertedWithCustomError(
           chainHabits,
           "CHAINHABITS__IncorrectAddressORChallengeId",
@@ -575,13 +541,12 @@ describe("ChainHabits", async function () {
         await chainHabits.handleIntervalReview(challengeID, owner.address, false);
         await chainHabits.handleIntervalReview(challengeID, owner.address, false);
 
-        const totalStaked = await chainHabits.getUserStake(owner.address, usdcAddress);
+        const totalStaked = await chainHabits.getUserStake(owner.address, ZeroAddress);
         forfeitAmount = totalStaked / BigInt(4);
       });
-
       it("ETH sent to forfeit address", async function () {
         // Perform the transaction and get the receipt
-        const tx = await chainHabits.handleCompleteChallenge(
+        const tx = await chainHabits.handleCompleteChallengeETH(
           challengeID,
           forfeitAmount,
           owner.address,
@@ -595,53 +560,333 @@ describe("ChainHabits", async function () {
           [-forfeitAmount, forfeitAmount], // Using BigInt negation
         );
       });
-      it("If transfer failed - Forfeit funds added to mapping", async function () {
-        // GET total staked and workdout forfeit funds
-        const forfeitAddressBalance = await provider.getBalance(forfeitAddress.address);
-        console.log("Eth Address of forfeit address Before:", forfeitAddressBalance);
-
-        const totalStaked = await chainHabits.getUserStake(owner.address, ZeroAddress);
-
-        const forfeitAmount = totalStaked;
-
-        // Perform the transaction and get the receipt
-        await expect(
-          chainHabits.handleCompleteChallenge(challengeID, forfeitAmount, owner.address, ethers.ZeroAddress),
-        ).emit(chainHabits, "ForfeitedFundsFailedToSend");
-      });
       it("Challenge Completed Event emitted", async function () {
-        await expect(chainHabits.handleCompleteChallenge(challengeID, forfeitAmount, owner.address, usdcAddress)).emit(
-          chainHabits,
-          "ChallengeCompleted",
-        );
+        await expect(
+          chainHabits.handleCompleteChallengeETH(challengeID, forfeitAmount, owner.address, ZeroAddress),
+        ).emit(chainHabits, "ChallengeCompleted");
       });
       it("Expect user challengeId set to 0", async function () {
         // Perform the transaction and get the receipt
-        await chainHabits.handleCompleteChallenge(challengeID, forfeitAmount, owner.address, ethers.ZeroAddress);
+        await chainHabits.handleCompleteChallengeETH(challengeID, forfeitAmount, owner.address, ethers.ZeroAddress);
         const challengeId = await chainHabits.getChallengeId(owner.address);
         expect(challengeId).to.equal(0);
       });
       it("Expect User hasLivechallengeSet to False", async function () {
         // Perform the transaction and get the receipt
-        await chainHabits.handleCompleteChallenge(challengeID, forfeitAmount, owner.address, ethers.ZeroAddress);
+        await chainHabits.handleCompleteChallengeETH(challengeID, forfeitAmount, owner.address, ethers.ZeroAddress);
+        const userHasLiveChallenge = await chainHabits.userHasLiveChallenge(owner.address);
+        expect(userHasLiveChallenge).equal(false);
       });
       it("isChallengeLive set to false", async function () {
         // Perform the transaction and get the receipt
-        await chainHabits.handleCompleteChallenge(challengeID, forfeitAmount, owner.address, ethers.ZeroAddress);
+        const tx = await chainHabits.handleCompleteChallengeETH(
+          challengeID,
+          forfeitAmount,
+          owner.address,
+          ethers.ZeroAddress,
+        );
+        await tx.wait();
+        const isChallengeLive = await chainHabits._isChallengeLive(challengeID);
+        expect(isChallengeLive).equal(false);
+      });
+      it("if stake forfeited is 0 then user can withdraw all of their stake", async function () {
+        const totalStaked = await chainHabits.getUserStake(owner.address, ZeroAddress);
+        await chainHabits.handleCompleteChallengeETH(challengeID, 0, owner.address, ethers.ZeroAddress);
+
+        const tx = await chainHabits.withdrawFunds(ZeroAddress);
+
+        await tx.wait();
+
+        await expect(tx).to.changeEtherBalances([chainHabits.target, owner.address], [-totalStaked, totalStaked]);
+      });
+      it("withdraw event emitted", async function () {
+        await chainHabits.handleCompleteChallengeETH(challengeID, 0, owner.address, ethers.ZeroAddress);
+
+        await expect(chainHabits.withdrawFunds(ZeroAddress)).emit(chainHabits, "FundsWithdrawn");
+      });
+    });
+    describe("failure", function () {
+      beforeEach("Register User, challenge and complete interval reviews", async function () {
+        await chainHabits.registerNewUser(62612170, "0ac2f45bea762e3f0c7abbc1d2e6b78ee8f2a7fd");
+        await chainHabits.createNewChallenge(
+          "Marathon",
+          startingMiles,
+          durationInWeeks,
+          forfeitAddress.address,
+          12,
+          ZeroAddress,
+          0,
+          {
+            value: stakeAmount,
+          },
+        );
+        challengeID = await chainHabits.getChallengeId(owner.address);
+        await chainHabits.handleIntervalReview(challengeID, owner.address, true);
+        await chainHabits.handleIntervalReview(challengeID, owner.address, false);
+        await chainHabits.handleIntervalReview(challengeID, owner.address, false);
+        await chainHabits.handleIntervalReview(challengeID, owner.address, false);
+
+        const totalStaked = await chainHabits.getUserStake(owner.address, ZeroAddress);
+        forfeitAmount = totalStaked / BigInt(4);
+      });
+      it("If stake forfeited is higher than total stake then revert", async function () {
+        const totalStaked = await chainHabits.getUserStake(owner.address, ZeroAddress);
+        const forfeitAmount = totalStaked + 100n;
+        await expect(
+          chainHabits.handleCompleteChallengeETH(challengeID, forfeitAmount, owner.address, ethers.ZeroAddress),
+        ).to.revertedWithCustomError(chainHabits, "CHAINHABITS__ForfeitExceedsStake");
+      });
+      it("If transfer failed - ForfeitedFundsFailedToSend Event emitted", async function () {
+        await chainHabits.connect(user2).registerNewUser(62612170, "0ac2f45bea762e3f0c7abbc1d2e6b78ee8f2a7fd");
+        const failingRecipientFactory = await ethers.getContractFactory("FailingRecipient");
+        const failingRecipient = (await failingRecipientFactory.connect(owner).deploy()) as FailingRecipient;
+        await failingRecipient.waitForDeployment();
+
+        await chainHabits
+          .connect(user2)
+          .createNewChallenge("Marathon", startingMiles, durationInWeeks, failingRecipient.target, 12, ZeroAddress, 0, {
+            value: stakeAmount,
+          });
+
+        challengeID = await chainHabits.getChallengeId(user2.address);
+        await chainHabits.handleIntervalReview(challengeID, user2.address, true);
+        await chainHabits.handleIntervalReview(challengeID, user2.address, false);
+        await chainHabits.handleIntervalReview(challengeID, user2.address, false);
+        await chainHabits.handleIntervalReview(challengeID, user2.address, false);
+
+        const totalStaked = await chainHabits.getUserStake(user2.address, ZeroAddress);
+        forfeitAmount = totalStaked;
+
+        // Perform the transaction and get the receipt
+        await expect(
+          chainHabits.handleCompleteChallengeETH(challengeID, forfeitAmount, user2.address, ethers.ZeroAddress),
+        ).emit(chainHabits, "ForfeitedFundsFailedToSend");
+      });
+      it("If transfer failed - Forfeit funds added to mapping", async function () {
+        await chainHabits.connect(user2).registerNewUser(62612170, "0ac2f45bea762e3f0c7abbc1d2e6b78ee8f2a7fd");
+        const failingRecipientFactory = await ethers.getContractFactory("FailingRecipient");
+        const failingRecipient = (await failingRecipientFactory.connect(owner).deploy()) as FailingRecipient;
+        await failingRecipient.waitForDeployment();
+
+        await chainHabits
+          .connect(user2)
+          .createNewChallenge("Marathon", startingMiles, durationInWeeks, failingRecipient.target, 12, ZeroAddress, 0, {
+            value: stakeAmount,
+          });
+
+        challengeID = await chainHabits.getChallengeId(user2.address);
+        await chainHabits.handleIntervalReview(challengeID, user2.address, true);
+        await chainHabits.handleIntervalReview(challengeID, user2.address, false);
+        await chainHabits.handleIntervalReview(challengeID, user2.address, false);
+        await chainHabits.handleIntervalReview(challengeID, user2.address, false);
+
+        const totalStaked = await chainHabits.getUserStake(user2.address, ZeroAddress);
+        forfeitAmount = totalStaked;
+
+        await chainHabits.handleCompleteChallengeETH(challengeID, forfeitAmount, user2.address, ZeroAddress);
+        // Perform the transaction and get the receipt
+        const ForfeitFundsToBeCollected = await chainHabits.ForfeitedFundsToBeCollected(failingRecipient.target);
+        expect(ForfeitFundsToBeCollected).equal(forfeitAmount);
       });
       it("", async function () {});
       it("", async function () {});
+      it("", async function () {});
+      it("", async function () {});
     });
-    describe("failure", function () {});
   });
-  describe("complete challenge Token Deposit", function () {
+
+  //-------------------------------------------------
+
+  describe("complete challenge ERC20 Deposit", function () {
+    let challengeID: bigint, forfeitAmount: bigint;
+
     describe("success", function () {
-      beforeEach("create profile and ", async function () {});
+      beforeEach("create profile and ", async function () {
+        await chainHabits.registerNewUser(62612170, "0ac2f45bea762e3f0c7abbc1d2e6b78ee8f2a7fd");
+        await chainHabits.createNewChallenge(
+          "Marathon",
+          startingMiles,
+          durationInWeeks,
+          forfeitAddress.address,
+          12,
+          usdcAddress,
+          tokenAmount,
+        );
+        challengeID = await chainHabits.getChallengeId(owner.address);
+        await chainHabits.handleIntervalReview(challengeID, owner.address, true);
+        await chainHabits.handleIntervalReview(challengeID, owner.address, false);
+        await chainHabits.handleIntervalReview(challengeID, owner.address, false);
+        await chainHabits.handleIntervalReview(challengeID, owner.address, false);
+
+        const totalStaked = await chainHabits.getUserStake(owner.address, usdcAddress);
+        forfeitAmount = totalStaked / BigInt(4);
+      });
+      it("USDC sent to forfeit address", async function () {
+        // Perform the transaction and get the receipt
+        const tx = await chainHabits.handleCompleteChallengeERC20(
+          challengeID,
+          forfeitAmount,
+          owner.address,
+          usdcAddress,
+        );
+        await tx.wait();
+
+        // Check balance changes
+        await expect(tx).to.changeTokenBalances(
+          usdcContract,
+          [chainHabits.target, forfeitAddress],
+          [-forfeitAmount, forfeitAmount],
+        );
+      });
+      it("Challenge Completed Event emitted", async function () {
+        await expect(
+          chainHabits.handleCompleteChallengeERC20(challengeID, forfeitAmount, owner.address, usdcAddress),
+        ).emit(chainHabits, "ChallengeCompleted");
+      });
+      it("Expect user challengeId set to 0", async function () {
+        // Perform the transaction and get the receipt
+        await chainHabits.handleCompleteChallengeERC20(challengeID, forfeitAmount, owner.address, usdcAddress);
+        const challengeId = await chainHabits.getChallengeId(owner.address);
+        expect(challengeId).to.equal(0);
+      });
+      it("Expect User hasLivechallengeSet to False", async function () {
+        // Perform the transaction and get the receipt
+        await chainHabits.handleCompleteChallengeERC20(challengeID, forfeitAmount, owner.address, usdcAddress);
+        const userHasLiveChallenge = await chainHabits.userHasLiveChallenge(owner.address);
+        expect(userHasLiveChallenge).equal(false);
+      });
+      it("isChallengeLive set to false", async function () {
+        // Perform the transaction and get the receipt
+        const tx = await chainHabits.handleCompleteChallengeERC20(
+          challengeID,
+          forfeitAmount,
+          owner.address,
+          usdcAddress,
+        );
+        await tx.wait();
+        const isChallengeLive = await chainHabits._isChallengeLive(challengeID);
+        expect(isChallengeLive).equal(false);
+      });
+      it("if stake forfeited is 0 then user can withdraw all of their stake", async function () {
+        const totalStaked = await chainHabits.getUserStake(owner.address, usdcAddress);
+        await chainHabits.handleCompleteChallengeERC20(challengeID, 0, owner.address, usdcAddress);
+
+        const tx = await chainHabits.withdrawFunds(usdcAddress);
+
+        await tx.wait();
+
+        await expect(tx).to.changeTokenBalances(
+          usdcContract,
+          [chainHabits.target, owner.address],
+          [-totalStaked, totalStaked],
+        );
+      });
+      it("withdraw event emitted", async function () {
+        await chainHabits.handleCompleteChallengeERC20(challengeID, 0, owner.address, usdcAddress);
+
+        await expect(chainHabits.withdrawFunds(usdcAddress)).emit(chainHabits, "FundsWithdrawn");
+      });
+    });
+    describe("failure", function () {
+      beforeEach("Register User, challenge and complete interval reviews", async function () {
+        await chainHabits.registerNewUser(62612170, "0ac2f45bea762e3f0c7abbc1d2e6b78ee8f2a7fd");
+        await chainHabits.createNewChallenge(
+          "Marathon",
+          startingMiles,
+          durationInWeeks,
+          forfeitAddress.address,
+          12,
+          usdcAddress,
+          tokenAmount,
+        );
+        challengeID = await chainHabits.getChallengeId(owner.address);
+        await chainHabits.handleIntervalReview(challengeID, owner.address, true);
+        await chainHabits.handleIntervalReview(challengeID, owner.address, false);
+        await chainHabits.handleIntervalReview(challengeID, owner.address, false);
+        await chainHabits.handleIntervalReview(challengeID, owner.address, false);
+
+        const totalStaked = await chainHabits.getUserStake(owner.address, usdcAddress);
+        forfeitAmount = totalStaked / BigInt(4);
+      });
+      it("If stake forfeited is higher than total stake then revert", async function () {
+        const totalStaked = await chainHabits.getUserStake(owner.address, usdcAddress);
+        const forfeitAmount = totalStaked + 100n;
+        await expect(
+          chainHabits.handleCompleteChallengeERC20(challengeID, forfeitAmount, owner.address, usdcAddress),
+        ).to.revertedWithCustomError(chainHabits, "CHAINHABITS__ForfeitExceedsStake");
+      });
+      // it("If transfer failed - ForfeitedFundsFailedToSend Event emitted", async function () {
+      //   await chainHabits.connect(user2).registerNewUser(62612170, "0ac2f45bea762e3f0c7abbc1d2e6b78ee8f2a7fd");
+      //   const failingRecipientFactory = await ethers.getContractFactory("FailingRecipient");
+      //   const failingRecipient = (await failingRecipientFactory.connect(owner).deploy()) as FailingRecipient;
+      //   await failingRecipient.waitForDeployment();
+
+      //   await chainHabits
+      //     .connect(user2)
+      //     .createNewChallenge(
+      //       "Marathon",
+      //       startingMiles,
+      //       durationInWeeks,
+      //       failingRecipient.target,
+      //       12,
+      //       usdcAddress,
+      //       tokenAmount,
+      //     );
+
+      //   challengeID = await chainHabits.getChallengeId(user2.address);
+      //   await chainHabits.handleIntervalReview(challengeID, user2.address, true);
+      //   await chainHabits.handleIntervalReview(challengeID, user2.address, false);
+      //   await chainHabits.handleIntervalReview(challengeID, user2.address, false);
+      //   await chainHabits.handleIntervalReview(challengeID, user2.address, false);
+
+      //   const totalStaked = await chainHabits.getUserStake(user2.address, usdcAddress);
+      //   forfeitAmount = totalStaked;
+
+      //   // Perform the transaction and get the receipt
+      //   await expect(
+      //     chainHabits.handleCompleteChallengeERC20(challengeID, forfeitAmount, user2.address, usdcAddress),
+      //   ).emit(chainHabits, "ForfeitedFundsFailedToSend");
+      // });
+      // it("If transfer failed - Forfeit funds added to mapping", async function () {
+      //   await chainHabits.connect(user2).registerNewUser(62612170, "0ac2f45bea762e3f0c7abbc1d2e6b78ee8f2a7fd");
+      //   const failingRecipientFactory = await ethers.getContractFactory("FailingRecipient");
+      //   const failingRecipient = (await failingRecipientFactory.connect(owner).deploy()) as FailingRecipient;
+      //   await failingRecipient.waitForDeployment();
+
+      //   await chainHabits
+      //     .connect(user2)
+      //     .createNewChallenge(
+      //       "Marathon",
+      //       startingMiles,
+      //       durationInWeeks,
+      //       failingRecipient.target,
+      //       12,
+      //       usdcAddress,
+      //       tokenAmount,
+      //     );
+
+      //   challengeID = await chainHabits.getChallengeId(user2.address);
+      //   await chainHabits.handleIntervalReview(challengeID, user2.address, true);
+      //   await chainHabits.handleIntervalReview(challengeID, user2.address, false);
+      //   await chainHabits.handleIntervalReview(challengeID, user2.address, false);
+      //   await chainHabits.handleIntervalReview(challengeID, user2.address, false);
+
+      //   const totalStaked = await chainHabits.getUserStake(user2.address, usdcAddress);
+      //   forfeitAmount = totalStaked;
+
+      //   await chainHabits.handleCompleteChallengeERC20(challengeID, forfeitAmount, user2.address, usdcAddress);
+      //   // Perform the transaction and get the receipt
+      //   const ForfeitFundsToBeCollected = await chainHabits.ForfeitedFundsToBeCollected(failingRecipient.target);
+      //   expect(ForfeitFundsToBeCollected).equal(forfeitAmount);
+      // });
+      it("", async function () {});
+      it("", async function () {});
       it("", async function () {});
       it("", async function () {});
     });
-    describe("failure", function () {});
   });
+  //-------------------------------------------------
+
   describe("bulk complete challenge", function () {
     describe("success", function () {
       //check
@@ -651,13 +896,6 @@ describe("ChainHabits", async function () {
     });
     describe("failure", function () {});
   });
-  describe("test2", function () {
-    describe("success", function () {
-      //check
-      beforeEach("create profile", async function () {});
-      it("", async function () {});
-      it("", async function () {});
-    });
-    describe("failure", function () {});
-  });
+
+  //-------------------------------------------------
 });
