@@ -47,6 +47,7 @@ export function handleChallengeCreate(event: NewChallengeCreated): void {
   challenge.status = true;
   challenge.transactionHash = event.transaction.hash.toHex();
   challenge.weeklyTargetIncreasePercentage = event.params.PercentageIncrease;
+  challenge.ERC20Address = event.params.erc20Address;
   const deadlineDateEpoch = BigInt.fromI32(event.params.NumberofWeeks).times(
     BigInt.fromI32(ONE_WEEK_IN_SECONDS)
   );
@@ -77,10 +78,20 @@ export function handleChallengeComplete(event: ChallengeCompleted): void {
     ]);
     return;
   }
+
   challenge.success = event.params.status ? 1 : 0;
   challenge.status = false;
   challenge.updatedAt = event.block.timestamp;
   challenge.save();
+
+  const user = User.load(event.params.user.toHexString());
+  if (!user) {
+    log.error("User not found: {}", [event.params.user.toHexString()]);
+    return;
+  }
+  user.stakedAmount = user.stakedAmount.minus(event.params.stakeForfeited);
+  user.updatedAt = event.block.timestamp;
+  user.save();
 }
 
 export function handleIntervalReview(event: IntervalReviewCompleted): void {

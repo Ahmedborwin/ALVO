@@ -16,7 +16,27 @@
   },
   {
     "inputs": [],
-    "name": "CHAINHABITS__ForfeitAddressIs0Address",
+    "name": "CHAINHABITS__ERC20DepositAmountIs0",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "CHAINHABITS__ERC20TokenNotSupported",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "CHAINHABITS__ERC20TransferFailed",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "CHAINHABITS__ForfeitAddressInvalid",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "CHAINHABITS__ForfeitExceedsStake",
     "type": "error"
   },
   {
@@ -26,7 +46,22 @@
   },
   {
     "inputs": [],
+    "name": "CHAINHABITS__InsufficientERC20Allowance",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "CHAINHABITS__InsufficientERC20Balance",
+    "type": "error"
+  },
+  {
+    "inputs": [],
     "name": "CHAINHABITS__InsufficientFunds",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "CHAINHABITS__PrivateInformation",
     "type": "error"
   },
   {
@@ -69,6 +104,12 @@
         "internalType": "bool",
         "name": "status",
         "type": "bool"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "stakeForfeited",
+        "type": "uint256"
       }
     ],
     "name": "ChallengeCompleted",
@@ -187,6 +228,12 @@
         "internalType": "uint256",
         "name": "amount",
         "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "erc20Address",
+        "type": "address"
       }
     ],
     "name": "NewChallengeCreated",
@@ -225,13 +272,19 @@
     "type": "event"
   },
   {
-    "inputs": [],
-    "name": "admin",
-    "outputs": [
+    "inputs": [
       {
         "internalType": "address",
         "name": "",
         "type": "address"
+      }
+    ],
+    "name": "ForfeitedFundsToBeCollected",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -241,15 +294,77 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "",
+        "name": "_challengeId",
         "type": "uint256"
       }
     ],
-    "name": "allUsers",
+    "name": "_isChallengeLive",
     "outputs": [
       {
-        "internalType": "address",
+        "internalType": "bool",
         "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "erc20Address",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_priceFeedAddress",
+        "type": "address"
+      }
+    ],
+    "name": "addPriceFeedAddress",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "challengeId",
+        "type": "uint256"
+      }
+    ],
+    "name": "challengeTable",
+    "outputs": [
+      {
+        "internalType": "uint8",
+        "name": "targetMiles",
+        "type": "uint8"
+      },
+      {
+        "internalType": "uint8",
+        "name": "NoOfWeeks",
+        "type": "uint8"
+      },
+      {
+        "internalType": "uint8",
+        "name": "failedWeeks",
+        "type": "uint8"
+      },
+      {
+        "internalType": "bool",
+        "name": "isLive",
+        "type": "bool"
+      },
+      {
+        "internalType": "uint48",
+        "name": "challengeStartDate",
+        "type": "uint48"
+      },
+      {
+        "internalType": "address",
+        "name": "defaultAddress",
         "type": "address"
       }
     ],
@@ -282,6 +397,16 @@
         "internalType": "uint8",
         "name": "_percentageIncrease",
         "type": "uint8"
+      },
+      {
+        "internalType": "address",
+        "name": "_erc20Address",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_depositAmount",
+        "type": "uint256"
       }
     ],
     "name": "createNewChallenge",
@@ -293,19 +418,6 @@
       }
     ],
     "stateMutability": "payable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "getAllUserDetails",
-    "outputs": [
-      {
-        "internalType": "address[]",
-        "name": "",
-        "type": "address[]"
-      }
-    ],
-    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -392,11 +504,6 @@
         "components": [
           {
             "internalType": "uint256",
-            "name": "currentStaked",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
             "name": "userID",
             "type": "uint256"
           },
@@ -409,6 +516,30 @@
         "internalType": "struct ChainHabits.UserDetails",
         "name": "",
         "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_user",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_token",
+        "type": "address"
+      }
+    ],
+    "name": "getUserStake",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -441,21 +572,54 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "challengeId",
+        "name": "_challengeID",
         "type": "uint256"
       },
       {
-        "internalType": "uint8",
-        "name": "stakeForfeited",
-        "type": "uint8"
+        "internalType": "uint256",
+        "name": "_stakeForfeited",
+        "type": "uint256"
       },
       {
         "internalType": "address",
-        "name": "userAddress",
+        "name": "_userAddress",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_erc20Address",
         "type": "address"
       }
     ],
-    "name": "handleCompleteChallenge",
+    "name": "handleCompleteChallengeERC20",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_challengeID",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_stakeForfeited",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "_userAddress",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_erc20Address",
+        "type": "address"
+      }
+    ],
+    "name": "handleCompleteChallengeETH",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -591,7 +755,13 @@
     "type": "function"
   },
   {
-    "inputs": [],
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_erc20Address",
+        "type": "address"
+      }
+    ],
     "name": "withdrawFunds",
     "outputs": [],
     "stateMutability": "nonpayable",

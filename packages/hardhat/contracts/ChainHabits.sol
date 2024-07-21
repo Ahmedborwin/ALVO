@@ -104,7 +104,8 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 	event ChallengeCompleted(
 		uint256 indexed challengeId,
 		address indexed user,
-		bool status
+		bool status,
+		uint256 stakeForfeited
 	);
 	event FundsWithdrawn(address indexed user, uint256 amount);
 	event ForfeitedFundsFailedToSend(address indexed user, uint256 amount);
@@ -303,7 +304,7 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 
 		usersCurrentChallenge[_userAddress] = 0;
 		userHasLiveChallenge[_userAddress] = false;
-		emit ChallengeCompleted(_challengeID, _userAddress, true);
+		emit ChallengeCompleted(_challengeID, _userAddress, true, _stakeForfeited);
 	}
 
 	function handleCompleteChallengeERC20(
@@ -340,7 +341,7 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 
 		usersCurrentChallenge[_userAddress] = 0;
 		userHasLiveChallenge[_userAddress] = false;
-		emit ChallengeCompleted(_challengeID, _userAddress, true);
+		emit ChallengeCompleted(_challengeID, _userAddress, true, _stakeForfeited);
 	}
 
 	//withdraw funds

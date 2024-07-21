@@ -41,14 +41,14 @@ const config: HardhatUserConfig = {
       },
     ],
   },
-  defaultNetwork: "hardhat",
+  defaultNetwork: "localhost",
   namedAccounts: {
     deployer: {
       // By default, it will take the first Hardhat account as the deployer
       default: 0,
     },
   },
-  networks: { ...networks },
+  // networks: { ...networks },
   // configuration for harhdat-verify plugin
   etherscan: {
     apiKey: {
