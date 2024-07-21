@@ -1,16 +1,24 @@
 import { StateCreator, create } from "zustand";
 import { PersistOptions, createJSONStorage, persist } from "zustand/middleware";
 import scaffoldConfig from "~~/scaffold.config";
-import { Athlete, StravaRefreshTokenResponse, StravaState, StravaTokenResponse } from "~~/types/utils";
+import {
+  Athlete,
+  CommonState,
+  ERCTokens,
+  StravaRefreshTokenResponse,
+  StravaState,
+  StravaTokenResponse,
+} from "~~/types/utils";
 import { ChainWithAttributes } from "~~/utils/scaffold-eth";
 import { filterStravaResponse, reInitializeStravaData } from "~~/utils/strava";
 
 type GlobalState = {
   nativeCurrency: {
     price: number;
+    gbpPrice: number;
     isFetching: boolean;
   };
-  setNativeCurrencyPrice: (newNativeCurrencyPriceState: number) => void;
+  setNativeCurrencyPrice: (newNativeCurrencyPriceState: number, gbpPrice: number) => void;
   setIsNativeCurrencyFetching: (newIsNativeCurrencyFetching: boolean) => void;
   targetNetwork: ChainWithAttributes;
   setTargetNetwork: (newTargetNetwork: ChainWithAttributes) => void;
@@ -19,10 +27,11 @@ type GlobalState = {
 export const useGlobalState = create<GlobalState>(set => ({
   nativeCurrency: {
     price: 0,
+    gbpPrice: 0,
     isFetching: true,
   },
-  setNativeCurrencyPrice: (newValue: number): void =>
-    set(state => ({ nativeCurrency: { ...state.nativeCurrency, price: newValue } })),
+  setNativeCurrencyPrice: (newValue: number, gbpPrice: number): void =>
+    set(state => ({ nativeCurrency: { ...state.nativeCurrency, price: newValue, gbpPrice } })),
   setIsNativeCurrencyFetching: (newValue: boolean): void =>
     set(state => ({ nativeCurrency: { ...state.nativeCurrency, isFetching: newValue } })),
   targetNetwork: scaffoldConfig.targetNetworks[0],
@@ -79,4 +88,31 @@ export const useStravaState = create<StravaState>(
       storage: createJSONStorage(() => localStorage),
     } as PersistOptions<StravaState>,
   ) as StateCreator<StravaState>,
+);
+
+export const useCommonState = create<CommonState>(
+  persist<CommonState>(
+    (set, get) => ({
+      state: {
+        ERCTokens: [],
+        ERCTokensInChain: [],
+      },
+      setERCTokens: (data: ERCTokens[]) => set(state => ({ state: { ...state.state, ERCTokens: data } })),
+      getERCTokens: () => get().state.ERCTokens,
+      setERCTokensInChain: (chainId: number) => {
+        const tokensInChain = get().state.ERCTokens.filter(
+          token => token.chainId.toString().toLowerCase() === chainId.toString().toLowerCase(),
+        );
+        set(state => ({ state: { ...state.state, ERCTokensInChain: tokensInChain } }));
+      },
+      getERCTokensInChain: () => get().state.ERCTokensInChain,
+      getERCTokensByAddress: (address: string) => {
+        return get().state.ERCTokens.find(token => token.address === address) || ({} as ERCTokens);
+      },
+    }),
+    {
+      name: "common-data",
+      storage: createJSONStorage(() => localStorage),
+    },
+  ) as StateCreator<CommonState>,
 );

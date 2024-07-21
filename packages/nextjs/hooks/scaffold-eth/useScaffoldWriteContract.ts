@@ -9,6 +9,7 @@ import { WriteContractErrorType, WriteContractReturnType } from "wagmi/actions";
 import { WriteContractVariables } from "wagmi/query";
 import { handleSentUserOP } from "~~/components/providers/UserOperationProvider";
 import { chain as accountChain, accountType } from "~~/config/AlchemyConfig";
+import ERC20_ABI from "~~/constants/contractDetails/ERC20ABI";
 import { useDeployedContractInfo, useTransactor } from "~~/hooks/scaffold-eth";
 import { notification } from "~~/utils/scaffold-eth";
 import {
@@ -16,6 +17,7 @@ import {
   ContractName,
   ScaffoldWriteContractOptions,
   ScaffoldWriteContractVariables,
+  ScaffoldWriteContractVariablesWithApprove,
 } from "~~/utils/scaffold-eth/contract";
 
 /**
@@ -43,11 +45,10 @@ export const useScaffoldWriteContract = <TContractName extends ContractName>(
 
   const { data: deployedContractData } = useDeployedContractInfo(contractName);
 
-  const sendContractWriteAsyncTx = async <
-    TFunctionName extends ExtractAbiFunctionNames<ContractAbi<TContractName>, "nonpayable" | "payable">,
-  >(
-    variables: ScaffoldWriteContractVariables<TContractName, TFunctionName>,
+  const sendContractWriteAsyncTx = async <TContractName extends ContractName>(
+    variables: ScaffoldWriteContractVariablesWithApprove<TContractName>,
     options?: ScaffoldWriteContractOptions,
+    targetERCAddress?: string,
   ) => {
     if (!deployedContractData) {
       notification.error("Target Contract is not deployed, did you forget to run `yarn deploy`?");
@@ -88,8 +89,8 @@ export const useScaffoldWriteContract = <TContractName extends ContractName>(
         const makeWriteWithParams = () =>
           wagmiContractWrite.writeContractAsync(
             {
-              abi: deployedContractData.abi as Abi,
-              address: deployedContractData.address,
+              abi: targetERCAddress ? (ERC20_ABI as Abi) : (deployedContractData.abi as Abi),
+              address: targetERCAddress || deployedContractData.address,
               ...variables,
             } as WriteContractVariables<Abi, string, any[], Config, number>,
             mutateOptions as
@@ -118,6 +119,7 @@ export const useScaffoldWriteContract = <TContractName extends ContractName>(
   >(
     variables: ScaffoldWriteContractVariables<TContractName, TFunctionName>,
     options?: Omit<ScaffoldWriteContractOptions, "onBlockConfirmation" | "blockConfirmations">,
+    targetERCAddress?: string,
   ) => {
     if (!deployedContractData) {
       notification.error("Target Contract is not deployed, did you forget to run `yarn deploy`?");
@@ -134,8 +136,8 @@ export const useScaffoldWriteContract = <TContractName extends ContractName>(
 
     wagmiContractWrite.writeContract(
       {
-        abi: deployedContractData.abi as Abi,
-        address: deployedContractData.address,
+        abi: targetERCAddress ? (ERC20_ABI as Abi) : (deployedContractData.abi as Abi),
+        address: targetERCAddress || deployedContractData.address,
         ...variables,
       } as WriteContractVariables<Abi, string, any[], Config, number>,
       options as

@@ -1,6 +1,8 @@
 import { useCallback, useEffect } from "react";
 import { useTargetNetwork } from "./useTargetNetwork";
+import axios from "axios";
 import { useInterval } from "usehooks-ts";
+import { ETH_PRICE_GBP_URL } from "~~/constants/common";
 import scaffoldConfig from "~~/scaffold.config";
 import { useGlobalState } from "~~/services/store/store";
 import { fetchPriceFromUniswap } from "~~/utils/scaffold-eth";
@@ -18,7 +20,8 @@ export const useInitializeNativeCurrencyPrice = () => {
   const fetchPrice = useCallback(async () => {
     setIsNativeCurrencyFetching(true);
     const price = await fetchPriceFromUniswap(targetNetwork);
-    setNativeCurrencyPrice(price);
+    const { data } = await axios.get(ETH_PRICE_GBP_URL);
+    setNativeCurrencyPrice(price, data.ethereum.gbp);
     setIsNativeCurrencyFetching(false);
   }, [setIsNativeCurrencyFetching, setNativeCurrencyPrice, targetNetwork]);
 

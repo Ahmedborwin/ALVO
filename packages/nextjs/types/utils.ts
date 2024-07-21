@@ -74,3 +74,44 @@ export interface IntervalReviews {
   status: boolean;
   createdAt: bigint;
 }
+
+type TokenExtension = {
+  baseBridgeAddress: string;
+  opListId: string;
+  opTokenId: string;
+};
+
+export interface ERCTokens {
+  chainId: number;
+  address: string;
+  name: string;
+  symbol: string;
+  decimals: number;
+  logoURI: string;
+  extensions: TokenExtension;
+}
+
+export interface CommonState {
+  state: {
+    ERCTokens: ERCTokens[];
+    ERCTokensInChain: ERCTokens[];
+  };
+  setERCTokens: (data: ERCTokens[]) => void;
+  getERCTokens: () => ERCTokens[];
+  setERCTokensInChain: (chainId: number) => void;
+  getERCTokensInChain: () => ERCTokens[];
+  getERCTokensByAddress: (address: string) => ERCTokens;
+}
+
+export interface Option {
+  value: string;
+  label: string;
+}
+
+export interface CustomSelectProps {
+  value: string;
+  onChange: (value: string) => void;
+  options: Option[];
+  placeholder: string;
+  className?: string;
+}

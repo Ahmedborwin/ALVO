@@ -856,7 +856,7 @@ const deployedContracts = {
   },
   31337: {
     ChainHabits: {
-      address: "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853",
+      address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
       abi: [
         {
           inputs: [],
@@ -895,6 +895,11 @@ const deployedContracts = {
         },
         {
           inputs: [],
+          name: "CHAINHABITS__ForfeitExceedsStake",
+          type: "error",
+        },
+        {
+          inputs: [],
           name: "CHAINHABITS__IncorrectAddressORChallengeId",
           type: "error",
         },
@@ -911,6 +916,11 @@ const deployedContracts = {
         {
           inputs: [],
           name: "CHAINHABITS__InsufficientFunds",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "CHAINHABITS__PrivateInformation",
           type: "error",
         },
         {
@@ -1265,11 +1275,6 @@ const deployedContracts = {
               components: [
                 {
                   internalType: "uint256",
-                  name: "currentStaked",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint256",
                   name: "userID",
                   type: "uint256",
                 },
@@ -1282,6 +1287,30 @@ const deployedContracts = {
               internalType: "struct ChainHabits.UserDetails",
               name: "",
               type: "tuple",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "_user",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "_token",
+              type: "address",
+            },
+          ],
+          name: "getUserStake",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
             },
           ],
           stateMutability: "view",
@@ -1314,17 +1343,22 @@ const deployedContracts = {
           inputs: [
             {
               internalType: "uint256",
-              name: "challengeId",
+              name: "_challengeID",
               type: "uint256",
             },
             {
-              internalType: "uint8",
-              name: "stakeForfeited",
-              type: "uint8",
+              internalType: "uint256",
+              name: "_stakeForfeited",
+              type: "uint256",
             },
             {
               internalType: "address",
-              name: "userAddress",
+              name: "_userAddress",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "_erc20Address",
               type: "address",
             },
           ],
@@ -1464,7 +1498,13 @@ const deployedContracts = {
           type: "function",
         },
         {
-          inputs: [],
+          inputs: [
+            {
+              internalType: "address",
+              name: "_erc20Address",
+              type: "address",
+            },
+          ],
           name: "withdrawFunds",
           outputs: [],
           stateMutability: "nonpayable",

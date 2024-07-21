@@ -58,3 +58,14 @@ p {
 .smooth-scroll {
   scroll-behavior: smooth;
 }
+
+.toggle-checkbox:checked {
+  right: 0;
+  border-color: #68D391;
+}
+.toggle-checkbox:checked + .toggle-label {
+  background-color: #68D391;
+}
+.toggle-label {
+  transition: background-color 0.2s ease-in;
+}
