@@ -4,6 +4,7 @@ import { ApolloClient, InMemoryCache, gql } from "@apollo/client";
 import axios, { AxiosResponse } from "axios";
 import { error } from "console";
 import { ethers } from "ethers";
+import { zeroAddress } from "viem";
 import chainHabits from "~~/contracts/deployedContracts";
 
 // Types
@@ -87,6 +88,8 @@ const LIVE_CHALLENGES_DUE_FOR_REVIEW = gql`
       competitionDeadline
       nextIntervalReviewEpoch
       intervalReviewTally
+      ERC20Address
+      weeklyTargetIncreasePercentage
     }
   }
 `;
@@ -227,6 +230,7 @@ async function _handleIntervalReview(
   new_access_token: string,
   userAddress: string,
 ) {
+  //TODO: should take into account the targetincrease?
   try {
     let distanceLogged = await getAthletesStravaData(challengeDetails, new_access_token);
     if (distanceLogged) {
@@ -238,7 +242,7 @@ async function _handleIntervalReview(
 
       await tx.wait();
     } else {
-      return; //how can i make my code break when i reach an
+      return;
     }
   } catch (e) {
     console.error(`Error handling interval review for challenge ${challengeId}: ${e}`);
@@ -251,17 +255,38 @@ async function handleCompleteChallenge(
   challengeDetails: Challenge,
   userAddress: string,
 ) {
-  try {
-    const ethToDefault =
-      (BigInt(userDetails.stakedAmount) / BigInt(challengeDetails.numberOfWeeks)) *
-      BigInt(challengeDetails.failedWeeks);
-    if (ethToDefault > BigInt(userDetails.stakedAmount)) {
-      return "logic error - Cannot send more Eth to default than what is staked";
-    }
+  //If deposit is in ETH
+  if (challengeDetails.ERC20Address == zeroAddress) {
+    try {
+      const ethToDefault =
+        (BigInt(userDetails.stakedAmount) / BigInt(challengeDetails.numberOfWeeks)) *
+        BigInt(challengeDetails.failedWeeks);
+      if (ethToDefault > BigInt(userDetails.stakedAmount)) {
+        return "logic error - Cannot send more Eth to default than what is staked";
+      }
 
-    await chainHabitsContract.handleCompleteChallenge(challengeId, ethToDefault, userAddress);
-  } catch (e) {
-    console.error(`Error completing challenge ${challengeId} for user ${userAddress}: ${e}`);
+      await chainHabitsContract.handleCompleteChallengeETH(challengeId, ethToDefault, userAddress, zeroAddress);
+    } catch (e) {
+      console.error(`Error completing challenge ${challengeId} for user ${userAddress}: ${e}`);
+    }
+  } else {
+    try {
+      const tokenToForfeit =
+        (BigInt(userDetails.stakedAmount) / BigInt(challengeDetails.numberOfWeeks)) *
+        BigInt(challengeDetails.failedWeeks);
+      if (tokenToForfeit > BigInt(userDetails.stakedAmount)) {
+        return "logic error - Cannot send more Tokens to default than what is staked";
+      }
+
+      await chainHabitsContract.handleCompleteChallengeERC20(
+        challengeId,
+        tokenToForfeit,
+        userAddress,
+        challengeDetails.ERC20Address,
+      );
+    } catch (e) {
+      console.error(`Error completing challenge ${challengeId} for user ${userAddress}: ${e}`);
+    }
   }
 }
 
