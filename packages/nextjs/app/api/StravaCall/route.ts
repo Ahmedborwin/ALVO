@@ -26,6 +26,7 @@ type Challenge = {
   startingMiles: number;
   numberOfWeeks: number;
   stakedAmount: string;
+  ERC20Address: string;
   defaultAddress: string;
   isLive: boolean;
   failedWeeks: string;

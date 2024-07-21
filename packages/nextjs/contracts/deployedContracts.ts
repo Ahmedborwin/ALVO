@@ -964,6 +964,12 @@ const deployedContracts = {
               name: "status",
               type: "bool",
             },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "stakeForfeited",
+              type: "uint256",
+            },
           ],
           name: "ChallengeCompleted",
           type: "event",
@@ -1128,6 +1134,44 @@ const deployedContracts = {
           inputs: [
             {
               internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          name: "ForfeitedFundsToBeCollected",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "_challengeId",
+              type: "uint256",
+            },
+          ],
+          name: "_isChallengeLive",
+          outputs: [
+            {
+              internalType: "bool",
+              name: "",
+              type: "bool",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
               name: "erc20Address",
               type: "address",
             },
@@ -1140,6 +1184,50 @@ const deployedContracts = {
           name: "addPriceFeedAddress",
           outputs: [],
           stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "challengeId",
+              type: "uint256",
+            },
+          ],
+          name: "challengeTable",
+          outputs: [
+            {
+              internalType: "uint8",
+              name: "targetMiles",
+              type: "uint8",
+            },
+            {
+              internalType: "uint8",
+              name: "NoOfWeeks",
+              type: "uint8",
+            },
+            {
+              internalType: "uint8",
+              name: "failedWeeks",
+              type: "uint8",
+            },
+            {
+              internalType: "bool",
+              name: "isLive",
+              type: "bool",
+            },
+            {
+              internalType: "uint48",
+              name: "challengeStartDate",
+              type: "uint48",
+            },
+            {
+              internalType: "address",
+              name: "defaultAddress",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
           type: "function",
         },
         {
@@ -1362,7 +1450,35 @@ const deployedContracts = {
               type: "address",
             },
           ],
-          name: "handleCompleteChallenge",
+          name: "handleCompleteChallengeERC20",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "_challengeID",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "_stakeForfeited",
+              type: "uint256",
+            },
+            {
+              internalType: "address",
+              name: "_userAddress",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "_erc20Address",
+              type: "address",
+            },
+          ],
+          name: "handleCompleteChallengeETH",
           outputs: [],
           stateMutability: "nonpayable",
           type: "function",
