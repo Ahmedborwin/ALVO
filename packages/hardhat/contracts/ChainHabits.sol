@@ -276,6 +276,7 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 		address _userAddress,
 		address _erc20Address
 	) external onlyOwner nonReentrant {
+		require(_erc20Address == address(0) , "This function expects zero address");
 		if (_stakeForfeited > 0) {
 			address forfeitAddress = challengeTable[_challengeID]
 				.defaultAddress;

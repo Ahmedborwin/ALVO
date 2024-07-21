@@ -40,7 +40,7 @@ export function handleChallengeCreate(event: NewChallengeCreated): void {
   challenge.numberOfWeeks = event.params.NumberofWeeks;
   challenge.defaultAddress = event.params.defaultAddress;
   challenge.failedWeeks = BigInt.fromI32(0);
-  challenge.success = 2; //What is this variable?
+  challenge.success = 2;
   challenge.stakedAmount = event.params.amount;
   challenge.createdAt = event.block.timestamp;
   challenge.updatedAt = event.block.timestamp;
@@ -66,30 +66,6 @@ export function handleUserWithdraw(event: FundsWithdrawn): void {
     return;
   }
   user.stakedAmount = user.stakedAmount.minus(event.params.amount);
-  user.updatedAt = event.block.timestamp;
-  user.save();
-}
-
-export function handleChallengeComplete(event: ChallengeCompleted): void {
-  const challenge = Challenge.load(event.params.challengeId.toHexString());
-  if (!challenge) {
-    log.error("Challenge not found: {}", [
-      event.params.challengeId.toHexString(),
-    ]);
-    return;
-  }
-
-  challenge.success = event.params.status ? 1 : 0;
-  challenge.status = false;
-  challenge.updatedAt = event.block.timestamp;
-  challenge.save();
-
-  const user = User.load(event.params.user.toHexString());
-  if (!user) {
-    log.error("User not found: {}", [event.params.user.toHexString()]);
-    return;
-  }
-  user.stakedAmount = user.stakedAmount.minus(event.params.stakeForfeited);
   user.updatedAt = event.block.timestamp;
   user.save();
 }
@@ -133,3 +109,32 @@ export function handleIntervalReview(event: IntervalReviewCompleted): void {
   challenge.updatedAt = event.block.timestamp;
   challenge.save();
 }
+
+
+export function handleChallengeComplete(event: ChallengeCompleted): void {
+  const challenge = Challenge.load(event.params.challengeId.toHexString());
+  if (!challenge) {
+    log.error("Challenge not found: {}", [
+      event.params.challengeId.toHexString(),
+    ]);
+    return;
+  }
+
+  challenge.stakedAmount = challenge.stakedAmount.minus(event.params.stakeForfeited);
+  challenge.success = event.params.status ? 1 : 0;
+  challenge.status = false;
+  challenge.updatedAt = event.block.timestamp;
+  challenge.save();
+
+  const user = User.load(event.params.user.toHexString());
+  if (!user) {
+    log.error("User not found: {}", [event.params.user.toHexString()]);
+    return;
+  }
+  user.stakedAmount = user.stakedAmount.minus(event.params.stakeForfeited);
+  user.updatedAt = event.block.timestamp;
+  user.save();
+}
+
+
+//TODO: Need withdraw event to update the balance of user
