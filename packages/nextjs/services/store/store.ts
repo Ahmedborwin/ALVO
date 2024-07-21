@@ -107,7 +107,10 @@ export const useCommonState = create<CommonState>(
       },
       getERCTokensInChain: () => get().state.ERCTokensInChain,
       getERCTokensByAddress: (address: string) => {
-        return get().state.ERCTokens.find(token => token.address === address) || ({} as ERCTokens);
+        return (
+          get().state.ERCTokensInChain.find(token => token.address.toLowerCase() === address.toLowerCase()) ||
+          ({} as ERCTokens)
+        );
       },
     }),
     {

@@ -64,6 +64,7 @@ export interface Challenge {
   defaultAddress: string;
   success: number;
   status: boolean;
+  ERC20Address: string;
   createdAt: bigint;
   updatedAt: bigint;
   transactionHash: string;

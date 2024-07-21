@@ -142,6 +142,13 @@ const Challenge: NextPage = () => {
   }, [data, loading, userDetails, fetchRanData, challengeDetails, setRanMiles]);
 
   const stakedAmount = useWeiToUSD(challengeDetails?.stakedAmount);
+  const getERCTokensByAddress = useCommonState(state => state.getERCTokensByAddress);
+  const StakedType = useMemo(() => {
+    if (challengeDetails?.ERC20Address)
+      return isZeroAddress(challengeDetails?.ERC20Address)
+        ? "USD"
+        : getERCTokensByAddress(challengeDetails?.ERC20Address)?.name || "ERC";
+  }, [challengeDetails?.ERC20Address]);
 
   useScaffoldWatchContractEvent({
     contractName: "ChainHabits",
@@ -384,7 +391,7 @@ const Challenge: NextPage = () => {
                   -4,
                 )}`}
               />
-              <DetailCard title="Staked" value={`${stakedAmount} USD`} />
+              <DetailCard title="Staked" value={`${stakedAmount} ${StakedType}`} />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {challengeDetails?.reviews.length

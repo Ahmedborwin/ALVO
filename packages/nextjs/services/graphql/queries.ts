@@ -26,6 +26,7 @@ query MyQuery($address: String!) {
   nextIntervalReviewEpoch
   success
   status
+  ERC20Address
   createdAt
   reviews {
    status
