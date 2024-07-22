@@ -52,15 +52,7 @@ function GlobalWrapper({ children }: { children: ReactNode }) {
     }
   }, [data?.targetNetwork]);
 
-  const {
-    data: isRegistered,
-    error: readRegisteredError,
-    isFetched: readRegisteredIsFetched,
-    isFetching: readRegisteredIsFetching,
-    isError: readRegisteredIsError,
-    isPending: readRegisteredIsPending,
-    status: readRegisteredStatus,
-  } = useScaffoldReadContract({
+  const { data: isRegistered } = useScaffoldReadContract({
     contractName: "ChainHabits",
     functionName: "isUserRegisteredTable",
     args: [address ?? alchemyAddress],
