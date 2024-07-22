@@ -7,8 +7,10 @@ import { UserOperationProvider } from "../providers/UserOperationProvider";
 import { StwwError } from "../stww";
 import { AlchemySignerStatus } from "@alchemy/aa-alchemy";
 import { useSignerStatus } from "@alchemy/aa-alchemy/react";
+import { useAccount as useAlchemyAccount } from "@alchemy/aa-alchemy/react";
 import { useAccount } from "wagmi";
-import { useTargetNetwork } from "~~/hooks/scaffold-eth";
+import { accountType } from "~~/config/AlchemyConfig";
+import { useScaffoldReadContract, useTargetNetwork } from "~~/hooks/scaffold-eth";
 import { useCommonState, useStravaState } from "~~/services/store/store";
 import { getERCTokenDetails } from "~~/utils/common";
 import { notification } from "~~/utils/scaffold-eth";
@@ -16,6 +18,7 @@ import { notification } from "~~/utils/scaffold-eth";
 function GlobalWrapper({ children }: { children: ReactNode }) {
   const { isInitializing, isConnected, status } = useSignerStatus();
   const { address } = useAccount();
+  const { address: alchemyAddress } = useAlchemyAccount({ type: accountType });
 
   const stravaData = useStravaState(state => state.getStravaTokens());
 
@@ -49,6 +52,20 @@ function GlobalWrapper({ children }: { children: ReactNode }) {
     }
   }, [data?.targetNetwork]);
 
+  const {
+    data: isRegistered,
+    error: readRegisteredError,
+    isFetched: readRegisteredIsFetched,
+    isFetching: readRegisteredIsFetching,
+    isError: readRegisteredIsError,
+    isPending: readRegisteredIsPending,
+    status: readRegisteredStatus,
+  } = useScaffoldReadContract({
+    contractName: "ChainHabits",
+    functionName: "isUserRegisteredTable",
+    args: [address ?? alchemyAddress],
+  });
+
   if (
     !address &&
     (isInitializing || status === AlchemySignerStatus.INITIALIZING || status === AlchemySignerStatus.AUTHENTICATING)
@@ -63,7 +80,7 @@ function GlobalWrapper({ children }: { children: ReactNode }) {
   if (
     ((address && status === AlchemySignerStatus.DISCONNECTED) ||
       (!address && status === AlchemySignerStatus.CONNECTED)) &&
-    (!stravaData.access_token || !stravaData.refresh_token)
+    (!stravaData.access_token || !stravaData.refresh_token || isRegistered === false)
   )
     return <StravaLogin />;
 

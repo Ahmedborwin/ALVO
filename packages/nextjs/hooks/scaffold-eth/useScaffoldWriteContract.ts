@@ -89,7 +89,7 @@ export const useScaffoldWriteContract = <TContractName extends ContractName>(
         const makeWriteWithParams = () =>
           wagmiContractWrite.writeContractAsync(
             {
-              abi: targetERCAddress ? (ERC20_ABI as Abi) : (deployedContractData.abi as Abi),
+              abi: targetERCAddress ? ERC20_ABI : (deployedContractData.abi as Abi),
               address: targetERCAddress || deployedContractData.address,
               ...variables,
             } as WriteContractVariables<Abi, string, any[], Config, number>,
@@ -136,7 +136,7 @@ export const useScaffoldWriteContract = <TContractName extends ContractName>(
 
     wagmiContractWrite.writeContract(
       {
-        abi: targetERCAddress ? (ERC20_ABI as Abi) : (deployedContractData.abi as Abi),
+        abi: targetERCAddress ? ERC20_ABI : (deployedContractData.abi as Abi),
         address: targetERCAddress || deployedContractData.address,
         ...variables,
       } as WriteContractVariables<Abi, string, any[], Config, number>,
