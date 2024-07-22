@@ -33,17 +33,17 @@ const deployChainHabits: DeployFunction = async function (hre: HardhatRuntimeEnv
 
   const tx = await chainHabits.registerNewUser(62612170, "0ac2f45bea762e3f0c7abbc1d2e6b78ee8f2a7fd");
   await tx.wait();
-
+  console.log("@@user registered");
   const tx2 = await await chainHabits.createNewChallenge(
     "Run marathon",
     200,
     4,
-    "0x5f2AF68dF96F3e58e1a243F4f83aD4f5D0Ca6029",
-    12,
+    "0x0a192a377E7F2Bd2ffe494cE0976b79D897E10B0",
+    5,
     ZeroAddress,
     0,
     {
-      value: ethers.parseEther("0.01"),
+      value: ethers.parseEther("0.001"),
     },
   );
   await tx2.wait();

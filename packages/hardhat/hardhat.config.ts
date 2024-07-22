@@ -48,7 +48,7 @@ const config: HardhatUserConfig = {
       default: 0,
     },
   },
-  // networks: { ...networks },
+  networks: { ...networks },
   // configuration for harhdat-verify plugin
   etherscan: {
     apiKey: {

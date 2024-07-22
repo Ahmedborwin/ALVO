@@ -1635,422 +1635,62 @@ const deployedContracts = {
     },
   },
   84532: {
-    APIConsumer: {
-      address: "0xE473e7c11eDf5fd9c5617Df24785DcACBcDE29Ca",
-      abi: [
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "router",
-              type: "address",
-            },
-            {
-              internalType: "bytes32",
-              name: "_donId",
-              type: "bytes32",
-            },
-          ],
-          stateMutability: "nonpayable",
-          type: "constructor",
-        },
-        {
-          inputs: [],
-          name: "EmptyArgs",
-          type: "error",
-        },
-        {
-          inputs: [],
-          name: "EmptySource",
-          type: "error",
-        },
-        {
-          inputs: [],
-          name: "NoInlineSecrets",
-          type: "error",
-        },
-        {
-          inputs: [],
-          name: "OnlyRouterCanFulfill",
-          type: "error",
-        },
-        {
-          anonymous: false,
-          inputs: [
-            {
-              indexed: true,
-              internalType: "address",
-              name: "from",
-              type: "address",
-            },
-            {
-              indexed: true,
-              internalType: "address",
-              name: "to",
-              type: "address",
-            },
-          ],
-          name: "OwnershipTransferRequested",
-          type: "event",
-        },
-        {
-          anonymous: false,
-          inputs: [
-            {
-              indexed: true,
-              internalType: "address",
-              name: "from",
-              type: "address",
-            },
-            {
-              indexed: true,
-              internalType: "address",
-              name: "to",
-              type: "address",
-            },
-          ],
-          name: "OwnershipTransferred",
-          type: "event",
-        },
-        {
-          anonymous: false,
-          inputs: [
-            {
-              indexed: true,
-              internalType: "bytes32",
-              name: "id",
-              type: "bytes32",
-            },
-          ],
-          name: "RequestFulfilled",
-          type: "event",
-        },
-        {
-          anonymous: false,
-          inputs: [
-            {
-              indexed: true,
-              internalType: "bytes32",
-              name: "id",
-              type: "bytes32",
-            },
-          ],
-          name: "RequestSent",
-          type: "event",
-        },
-        {
-          anonymous: false,
-          inputs: [
-            {
-              indexed: false,
-              internalType: "bytes32",
-              name: "_requestId",
-              type: "bytes32",
-            },
-            {
-              indexed: false,
-              internalType: "bytes",
-              name: "_response",
-              type: "bytes",
-            },
-          ],
-          name: "ResponseReceived",
-          type: "event",
-        },
-        {
-          anonymous: false,
-          inputs: [
-            {
-              indexed: false,
-              internalType: "bytes32",
-              name: "requestID",
-              type: "bytes32",
-            },
-          ],
-          name: "_RequestSent",
-          type: "event",
-        },
-        {
-          inputs: [],
-          name: "StravaCall",
-          outputs: [
-            {
-              internalType: "string",
-              name: "",
-              type: "string",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "_router",
-          outputs: [
-            {
-              internalType: "address",
-              name: "",
-              type: "address",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "acceptOwnership",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "bytes32",
-              name: "_bytes32",
-              type: "bytes32",
-            },
-          ],
-          name: "bytes32ToString",
-          outputs: [
-            {
-              internalType: "string",
-              name: "",
-              type: "string",
-            },
-          ],
-          stateMutability: "pure",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "callbackGasLimit",
-          outputs: [
-            {
-              internalType: "uint32",
-              name: "",
-              type: "uint32",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "contract_Admin",
-          outputs: [
-            {
-              internalType: "address",
-              name: "",
-              type: "address",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "donId",
-          outputs: [
-            {
-              internalType: "bytes32",
-              name: "",
-              type: "bytes32",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "bytes32",
-              name: "requestId",
-              type: "bytes32",
-            },
-            {
-              internalType: "bytes",
-              name: "response",
-              type: "bytes",
-            },
-            {
-              internalType: "bytes",
-              name: "err",
-              type: "bytes",
-            },
-          ],
-          name: "handleOracleFulfillment",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "owner",
-          outputs: [
-            {
-              internalType: "address",
-              name: "",
-              type: "address",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "string",
-              name: "_stravaCall",
-              type: "string",
-            },
-          ],
-          name: "populateStravaCall",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "uint64",
-              name: "_subId",
-              type: "uint64",
-            },
-            {
-              internalType: "uint32",
-              name: "_callbackGasLimit",
-              type: "uint32",
-            },
-          ],
-          name: "populateSubIdANDGasLimit",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "s_lastError",
-          outputs: [
-            {
-              internalType: "bytes",
-              name: "",
-              type: "bytes",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "s_lastRequestId",
-          outputs: [
-            {
-              internalType: "bytes32",
-              name: "",
-              type: "bytes32",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "s_lastResponse",
-          outputs: [
-            {
-              internalType: "bytes",
-              name: "",
-              type: "bytes",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "string[]",
-              name: "args",
-              type: "string[]",
-            },
-          ],
-          name: "sendRequest",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "_newAdmin",
-              type: "address",
-            },
-          ],
-          name: "setContractAdmin",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "bytes32",
-              name: "newDonId",
-              type: "bytes32",
-            },
-          ],
-          name: "setDonId",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "subscriptionId",
-          outputs: [
-            {
-              internalType: "uint64",
-              name: "",
-              type: "uint64",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "to",
-              type: "address",
-            },
-          ],
-          name: "transferOwnership",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-      ],
-      inheritedFunctions: {
-        handleOracleFulfillment: "@chainlink/contracts/src/v0.8/functions/v1_0_0/FunctionsClient.sol",
-        acceptOwnership: "@chainlink/contracts/src/v0.8/shared/access/ConfirmedOwner.sol",
-        owner: "@chainlink/contracts/src/v0.8/shared/access/ConfirmedOwner.sol",
-        transferOwnership: "@chainlink/contracts/src/v0.8/shared/access/ConfirmedOwner.sol",
-      },
-    },
     ChainHabits: {
-      address: "0xD83E502fb420494A130d934B0586A94Ee2C10471",
+      address: "0x817253f245A48B0B2f156c0b84460c2819a9D2c1",
       abi: [
         {
           inputs: [],
           stateMutability: "nonpayable",
           type: "constructor",
+        },
+        {
+          inputs: [],
+          name: "CHAINHABITS__ChallengeNotLive",
+          type: "error",
         },
         {
           inputs: [],
           name: "CHAINHABITS__ChallengeStillActive",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "CHAINHABITS__ERC20DepositAmountIs0",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "CHAINHABITS__ERC20TokenNotSupported",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "CHAINHABITS__ERC20TransferFailed",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "CHAINHABITS__ForfeitAddressInvalid",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "CHAINHABITS__ForfeitExceedsStake",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "CHAINHABITS__IncorrectAddressORChallengeId",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "CHAINHABITS__InsufficientERC20Allowance",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "CHAINHABITS__InsufficientERC20Balance",
           type: "error",
         },
         {
@@ -2060,7 +1700,22 @@ const deployedContracts = {
         },
         {
           inputs: [],
+          name: "CHAINHABITS__PrivateInformation",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "CHAINHABITS__StakeAmountisZero",
+          type: "error",
+        },
+        {
+          inputs: [],
           name: "CHAINHABITS__UserAlreadyRegistered",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "CHAINHABITS__UserHasLiveObjective",
           type: "error",
         },
         {
@@ -2085,12 +1740,37 @@ const deployedContracts = {
             },
             {
               indexed: false,
-              internalType: "uint8",
+              internalType: "bool",
+              name: "status",
+              type: "bool",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
               name: "stakeForfeited",
-              type: "uint8",
+              type: "uint256",
             },
           ],
           name: "ChallengeCompleted",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "user",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "amount",
+              type: "uint256",
+            },
+          ],
+          name: "ForfeitedFundsFailedToSend",
           type: "event",
         },
         {
@@ -2122,13 +1802,38 @@ const deployedContracts = {
               type: "uint256",
             },
             {
+              indexed: false,
+              internalType: "address",
+              name: "userAddress",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "bool",
+              name: "success",
+              type: "bool",
+            },
+          ],
+          name: "IntervalReviewCompleted",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "uint256",
+              name: "challengeId",
+              type: "uint256",
+            },
+            {
               indexed: true,
               internalType: "address",
               name: "user",
               type: "address",
             },
             {
-              indexed: true,
+              indexed: false,
               internalType: "string",
               name: "Objective",
               type: "string",
@@ -2147,14 +1852,26 @@ const deployedContracts = {
             },
             {
               indexed: false,
-              internalType: "uint48",
-              name: "challengeStartDate",
-              type: "uint48",
+              internalType: "uint8",
+              name: "PercentageIncrease",
+              type: "uint8",
             },
             {
               indexed: false,
               internalType: "address",
               name: "defaultAddress",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "amount",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "address",
+              name: "erc20Address",
               type: "address",
             },
           ],
@@ -2165,7 +1882,7 @@ const deployedContracts = {
           anonymous: false,
           inputs: [
             {
-              indexed: false,
+              indexed: true,
               internalType: "address",
               name: "user",
               type: "address",
@@ -2194,38 +1911,19 @@ const deployedContracts = {
           type: "event",
         },
         {
-          anonymous: false,
           inputs: [
-            {
-              indexed: true,
-              internalType: "uint256",
-              name: "challengeId",
-              type: "uint256",
-            },
-            {
-              indexed: true,
-              internalType: "address",
-              name: "user",
-              type: "address",
-            },
-            {
-              indexed: false,
-              internalType: "bool",
-              name: "success",
-              type: "bool",
-            },
-          ],
-          name: "intervalReviewCompleted",
-          type: "event",
-        },
-        {
-          inputs: [],
-          name: "admin",
-          outputs: [
             {
               internalType: "address",
               name: "",
               type: "address",
+            },
+          ],
+          name: "ForfeitedFundsToBeCollected",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
             },
           ],
           stateMutability: "view",
@@ -2235,15 +1933,77 @@ const deployedContracts = {
           inputs: [
             {
               internalType: "uint256",
-              name: "",
+              name: "_challengeId",
               type: "uint256",
             },
           ],
-          name: "allUsers",
+          name: "_isChallengeLive",
           outputs: [
             {
-              internalType: "address",
+              internalType: "bool",
               name: "",
+              type: "bool",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "erc20Address",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "_priceFeedAddress",
+              type: "address",
+            },
+          ],
+          name: "addPriceFeedAddress",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "challengeId",
+              type: "uint256",
+            },
+          ],
+          name: "challengeTable",
+          outputs: [
+            {
+              internalType: "uint8",
+              name: "targetMiles",
+              type: "uint8",
+            },
+            {
+              internalType: "uint8",
+              name: "NoOfWeeks",
+              type: "uint8",
+            },
+            {
+              internalType: "uint8",
+              name: "failedWeeks",
+              type: "uint8",
+            },
+            {
+              internalType: "bool",
+              name: "isLive",
+              type: "bool",
+            },
+            {
+              internalType: "uint48",
+              name: "challengeStartDate",
+              type: "uint48",
+            },
+            {
+              internalType: "address",
+              name: "defaultAddress",
               type: "address",
             },
           ],
@@ -2269,8 +2029,23 @@ const deployedContracts = {
             },
             {
               internalType: "address",
-              name: "_defaultAddress",
+              name: "_forfeitAddress",
               type: "address",
+            },
+            {
+              internalType: "uint8",
+              name: "_percentageIncrease",
+              type: "uint8",
+            },
+            {
+              internalType: "address",
+              name: "_erc20Address",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "_depositAmount",
+              type: "uint256",
             },
           ],
           name: "createNewChallenge",
@@ -2282,19 +2057,6 @@ const deployedContracts = {
             },
           ],
           stateMutability: "payable",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "getAllUserDetails",
-          outputs: [
-            {
-              internalType: "address[]",
-              name: "",
-              type: "address[]",
-            },
-          ],
-          stateMutability: "view",
           type: "function",
         },
         {
@@ -2380,11 +2142,6 @@ const deployedContracts = {
             {
               components: [
                 {
-                  internalType: "uint48",
-                  name: "currentStaked",
-                  type: "uint48",
-                },
-                {
                   internalType: "uint256",
                   name: "userID",
                   type: "uint256",
@@ -2406,22 +2163,102 @@ const deployedContracts = {
         {
           inputs: [
             {
-              internalType: "uint256",
-              name: "challengeId",
-              type: "uint256",
-            },
-            {
-              internalType: "uint8",
-              name: "stakeForfeited",
-              type: "uint8",
+              internalType: "address",
+              name: "_user",
+              type: "address",
             },
             {
               internalType: "address",
-              name: "userAddress",
+              name: "_token",
               type: "address",
             },
           ],
-          name: "handleCompleteChallenge",
+          name: "getUserStake",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256[]",
+              name: "_challengeId",
+              type: "uint256[]",
+            },
+            {
+              internalType: "address[]",
+              name: "_user",
+              type: "address[]",
+            },
+            {
+              internalType: "bool[]",
+              name: "failed",
+              type: "bool[]",
+            },
+          ],
+          name: "handleBulkIntervalReview",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "_challengeID",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "_stakeForfeited",
+              type: "uint256",
+            },
+            {
+              internalType: "address",
+              name: "_userAddress",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "_erc20Address",
+              type: "address",
+            },
+          ],
+          name: "handleCompleteChallengeERC20",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "_challengeID",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "_stakeForfeited",
+              type: "uint256",
+            },
+            {
+              internalType: "address",
+              name: "_userAddress",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "_erc20Address",
+              type: "address",
+            },
+          ],
+          name: "handleCompleteChallengeETH",
           outputs: [],
           stateMutability: "nonpayable",
           type: "function",
@@ -2432,6 +2269,11 @@ const deployedContracts = {
               internalType: "uint256",
               name: "_challengeId",
               type: "uint256",
+            },
+            {
+              internalType: "address",
+              name: "_user",
+              type: "address",
             },
             {
               internalType: "bool",
@@ -2552,7 +2394,13 @@ const deployedContracts = {
           type: "function",
         },
         {
-          inputs: [],
+          inputs: [
+            {
+              internalType: "address",
+              name: "_erc20Address",
+              type: "address",
+            },
+          ],
           name: "withdrawFunds",
           outputs: [],
           stateMutability: "nonpayable",

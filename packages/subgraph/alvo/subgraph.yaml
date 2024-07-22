@@ -1,0 +1,44 @@
+specVersion: 1.0.0
+indexerHints:
+  prune: auto
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: ChainHabits
+    network: base-sepolia
+    source:
+      address: "0x817253f245A48B0B2f156c0b84460c2819a9D2c1"
+      abi: ChainHabits
+      startBlock: 12936740
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - ChallengeCompleted
+        - ForfeitedFundsFailedToSend
+        - FundsWithdrawn
+        - IntervalReviewCompleted
+        - NewChallengeCreated
+        - NewUserRegistered
+        - OwnershipTransferred
+      abis:
+        - name: ChainHabits
+          file: ./abis/ChainHabits.json
+      eventHandlers:
+        - event: ChallengeCompleted(indexed uint256,indexed address,bool,uint256)
+          handler: handleChallengeCompleted
+        - event: ForfeitedFundsFailedToSend(indexed address,uint256)
+          handler: handleForfeitedFundsFailedToSend
+        - event: FundsWithdrawn(indexed address,uint256)
+          handler: handleFundsWithdrawn
+        - event: IntervalReviewCompleted(indexed uint256,address,bool)
+          handler: handleIntervalReviewCompleted
+        - event: NewChallengeCreated(indexed uint256,indexed address,string,uint8,uint8,uint8,address,uint256,address)
+          handler: handleNewChallengeCreated
+        - event: NewUserRegistered(indexed address)
+          handler: handleNewUserRegistered
+        - event: OwnershipTransferred(indexed address,indexed address)
+          handler: handleOwnershipTransferred
+      file: ./src/chain-habits.ts

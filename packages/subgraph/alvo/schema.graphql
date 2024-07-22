@@ -1,0 +1,71 @@
+type ChallengeCompleted @entity(immutable: true) {
+  id: Bytes!
+  challengeId: BigInt! # uint256
+  user: Bytes! # address
+  status: Boolean! # bool
+  stakeForfeited: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type ForfeitedFundsFailedToSend @entity(immutable: true) {
+  id: Bytes!
+  user: Bytes! # address
+  amount: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type FundsWithdrawn @entity(immutable: true) {
+  id: Bytes!
+  user: Bytes! # address
+  amount: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type IntervalReviewCompleted @entity(immutable: true) {
+  id: Bytes!
+  challengeId: BigInt! # uint256
+  userAddress: Bytes! # address
+  success: Boolean! # bool
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type NewChallengeCreated @entity(immutable: true) {
+  id: Bytes!
+  challengeId: BigInt! # uint256
+  user: Bytes! # address
+  Objective: String! # string
+  startingMiles: Int! # uint8
+  NumberofWeeks: Int! # uint8
+  PercentageIncrease: Int! # uint8
+  defaultAddress: Bytes! # address
+  amount: BigInt! # uint256
+  erc20Address: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type NewUserRegistered @entity(immutable: true) {
+  id: Bytes!
+  user: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type OwnershipTransferred @entity(immutable: true) {
+  id: Bytes!
+  previousOwner: Bytes! # address
+  newOwner: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}

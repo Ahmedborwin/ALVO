@@ -1,0 +1,8 @@
+{
+  "base-sepolia": {
+    "ChainHabits": {
+      "address": "0x817253f245A48B0B2f156c0b84460c2819a9D2c1",
+      "startBlock": 12936740
+    }
+  }
+}
