@@ -14,6 +14,7 @@ import {
   STRAVA_REFRESH_REQUEST_TOKEN_URL,
   STRAVA_REQUEST_TOKEN_URL,
 } from "./StravaConsts";
+import { ERC_TOKEN_URL } from "./common";
 
 export {
   rpcUrl,
@@ -30,4 +31,5 @@ export {
   STRAVA_REQUEST_TOKEN_URL,
   STRAVA_REFRESH_REQUEST_TOKEN_URL,
   STRAVA_AXIOS_BASE_URL,
+  ERC_TOKEN_URL,
 };

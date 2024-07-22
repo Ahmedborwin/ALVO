@@ -178,6 +178,19 @@ export type UseScaffoldReadConfig<
   } & UseScaffoldArgsParam<TContractName, TFunctionName> &
     Omit<UseReadContractParameters, "chainId" | "abi" | "address" | "functionName" | "args">
 >;
+type ApproveFunction = {
+  functionName: "approve";
+  args: [string | undefined, bigint];
+};
+export type ScaffoldWriteContractVariablesWithApprove<TContractName extends ContractName> =
+  | ScaffoldWriteContractVariables<
+      TContractName,
+      ExtractAbiFunctionNames<ContractAbi<TContractName>, WriteAbiStateMutability>
+    >
+  | (ApproveFunction &
+      Omit<WriteContractParameters, "chainId" | "abi" | "address" | "functionName" | "args"> & {
+        targetERCAddress?: string;
+      });
 
 export type ScaffoldWriteContractVariables<
   TContractName extends ContractName,

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useAccount as useAlchemyAccount } from "@alchemy/aa-alchemy/react";
 import { gql, useQuery } from "@apollo/client";
@@ -9,13 +9,29 @@ import { useAccount } from "wagmi";
 import { ObjectiveCard } from "~~/components/cards";
 import { MoonSpinner } from "~~/components/loader";
 import { accountType } from "~~/config/AlchemyConfig";
+import AxiosInstance from "~~/config/AxiosConfig";
+import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
+import { useStrava } from "~~/hooks/strava";
 import { CREATE_CHALLENGES } from "~~/services/graphql/queries";
 import { Challenge, IntervalReviews } from "~~/types/utils";
+import { notification } from "~~/utils/scaffold-eth";
 
-const ChallengeDetailItem = ({ label, value }: { label: string; value: string | number }) => (
+const ChallengeDetailItem = ({
+  label,
+  value,
+  loading = false,
+}: {
+  label: string;
+  value: string | number;
+  loading?: boolean;
+}) => (
   <div className="flex flex-col items-start">
     <span className="text-purple-300 text-sm">{label}</span>
-    <span className="text-white font-medium text-lg">{value}</span>
+    {loading ? (
+      <span className="loading loading-dots loading-sm"></span>
+    ) : (
+      <span className="text-white font-medium text-lg">{value}</span>
+    )}
   </div>
 );
 
@@ -23,12 +39,21 @@ const Home: NextPage = () => {
   const { address } = useAccount();
   const { address: alchemyAddress } = useAlchemyAccount({ type: accountType });
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [ranMiles, setRanMiles] = useState<string | null>(null);
 
   const GET_CHALLENGE_GQL = gql(CREATE_CHALLENGES);
+
+  const { callStravaApi } = useStrava();
 
   const { data, loading } = useQuery(GET_CHALLENGE_GQL, {
     variables: { address: address || alchemyAddress },
     fetchPolicy: "network-only",
+  });
+
+  const { data: userDetails } = useScaffoldReadContract({
+    contractName: "ChainHabits",
+    functionName: "getUserDetails",
+    args: [address ?? alchemyAddress],
   });
 
   const challengeDetails: Challenge = useMemo(() => {
@@ -38,6 +63,49 @@ const Home: NextPage = () => {
     }
     return {};
   }, [data, loading]);
+
+  const fetchRanData = useCallback(
+    async (nextIntervalReviewEpoch: string) => {
+      const beforeEpoch = nextIntervalReviewEpoch;
+      const afterEpoch = Number(nextIntervalReviewEpoch) - 6048000;
+      try {
+        const { data } = await callStravaApi(async () => {
+          return await AxiosInstance.get(
+            `/athlete/activities?before=${beforeEpoch}&after=${afterEpoch}&page=1&per_page=30`,
+          );
+        }, userDetails?.refreshToken);
+
+        const allActivity: any[] = data;
+        const OnlyRuns = allActivity.filter((activity: any) => activity.type === "Run");
+        const distanceLogged = OnlyRuns.reduce(
+          (accDistance: number, activity: any) => accDistance + activity.distance,
+          0,
+        );
+
+        return String(Number(distanceLogged / 1609.34)).substring(0, 4) || "0.00";
+      } catch (e) {
+        console.error(`Error retrieving Strava data: ${e}`);
+        notification.error("Something went wrong while fetching latest week running report");
+        return "0.00";
+      }
+    },
+    [userDetails],
+  );
+
+  useEffect(() => {
+    if (data && !loading && userDetails && challengeDetails) {
+      const handleMount = async () => {
+        const objectiveDetails = data.challenge.length ? data.challenge[0] : {};
+        if (objectiveDetails?.status) {
+          const value = await fetchRanData(objectiveDetails?.nextIntervalReviewEpoch);
+          setRanMiles(value);
+        }
+        setIsLoading(false);
+      };
+      handleMount();
+    }
+    setRanMiles(null);
+  }, [data, loading, userDetails, fetchRanData, challengeDetails, setRanMiles]);
 
   if (isLoading) return <MoonSpinner />;
 
@@ -56,7 +124,11 @@ const Home: NextPage = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
                 <ChallengeDetailItem label="Objective" value={challengeDetails.objective} />
                 <ChallengeDetailItem label="Target" value={`${challengeDetails?.startingMiles} miles`} />
-                <ChallengeDetailItem label="Duration" value={`${challengeDetails?.numberOfWeeks} weeks`} />
+                <ChallengeDetailItem
+                  label="Miles recorded this week"
+                  value={ranMiles || 0}
+                  loading={ranMiles === null}
+                />
                 <ChallengeDetailItem
                   label="Failed Weeks"
                   value={(challengeDetails?.reviews.filter((item: IntervalReviews) => item.status === false)).length}

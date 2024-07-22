@@ -4,9 +4,9 @@ import { SetStateAction, useCallback, useEffect, useMemo, useState } from "react
 import { useAccount as useAlchemyAccount } from "@alchemy/aa-alchemy/react";
 import { gql, useQuery } from "@apollo/client";
 import { NextPage } from "next";
-import { Address, isAddress, parseEther } from "viem";
+import { isAddress, parseEther, zeroAddress } from "viem";
 import { useAccount } from "wagmi";
-import { AddressInput, CustomInput } from "~~/components/Input";
+import { AddressInput, CustomInput, CustomSelect, ToggleCheckBox } from "~~/components/Input";
 import { CancelButton, SubmitButton } from "~~/components/buttons";
 import { DetailCard, ObjectiveCard } from "~~/components/cards";
 import { MoonSpinner } from "~~/components/loader";
@@ -14,15 +14,17 @@ import { accountType } from "~~/config/AlchemyConfig";
 import AxiosInstance from "~~/config/AxiosConfig";
 import { useWeiToUSD } from "~~/hooks/common";
 import {
+  useDeployedContractInfo,
   useScaffoldReadContract,
   useScaffoldWatchContractEvent,
   useScaffoldWriteContract,
 } from "~~/hooks/scaffold-eth";
 import { useStrava } from "~~/hooks/strava";
 import { CREATE_CHALLENGES } from "~~/services/graphql/queries";
-import { useGlobalState } from "~~/services/store/store";
-import { Challenge as ChallengeType, IntervalReviews } from "~~/types/utils";
+import { useCommonState, useGlobalState } from "~~/services/store/store";
+import { Challenge as ChallengeType, IntervalReviews, Option } from "~~/types/utils";
 import { notification } from "~~/utils/scaffold-eth";
+import { isZeroAddress } from "~~/utils/scaffold-eth/common";
 
 const Label = ({ label, children }: { label: string; children?: React.ReactNode }) => (
   <label htmlFor={label} className="flex items-center text-sm font-medium text-indigo-200 mb-2">
@@ -39,11 +41,17 @@ const Challenge: NextPage = () => {
   const [startingMiles, setStartingMiles] = useState<number | null>(null);
   const [targetIncrease, setTargetIncrease] = useState<number | null>(0);
   const [ranMiles, setRanMiles] = useState<string | null>(null);
+  const [isGBP, setIsGBP] = useState<boolean>(false);
+  const [price, setPrice] = useState<number>(0);
+  const [token, setToken] = useState<boolean>(false);
+  const [selectedToken, setSelectedToken] = useState<string>(zeroAddress);
 
   const { callStravaApi } = useStrava();
 
   const { writeContractAsync: writeYourContractAsync } = useScaffoldWriteContract("ChainHabits");
-  const nativeCurrencyPrice = useGlobalState(state => state.nativeCurrency.price);
+
+  const { gbpPrice, price: nativeCurrencyPrice } = useGlobalState(state => state.nativeCurrency);
+  const chainTokenDetails = useCommonState(state => state.getERCTokensInChain());
 
   const { address } = useAccount();
   const { address: alchemyAddress } = useAlchemyAccount({ type: accountType });
@@ -60,6 +68,23 @@ const Challenge: NextPage = () => {
     functionName: "getUserDetails",
     args: [address ?? alchemyAddress],
   });
+
+  const allowedTokens: { [key: string]: string } = {
+    USDC: "USDC",
+  };
+
+  const { data: AlVOContractDetails } = useDeployedContractInfo("ChainHabits");
+
+  const options: Option[] = useMemo(() => {
+    return chainTokenDetails.reduce((prev: Option[], { name, address }) => {
+      if (allowedTokens[name] === name)
+        prev.push({
+          value: address,
+          label: name,
+        });
+      return prev;
+    }, []);
+  }, []);
 
   const fetchRanData = useCallback(
     async (nextIntervalReviewEpoch: string) => {
@@ -98,11 +123,17 @@ const Challenge: NextPage = () => {
   }, [data, loading]);
 
   useEffect(() => {
+    if (!token) setSelectedToken(zeroAddress);
+  }, [token]);
+
+  useEffect(() => {
     if (data && !loading && userDetails && challengeDetails) {
       const handleMount = async () => {
         const objectiveDetails = data.challenge.length ? data.challenge[0] : {};
-        const value = await fetchRanData(objectiveDetails?.nextIntervalReviewEpoch);
-        setRanMiles(value);
+        if (objectiveDetails?.status) {
+          const value = await fetchRanData(objectiveDetails?.nextIntervalReviewEpoch);
+          setRanMiles(value);
+        }
         setIsLoading(false);
       };
       handleMount();
@@ -111,6 +142,13 @@ const Challenge: NextPage = () => {
   }, [data, loading, userDetails, fetchRanData, challengeDetails, setRanMiles]);
 
   const stakedAmount = useWeiToUSD(challengeDetails?.stakedAmount);
+  const getERCTokensByAddress = useCommonState(state => state.getERCTokensByAddress);
+  const StakedType = useMemo(() => {
+    if (challengeDetails?.ERC20Address)
+      return isZeroAddress(challengeDetails?.ERC20Address)
+        ? "USD"
+        : getERCTokensByAddress(challengeDetails?.ERC20Address)?.name || "ERC";
+  }, [challengeDetails?.ERC20Address]);
 
   useScaffoldWatchContractEvent({
     contractName: "ChainHabits",
@@ -132,7 +170,9 @@ const Challenge: NextPage = () => {
     setNoOfWeeks(4);
     setStakeValue(40);
     setTargetIncrease(0);
+    setIsGBP(false);
     setStartingMiles(null);
+    setSelectedToken(zeroAddress);
   };
 
   const handleCreateChallenge = async () => {
@@ -149,13 +189,24 @@ const Challenge: NextPage = () => {
         return;
       }
       setIsLoading(true);
+      let ethAmount = 0;
+      if (!token && isZeroAddress(selectedToken) && AlVOContractDetails?.address) {
+        ethAmount = !isGBP
+          ? stakeValue / nativeCurrencyPrice
+          : (stakeValue * (nativeCurrencyPrice / gbpPrice)) / nativeCurrencyPrice;
+      }
+      if (token && !isZeroAddress(selectedToken))
+        await writeYourContractAsync({
+          functionName: "approve",
+          args: [AlVOContractDetails?.address, parseEther(stakeValue.toString())],
+          targetERCAddress: selectedToken,
+        });
 
-      const ethAmount = stakeValue / nativeCurrencyPrice;
-      // await writeYourContractAsync({
-      //   functionName: "createNewChallenge",
-      //   args: [objective, startingMiles, noOfWeeks, forfeitAddress as Address, targetIncrease],
-      //   value: parseEther(ethAmount.toString()),
-      // });
+      await writeYourContractAsync({
+        functionName: "createNewChallenge",
+        args: [objective, startingMiles, noOfWeeks, forfeitAddress, targetIncrease, selectedToken, BigInt(stakeValue)],
+        value: parseEther(ethAmount.toString()),
+      });
       notification.success("Successfully created");
       clearAll();
       setIsLoading(false);
@@ -172,7 +223,7 @@ const Challenge: NextPage = () => {
       setState(null);
       return;
     }
-    if (!Number.isNaN(data) && data >= 1) setState(data);
+    if (!Number.isNaN(data) && data >= 1) setState(parseInt(data.toString()));
   }, []);
 
   const assignPercentage = useCallback((value: string): void => {
@@ -184,6 +235,15 @@ const Challenge: NextPage = () => {
     if (castValue < 0 || castValue > 100) return;
     setTargetIncrease(castValue);
   }, []);
+
+  useEffect(() => {
+    if (stakeValue && nativeCurrencyPrice && gbpPrice && !token) {
+      let value: number;
+      if (isGBP) value = stakeValue * (nativeCurrencyPrice / gbpPrice);
+      else value = stakeValue * (gbpPrice / nativeCurrencyPrice);
+      setPrice(parseFloat(value.toFixed(2).toString()));
+    } else setPrice(0);
+  }, [stakeValue, isGBP, nativeCurrencyPrice, gbpPrice, token]);
 
   if (isLoading) return <MoonSpinner />;
 
@@ -252,15 +312,45 @@ const Challenge: NextPage = () => {
                   placeholder="Address funds will go to (e.g., charity)"
                 />
               </div>
-              <div>
-                <Label label="Stake value (USD)" />
-                <CustomInput
-                  className="w-full px-4 py-3 bg-white bg-opacity-20 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 text-white placeholder-indigo-200"
-                  onChange={value => assignValue(value, setStakeValue)}
-                  value={stakeValue ?? ""}
-                  placeholder="Enter stake value (USD)"
-                  type="string"
-                />
+              <div className="space-y-6">
+                <div className="backdrop-blur-md bg-white bg-opacity-10 rounded-xl shadow-lg border border-white border-opacity-20 p-6">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0 mb-4">
+                    <Label label={`Stake Value (${token ? "ERC" : isGBP ? "GBP" : "USD"})`} />
+                    <div className="flex space-x-4">
+                      {!token ? (
+                        <ToggleCheckBox id="currency-toggle" label="GBP" checked={isGBP} onChange={setIsGBP} />
+                      ) : (
+                        ""
+                      )}
+                      <ToggleCheckBox id="token-toggle" label="Token" checked={token} onChange={setToken} />
+                    </div>
+                  </div>
+                  {token ? (
+                    <CustomSelect
+                      className="w-full px-4 py-3 bg-white bg-opacity-20 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 text-white placeholder-indigo-200 transition duration-300 ease-in-out"
+                      onChange={value => setSelectedToken(value)}
+                      value={selectedToken}
+                      placeholder={"Select the token"}
+                      options={options}
+                    />
+                  ) : (
+                    ""
+                  )}
+                  <CustomInput
+                    className="w-full mt-2 px-4 py-3 bg-white bg-opacity-20 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 text-white placeholder-indigo-200 transition duration-300 ease-in-out"
+                    onChange={value => assignValue(value, setStakeValue)}
+                    value={stakeValue ?? ""}
+                    placeholder={`Enter stake value (${token ? "ERC" : isGBP ? "GBP" : "USD"})`}
+                    type="text"
+                  />
+                  {!token ? (
+                    <p className="mt-4 text-sm text-indigo-200">
+                      Equivalent: ({isGBP ? "USD" : "GBP"}) {price}
+                    </p>
+                  ) : (
+                    ""
+                  )}
+                </div>
               </div>
               <div className="flex space-x-4 pt-4">
                 <SubmitButton
@@ -301,7 +391,7 @@ const Challenge: NextPage = () => {
                   -4,
                 )}`}
               />
-              <DetailCard title="Staked" value={`${stakedAmount} USD`} />
+              <DetailCard title="Staked" value={`${stakedAmount} ${StakedType}`} />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {challengeDetails?.reviews.length
