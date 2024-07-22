@@ -1,0 +1,783 @@
+[
+  {
+    "inputs": [],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "inputs": [],
+    "name": "CHAINHABITS__ChallengeNotLive",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "CHAINHABITS__ChallengeStillActive",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "CHAINHABITS__ERC20DepositAmountIs0",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "CHAINHABITS__ERC20TokenNotSupported",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "CHAINHABITS__ERC20TransferFailed",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "CHAINHABITS__ForfeitAddressInvalid",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "CHAINHABITS__ForfeitExceedsStake",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "CHAINHABITS__IncorrectAddressORChallengeId",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "CHAINHABITS__InsufficientERC20Allowance",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "CHAINHABITS__InsufficientERC20Balance",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "CHAINHABITS__InsufficientFunds",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "CHAINHABITS__PrivateInformation",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "CHAINHABITS__StakeAmountisZero",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "CHAINHABITS__UserAlreadyRegistered",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "CHAINHABITS__UserHasLiveObjective",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "CHAINHABITS__UserNotYetRegistered",
+    "type": "error"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "challengeId",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "status",
+        "type": "bool"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "stakeForfeited",
+        "type": "uint256"
+      }
+    ],
+    "name": "ChallengeCompleted",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "ForfeitedFundsFailedToSend",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "FundsWithdrawn",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "challengeId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "userAddress",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "success",
+        "type": "bool"
+      }
+    ],
+    "name": "IntervalReviewCompleted",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "challengeId",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "Objective",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint8",
+        "name": "startingMiles",
+        "type": "uint8"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint8",
+        "name": "NumberofWeeks",
+        "type": "uint8"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint8",
+        "name": "PercentageIncrease",
+        "type": "uint8"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "defaultAddress",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "erc20Address",
+        "type": "address"
+      }
+    ],
+    "name": "NewChallengeCreated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      }
+    ],
+    "name": "NewUserRegistered",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "previousOwner",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "OwnershipTransferred",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "ForfeitedFundsToBeCollected",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_challengeId",
+        "type": "uint256"
+      }
+    ],
+    "name": "_isChallengeLive",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "erc20Address",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_priceFeedAddress",
+        "type": "address"
+      }
+    ],
+    "name": "addPriceFeedAddress",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "challengeId",
+        "type": "uint256"
+      }
+    ],
+    "name": "challengeTable",
+    "outputs": [
+      {
+        "internalType": "uint8",
+        "name": "targetMiles",
+        "type": "uint8"
+      },
+      {
+        "internalType": "uint8",
+        "name": "NoOfWeeks",
+        "type": "uint8"
+      },
+      {
+        "internalType": "uint8",
+        "name": "failedWeeks",
+        "type": "uint8"
+      },
+      {
+        "internalType": "bool",
+        "name": "isLive",
+        "type": "bool"
+      },
+      {
+        "internalType": "uint48",
+        "name": "challengeStartDate",
+        "type": "uint48"
+      },
+      {
+        "internalType": "address",
+        "name": "defaultAddress",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "_obj",
+        "type": "string"
+      },
+      {
+        "internalType": "uint8",
+        "name": "_targetMiles",
+        "type": "uint8"
+      },
+      {
+        "internalType": "uint8",
+        "name": "_weeks",
+        "type": "uint8"
+      },
+      {
+        "internalType": "address",
+        "name": "_forfeitAddress",
+        "type": "address"
+      },
+      {
+        "internalType": "uint8",
+        "name": "_percentageIncrease",
+        "type": "uint8"
+      },
+      {
+        "internalType": "address",
+        "name": "_erc20Address",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_depositAmount",
+        "type": "uint256"
+      }
+    ],
+    "name": "createNewChallenge",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "challengeId",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_challengeId",
+        "type": "uint256"
+      }
+    ],
+    "name": "getChallengeDetails",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint8",
+            "name": "targetMiles",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint8",
+            "name": "NoOfWeeks",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint8",
+            "name": "failedWeeks",
+            "type": "uint8"
+          },
+          {
+            "internalType": "bool",
+            "name": "isLive",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint48",
+            "name": "challengeStartDate",
+            "type": "uint48"
+          },
+          {
+            "internalType": "address",
+            "name": "defaultAddress",
+            "type": "address"
+          }
+        ],
+        "internalType": "struct ChainHabits.ChallengeDetails",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_userAddress",
+        "type": "address"
+      }
+    ],
+    "name": "getChallengeId",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_user",
+        "type": "address"
+      }
+    ],
+    "name": "getUserDetails",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "userID",
+            "type": "uint256"
+          },
+          {
+            "internalType": "string",
+            "name": "refreshToken",
+            "type": "string"
+          }
+        ],
+        "internalType": "struct ChainHabits.UserDetails",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_user",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_token",
+        "type": "address"
+      }
+    ],
+    "name": "getUserStake",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256[]",
+        "name": "_challengeId",
+        "type": "uint256[]"
+      },
+      {
+        "internalType": "address[]",
+        "name": "_user",
+        "type": "address[]"
+      },
+      {
+        "internalType": "bool[]",
+        "name": "failed",
+        "type": "bool[]"
+      }
+    ],
+    "name": "handleBulkIntervalReview",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_challengeID",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_stakeForfeited",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "_userAddress",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_erc20Address",
+        "type": "address"
+      }
+    ],
+    "name": "handleCompleteChallengeERC20",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_challengeID",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_stakeForfeited",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "_userAddress",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_erc20Address",
+        "type": "address"
+      }
+    ],
+    "name": "handleCompleteChallengeETH",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_challengeId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "_user",
+        "type": "address"
+      },
+      {
+        "internalType": "bool",
+        "name": "failed",
+        "type": "bool"
+      }
+    ],
+    "name": "handleIntervalReview",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "isUserRegisteredTable",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "owner",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "userID",
+        "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "_refreshToken",
+        "type": "string"
+      }
+    ],
+    "name": "registerNewUser",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "renounceOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "transferOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_erc20Address",
+        "type": "address"
+      }
+    ],
+    "name": "unlockERCToken",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_user",
+        "type": "address"
+      },
+      {
+        "internalType": "string",
+        "name": "_refreshToken",
+        "type": "string"
+      }
+    ],
+    "name": "updateRefreshToken",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "userHasLiveChallenge",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_erc20Address",
+        "type": "address"
+      }
+    ],
+    "name": "withdrawFunds",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+]

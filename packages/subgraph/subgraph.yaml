@@ -6,19 +6,22 @@ schema:
 dataSources:
   - kind: ethereum/contract
     name: ChainHabits
-    network: localhost
+    network: sepolia
     source:
       abi: ChainHabits
-      address: "0x5FbDB2315678afecb367f032d93F642f64180aa3"
+      address: "0x4A8BDeF7004118449F4Bf2A9fb3777080a57d3B2"
+      startBlock: 6355219
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
       language: wasm/assemblyscript
       entities:
         - User
+        - Challenge
+        - IntervalReviews
       abis:
         - name: ChainHabits
-          file: ./abis/localhost_ChainHabits.json
+          file: ./abis/sepolia_ChainHabits.json
       eventHandlers:
         - event: NewUserRegistered(indexed address)
           handler: handleUserRegistration
