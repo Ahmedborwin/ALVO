@@ -24,5 +24,10 @@
     "ChainHabits": {
       "address": "0x5FbDB2315678afecb367f032d93F642f64180aa3"
     }
+  },
+  "sepolia": {
+    "ChainHabits": {
+      "address": "0x4A8BDeF7004118449F4Bf2A9fb3777080a57d3B2"
+    }
   }
 }

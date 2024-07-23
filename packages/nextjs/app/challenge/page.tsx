@@ -141,7 +141,6 @@ const Challenge: NextPage = () => {
     setRanMiles(null);
   }, [data, loading, userDetails, fetchRanData, challengeDetails, setRanMiles]);
 
-  const stakedAmount = useWeiToUSD(challengeDetails?.stakedAmount);
   const getERCTokensByAddress = useCommonState(state => state.getERCTokensByAddress);
   const StakedType = useMemo(() => {
     if (challengeDetails?.ERC20Address)
@@ -149,6 +148,12 @@ const Challenge: NextPage = () => {
         ? "USD"
         : getERCTokensByAddress(challengeDetails?.ERC20Address)?.name || "ERC";
   }, [challengeDetails?.ERC20Address]);
+
+  const stakedAmount = useWeiToUSD(challengeDetails?.stakedAmount);
+  // const stakedAmount = useMemo(() => {
+  //   if (StakedType === "USD" && challengeDetails?.stakedAmount) return
+  //   else return challengeDetails?.stakedAmount || 0;
+  // }, [challengeDetails?.stakedAmount, StakedType]);
 
   useScaffoldWatchContractEvent({
     contractName: "ChainHabits",
@@ -195,12 +200,17 @@ const Challenge: NextPage = () => {
           ? stakeValue / nativeCurrencyPrice
           : (stakeValue * (nativeCurrencyPrice / gbpPrice)) / nativeCurrencyPrice;
       }
-      if (token && !isZeroAddress(selectedToken))
-        await writeYourContractAsync({
-          functionName: "approve",
-          args: [AlVOContractDetails?.address, parseEther(stakeValue.toString())],
-          targetERCAddress: selectedToken,
-        });
+      if (token && !isZeroAddress(selectedToken)) {
+        await writeYourContractAsync(
+          {
+            functionName: "approve",
+            args: [AlVOContractDetails?.address, BigInt(stakeValue * 1e6)],
+            targetERCAddress: selectedToken,
+          },
+          undefined,
+          selectedToken,
+        );
+      }
 
       await writeYourContractAsync({
         functionName: "createNewChallenge",
@@ -391,7 +401,10 @@ const Challenge: NextPage = () => {
                   -4,
                 )}`}
               />
-              <DetailCard title="Staked" value={`${stakedAmount} ${StakedType}`} />
+              <DetailCard
+                title="Staked"
+                value={`${StakedType === "USD" ? stakedAmount : challengeDetails?.stakedAmount || 0} ${StakedType}`}
+              />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {challengeDetails?.reviews.length
