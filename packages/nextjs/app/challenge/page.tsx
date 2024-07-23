@@ -13,12 +13,7 @@ import { MoonSpinner } from "~~/components/loader";
 import { accountType } from "~~/config/AlchemyConfig";
 import AxiosInstance from "~~/config/AxiosConfig";
 import { useWeiToUSD } from "~~/hooks/common";
-import {
-  useDeployedContractInfo,
-  useScaffoldReadContract,
-  useScaffoldWatchContractEvent,
-  useScaffoldWriteContract,
-} from "~~/hooks/scaffold-eth";
+import { useDeployedContractInfo, useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 import { useStrava } from "~~/hooks/strava";
 import { CREATE_CHALLENGES } from "~~/services/graphql/queries";
 import { useCommonState, useGlobalState } from "~~/services/store/store";
@@ -67,6 +62,18 @@ const Challenge: NextPage = () => {
     contractName: "ChainHabits",
     functionName: "getUserDetails",
     args: [address ?? alchemyAddress],
+  });
+
+  const { data: challengeID } = useScaffoldReadContract({
+    contractName: "ChainHabits",
+    functionName: "getChallengeId",
+    args: [address ?? alchemyAddress],
+  });
+
+  const { data: challengeDetailsContract } = useScaffoldReadContract({
+    contractName: "ChainHabits",
+    functionName: "getChallengeDetails",
+    args: [challengeID],
   });
 
   const allowedTokens: { [key: string]: string } = {
@@ -150,24 +157,6 @@ const Challenge: NextPage = () => {
   }, [challengeDetails?.ERC20Address]);
 
   const stakedAmount = useWeiToUSD(challengeDetails?.stakedAmount);
-  // const stakedAmount = useMemo(() => {
-  //   if (StakedType === "USD" && challengeDetails?.stakedAmount) return
-  //   else return challengeDetails?.stakedAmount || 0;
-  // }, [challengeDetails?.stakedAmount, StakedType]);
-
-  useScaffoldWatchContractEvent({
-    contractName: "ChainHabits",
-    eventName: "NewChallengeCreated",
-    onLogs: logs => {
-      logs.map(log => {
-        const { user } = log.args;
-        const fetchAgain = async () => {
-          await refetch();
-        };
-        if (user === address || user === alchemyAddress) fetchAgain();
-      });
-    },
-  });
 
   const clearAll = () => {
     setObjective("");
@@ -182,6 +171,11 @@ const Challenge: NextPage = () => {
 
   const handleCreateChallenge = async () => {
     try {
+      if (challengeDetailsContract?.isLive) {
+        notification.info("Already have a active challenge");
+        return;
+      }
+
       if (
         objective.length === 0 ||
         noOfWeeks === null ||

@@ -11,9 +11,6 @@ type TransactionFunc = (
   options?: TransactorFuncOptions,
 ) => Promise<Hash | undefined>;
 
-/**
- * Custom notification content for TXs.
- */
 const TxnNotification = ({ message, blockExplorerLink }: { message: string; blockExplorerLink?: string }) => {
   return (
     <div className={`flex flex-col ml-1 cursor-default`}>
@@ -27,11 +24,6 @@ const TxnNotification = ({ message, blockExplorerLink }: { message: string; bloc
   );
 };
 
-/**
- * Runs Transaction passed in to returned function showing UI feedback.
- * @param _walletClient - Optional wallet client to use. If not provided, will use the one from useWalletClient.
- * @returns function that takes in transaction function as callback, shows UI feedback for transaction and returns a promise of the transaction hash
- */
 export const useTransactor = (_walletClient?: WalletClient): TransactionFunc => {
   let walletClient = _walletClient;
   const { data } = useWalletClient();
@@ -50,12 +42,10 @@ export const useTransactor = (_walletClient?: WalletClient): TransactionFunc => 
     let transactionHash: Hash | undefined = undefined;
     try {
       const network = await walletClient.getChainId();
-      // Get full transaction from public client
       const publicClient = getPublicClient(wagmiConfig);
 
       notificationId = notification.loading(<TxnNotification message="Awaiting for user confirmation" />);
       if (typeof tx === "function") {
-        // Tx is already prepared by the caller
         const result = await tx();
         transactionHash = result;
       } else if (tx != null) {
@@ -71,10 +61,18 @@ export const useTransactor = (_walletClient?: WalletClient): TransactionFunc => 
         <TxnNotification message="Waiting for transaction to complete." blockExplorerLink={blockExplorerTxURL} />,
       );
 
-      const transactionReceipt = await publicClient.waitForTransactionReceipt({
-        hash: transactionHash,
-        confirmations: options?.blockConfirmations,
-      });
+      const timeoutPromise = new Promise<Hash>(resolve =>
+        setTimeout(() => resolve(transactionHash as `0x${string}`), 45000),
+      );
+
+      const transactionReceipt = await Promise.race([
+        publicClient.waitForTransactionReceipt({
+          hash: transactionHash,
+          confirmations: 1,
+        }),
+        timeoutPromise,
+      ]);
+
       notification.remove(notificationId);
 
       notification.success(

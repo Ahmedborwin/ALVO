@@ -206,7 +206,7 @@ export type ScaffoldWriteContractVariables<
 type WriteVariables = WriteContractVariables<Abi, string, any[], Config, number>;
 
 export type TransactorFuncOptions = {
-  onBlockConfirmation?: (txnReceipt: TransactionReceipt) => void;
+  onBlockConfirmation?: (txnReceipt: TransactionReceipt | `0x${string}`) => void;
   blockConfirmations?: number;
 };
 
