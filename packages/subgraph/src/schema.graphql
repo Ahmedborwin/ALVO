@@ -2,6 +2,7 @@ type User @entity {
   id: ID!
   userAddress: Bytes!
   stakedAmount: BigInt!
+  stakedTokens: BigInt!
   status: Boolean!
   createdAt: BigInt!
   updatedAt: BigInt!

@@ -1003,6 +1003,12 @@ const deployedContracts = {
               type: "address",
             },
             {
+              indexed: true,
+              internalType: "address",
+              name: "erc20Address",
+              type: "address",
+            },
+            {
               indexed: false,
               internalType: "uint256",
               name: "amount",
@@ -1572,19 +1578,6 @@ const deployedContracts = {
             },
           ],
           name: "transferOwnership",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "_erc20Address",
-              type: "address",
-            },
-          ],
-          name: "unlockERCToken",
           outputs: [],
           stateMutability: "nonpayable",
           type: "function",

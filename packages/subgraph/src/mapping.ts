@@ -1,4 +1,4 @@
-import { BigInt, log } from "@graphprotocol/graph-ts";
+import { Address, BigInt, log } from "@graphprotocol/graph-ts";
 import {
   NewUserRegistered,
   NewChallengeCreated,
@@ -27,7 +27,15 @@ export function handleChallengeCreate(event: NewChallengeCreated): void {
     log.error("User not found: {}", [event.params.user.toHexString()]);
     return;
   }
-  user.stakedAmount = user.stakedAmount.plus(event.params.amount);
+  const zeroAddress = Address.fromString(
+    "0x0000000000000000000000000000000000000000"
+  );
+
+  if (event.params.erc20Address == zeroAddress) {
+    user.stakedAmount = user.stakedAmount.plus(event.params.amount);
+  } else {
+    user.stakedTokens = user.stakedTokens.plus(event.params.amount);
+  }
   user.updatedAt = event.block.timestamp;
   user.save();
 
@@ -65,7 +73,15 @@ export function handleUserWithdraw(event: FundsWithdrawn): void {
     log.error("User not found: {}", [event.params.user.toHexString()]);
     return;
   }
-  user.stakedAmount = user.stakedAmount.minus(event.params.amount);
+  const zeroAddress = Address.fromString(
+    "0x0000000000000000000000000000000000000000"
+  );
+
+  if (event.params.erc20Address == zeroAddress) {
+    user.stakedAmount = user.stakedAmount.minus(event.params.amount);
+  } else {
+    user.stakedTokens = user.stakedTokens.minus(event.params.amount);
+  }
   user.updatedAt = event.block.timestamp;
   user.save();
 }
@@ -110,7 +126,6 @@ export function handleIntervalReview(event: IntervalReviewCompleted): void {
   challenge.save();
 }
 
-
 export function handleChallengeComplete(event: ChallengeCompleted): void {
   const challenge = Challenge.load(event.params.challengeId.toHexString());
   if (!challenge) {
@@ -120,7 +135,9 @@ export function handleChallengeComplete(event: ChallengeCompleted): void {
     return;
   }
 
-  challenge.stakedAmount = challenge.stakedAmount.minus(event.params.stakeForfeited);
+  challenge.stakedAmount = challenge.stakedAmount.minus(
+    event.params.stakeForfeited
+  );
   challenge.success = event.params.status ? 1 : 0;
   challenge.status = false;
   challenge.updatedAt = event.block.timestamp;
@@ -135,6 +152,5 @@ export function handleChallengeComplete(event: ChallengeCompleted): void {
   user.updatedAt = event.block.timestamp;
   user.save();
 }
-
 
 //TODO: Need withdraw event to update the balance of user
