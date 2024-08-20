@@ -6,11 +6,10 @@ schema:
 dataSources:
   - kind: ethereum/contract
     name: ChainHabits
-    network: sepolia
+    network: localhost
     source:
       abi: ChainHabits
-      address: "0x4A8BDeF7004118449F4Bf2A9fb3777080a57d3B2"
-      startBlock: 6355219
+      address: "0x5FbDB2315678afecb367f032d93F642f64180aa3"
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
@@ -21,14 +20,14 @@ dataSources:
         - IntervalReviews
       abis:
         - name: ChainHabits
-          file: ./abis/sepolia_ChainHabits.json
+          file: ./abis/localhost_ChainHabits.json
       eventHandlers:
         - event: NewUserRegistered(indexed address)
           handler: handleUserRegistration
         - event: NewChallengeCreated(indexed uint256,indexed
             address,string,uint8,uint8,uint8,address,uint256,address)
           handler: handleChallengeCreate
-        - event: FundsWithdrawn(indexed address,uint256)
+        - event: FundsWithdrawn(indexed address,indexed address,uint256)
           handler: handleUserWithdraw
         - event: ChallengeCompleted(indexed uint256,indexed address,bool,uint256)
           handler: handleChallengeComplete

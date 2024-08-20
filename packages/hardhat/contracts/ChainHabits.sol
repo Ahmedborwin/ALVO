@@ -107,7 +107,7 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 		bool status,
 		uint256 stakeForfeited
 	);
-	event FundsWithdrawn(address indexed user, uint256 amount);
+	event FundsWithdrawn(address indexed user, address indexed erc20Address, uint256 amount);
 	event ForfeitedFundsFailedToSend(address indexed user, uint256 amount);
 
 	constructor() Ownable() {}
@@ -372,7 +372,7 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 			);
 		}
 
-		emit FundsWithdrawn(msg.sender, withdrawAmount);
+		emit FundsWithdrawn(msg.sender,_erc20Address, withdrawAmount);
 	}
 
 	//setter - TODO this needs to be removed when we incorporate the encrypted database
