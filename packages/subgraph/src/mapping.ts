@@ -14,6 +14,7 @@ export function handleUserRegistration(event: NewUserRegistered): void {
   const userCreate = new User(event.params.user.toHexString());
   userCreate.userAddress = event.params.user;
   userCreate.stakedAmount = BigInt.zero();
+  userCreate.stakedTokens = BigInt.zero();
   userCreate.createdAt = event.block.timestamp;
   userCreate.updatedAt = event.block.timestamp;
   userCreate.status = true;
@@ -148,7 +149,15 @@ export function handleChallengeComplete(event: ChallengeCompleted): void {
     log.error("User not found: {}", [event.params.user.toHexString()]);
     return;
   }
-  user.stakedAmount = user.stakedAmount.minus(event.params.stakeForfeited);
+  const zeroAddress = Address.fromString(
+    "0x0000000000000000000000000000000000000000"
+  );
+
+  if (event.params.erc20Address == zeroAddress) {
+    user.stakedAmount = user.stakedAmount.minus(event.params.stakeForfeited);
+  } else {
+    user.stakedTokens = user.stakedTokens.minus(event.params.stakeForfeited);
+  }
   user.updatedAt = event.block.timestamp;
   user.save();
 }

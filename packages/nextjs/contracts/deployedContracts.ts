@@ -959,6 +959,12 @@ const deployedContracts = {
               type: "address",
             },
             {
+              indexed: true,
+              internalType: "address",
+              name: "erc20Address",
+              type: "address",
+            },
+            {
               indexed: false,
               internalType: "bool",
               name: "status",
