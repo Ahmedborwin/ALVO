@@ -9,6 +9,9 @@ import {
 import { User, Challenge, IntervalReviews } from "../generated/schema";
 
 const ONE_WEEK_IN_SECONDS = 7 * 24 * 60 * 60;
+const zeroAddress = Address.fromString(
+  "0x0000000000000000000000000000000000000000"
+);
 
 export function handleUserRegistration(event: NewUserRegistered): void {
   const userCreate = new User(event.params.user.toHexString());
@@ -28,9 +31,6 @@ export function handleChallengeCreate(event: NewChallengeCreated): void {
     log.error("User not found: {}", [event.params.user.toHexString()]);
     return;
   }
-  const zeroAddress = Address.fromString(
-    "0x0000000000000000000000000000000000000000"
-  );
 
   if (event.params.erc20Address == zeroAddress) {
     user.stakedAmount = user.stakedAmount.plus(event.params.amount);
@@ -74,9 +74,6 @@ export function handleUserWithdraw(event: FundsWithdrawn): void {
     log.error("User not found: {}", [event.params.user.toHexString()]);
     return;
   }
-  const zeroAddress = Address.fromString(
-    "0x0000000000000000000000000000000000000000"
-  );
 
   if (event.params.erc20Address == zeroAddress) {
     user.stakedAmount = user.stakedAmount.minus(event.params.amount);
@@ -149,9 +146,6 @@ export function handleChallengeComplete(event: ChallengeCompleted): void {
     log.error("User not found: {}", [event.params.user.toHexString()]);
     return;
   }
-  const zeroAddress = Address.fromString(
-    "0x0000000000000000000000000000000000000000"
-  );
 
   if (event.params.erc20Address == zeroAddress) {
     user.stakedAmount = user.stakedAmount.minus(event.params.stakeForfeited);
