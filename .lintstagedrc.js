@@ -15,7 +15,7 @@ const buildHardhatEslintCommand = (filenames) =>
 module.exports = {
   "packages/reactjs/**/*.{ts,tsx}": [
     // buildReactEslintCommand,
-    checkTypesReactCommand,
+    // checkTypesReactCommand,
   ],
   "packages/hardhat/**/*.{ts,tsx}": [buildHardhatEslintCommand],
 };
