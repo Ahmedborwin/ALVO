@@ -11,7 +11,6 @@ node_modules/
 # eslint
 .eslintcache
 yarn.lock
-yarn copy.lock
 # misc
 .DS_Store
 
@@ -31,3 +30,15 @@ subgraph/graph-node/data/
 packages/subgraph/build/
 packages/subgraph/generated/
 packages/subgraph/graph-node/data/
+
+# envio
+
+envio/build/
+envio/node_modules/
+envio/generated/
+envio/graph-node/data/
+
+packages/envio/build/
+packages/envio/generated/
+packages/envio/node_modules/
+packages/envio/graph-node/data/
