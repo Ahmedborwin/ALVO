@@ -1,0 +1,45 @@
+type User @entity {
+  id: ID!
+  userAddress: Bytes!
+  stakedAmount: BigInt!
+  stakedTokens: BigInt!
+  status: Boolean!
+  createdAt: BigInt!
+  updatedAt: BigInt!
+  transactionHash: String!
+  challenges: [Challenge!]! @derivedFrom(field: "user")
+}
+
+type Challenge @entity {
+  id: ID!
+  challengeId: BigInt!
+  user: User!
+  userAddress: Bytes!
+  objective: String!
+  startingMiles: Int!
+  numberOfWeeks: Int!
+  stakedAmount: BigInt!
+  defaultAddress: Bytes!
+  success: Int!
+  status: Boolean!
+  failedWeeks: BigInt!
+  createdAt: BigInt!
+  updatedAt: BigInt!
+  transactionHash: String!
+  ERC20Address: Bytes!
+  competitionDeadline: BigInt!
+  nextIntervalReviewEpoch: BigInt!  
+  intervalReviewTally: Int!      
+  weeklyTargetIncreasePercentage: Int!   
+  reviews: [IntervalReviews!]! @derivedFrom(field: "challenge")
+}
+
+type IntervalReviews @entity {
+  id: ID!
+  challenge: Challenge!
+  challengeId: BigInt!
+  status: Boolean!
+  createdAt: BigInt!
+  updatedAt: BigInt!
+  transactionHash: String!
+}

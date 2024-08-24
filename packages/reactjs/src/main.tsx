@@ -10,7 +10,7 @@ import { Helmet, HelmetProvider } from "react-helmet-async";
 import { BrowserRouter } from "react-router-dom";
 import { AlchemyProvider, ScaffoldEthAppWithProviders } from "~~/components/providers";
 import { config } from "~~/config/AlchemyConfig";
-import { getMetadata } from "~~/utils/scaffold-eth/getMetadata.ts";
+import { getMetadata } from "~~/utils/scaffold-eth/getMetadata";
 
 const Wrapper: React.FC = () => {
   const metadata = getMetadata({

@@ -2428,7 +2428,7 @@ const deployedContracts = {
   },
   11155111: {
     ChainHabits: {
-      address: "0x4A8BDeF7004118449F4Bf2A9fb3777080a57d3B2",
+      address: "0xd2C25Ce90d7F07b91680A009Ac7F7d9011b5Ca90",
       abi: [
         {
           inputs: [],
@@ -2531,6 +2531,12 @@ const deployedContracts = {
               type: "address",
             },
             {
+              indexed: true,
+              internalType: "address",
+              name: "erc20Address",
+              type: "address",
+            },
+            {
               indexed: false,
               internalType: "bool",
               name: "status",
@@ -2572,6 +2578,12 @@ const deployedContracts = {
               indexed: true,
               internalType: "address",
               name: "user",
+              type: "address",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "erc20Address",
               type: "address",
             },
             {
@@ -3144,19 +3156,6 @@ const deployedContracts = {
             },
           ],
           name: "transferOwnership",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "_erc20Address",
-              type: "address",
-            },
-          ],
-          name: "unlockERCToken",
           outputs: [],
           stateMutability: "nonpayable",
           type: "function",

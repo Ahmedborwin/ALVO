@@ -12,16 +12,16 @@ export default defineConfig({
     // Equivalent to Next.js's reactStrictMode
     "React.strictMode": true,
     // Environment variables
-    "process.env.NEXT_PUBLIC_IGNORE_BUILD_ERROR": JSON.stringify(import.meta["env"].NEXT_PUBLIC_IGNORE_BUILD_ERROR),
+    "process.env.VITE_IGNORE_BUILD_ERROR": false,
   },
   build: {
     // Equivalent to Next.js's typescript.ignoreBuildErrors and eslint.ignoreDuringBuilds
     // Note: This is not a direct equivalent, you might need additional setup
-    sourcemap: import.meta["env"].NEXT_PUBLIC_IGNORE_BUILD_ERROR === "true" ? false : true,
+    sourcemap: false,
   },
   resolve: {
     alias: {
-      "~~": path.resolve(import.meta.url, "../src"),
+      "~~": path.resolve(__dirname, "src"),
     },
   },
   optimizeDeps: {
