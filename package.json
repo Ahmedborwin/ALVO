@@ -6,10 +6,13 @@
     "packages": [
       "packages/hardhat",
       "packages/reactjs",
-      "packages/subgraph"
+      "packages/subgraph",
+      "packages/backend"
     ]
   },
   "scripts": {
+    "server": "yarn workspace @se-2/backend start",
+    "copy-contracts": "yarn workspace @se-2/backend copy-contracts",
     "account": "yarn workspace @se-2/hardhat account",
     "chain": "yarn workspace @se-2/hardhat chain",
     "fork": "yarn workspace @se-2/hardhat fork",

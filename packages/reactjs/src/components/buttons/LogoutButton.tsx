@@ -12,8 +12,8 @@ const LogoutButton = () => {
   const { data: ensName } = useEnsName({ address });
 
   return address ? (
-    <>
-      <div className="flex flex-col items-center mr-1">
+    <div className="flex  ">
+      <div className="flex flex-col items-center mr-1 mt-4">
         <Balance address={address as Address} className="min-h-0 h-auto" />
         <span className="text-xs" style={{ color: networkColor }}>
           {chain.name}
@@ -25,7 +25,7 @@ const LogoutButton = () => {
         ensAvatar={undefined}
         blockExplorerAddressLink={chain.blockExplorers?.default?.url}
       />
-    </>
+    </div>
   ) : (
     ""
   );
