@@ -3,13 +3,13 @@ import { SupportedAccountTypes, cookieStorage, createConfig } from "@alchemy/aa-
 import { SmartAccountClientOptsSchema, sepolia } from "@alchemy/aa-core";
 import { QueryClient } from "@tanstack/react-query";
 import { z } from "zod";
-import { VITE_ALCHEMY_GAS_MANAGER_POLICY_ID, rpcUrl, rpcUrlWChain } from "~~/constants";
+import { VITE_ALCHEMY_GAS_MANAGER_POLICY_ID, rpcUrlSigner, rpcUrlWChain } from "~~/constants";
 
 const chain = sepolia;
 const config = createConfig({
   rpcUrl: rpcUrlWChain + chain.id,
   signerConnection: {
-    rpcUrl,
+    rpcUrl: rpcUrlSigner,
   },
   chain,
   ssr: true,

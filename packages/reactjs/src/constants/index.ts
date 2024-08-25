@@ -1,4 +1,4 @@
-import { apiUrl, rpcUrl, rpcUrlWChain } from "./AlchemyConsts";
+import { apiUrl, rpcUrl, rpcUrlSigner, rpcUrlWChain } from "./AlchemyConsts";
 import {
   VITE_ALCHEMY_API_KEY,
   VITE_ALCHEMY_GAS_MANAGER_POLICY_ID,
@@ -20,6 +20,7 @@ export {
   rpcUrl,
   rpcUrlWChain,
   apiUrl,
+  rpcUrlSigner,
   VITE_ALCHEMY_API_KEY,
   VITE_ALCHEMY_GAS_MANAGER_POLICY_ID,
   VITE_WALLET_CONNECT_PROJECT_ID,
