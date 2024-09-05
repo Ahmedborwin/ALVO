@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { EmailInput } from "../Input";
 import { SubmitButton } from "../buttons";
-import { ChainSVG, LargeMailSVG } from "../svg";
+import { LargeMailSVG } from "../svg";
 import { useAuthenticate } from "@alchemy/aa-alchemy/react";
+import { notification } from "~~/utils/scaffold-eth";
+import { EmailRegEx } from "~~/utils/common";
 
 const LogInCard = ({ isAwaitingEmail }: { isAwaitingEmail: boolean }) => {
   const [email, setEmail] = useState<string>("");
@@ -13,48 +15,67 @@ const LogInCard = ({ isAwaitingEmail }: { isAwaitingEmail: boolean }) => {
   };
 
   const login = () => {
+
+    if (!email) {
+      notification.info('Please enter your email')
+      return
+    }
+
+    if (!EmailRegEx.test(email)) {
+      notification.info('Please enter a valid email')
+      return
+    }
+
     authenticate({ type: "email", email });
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen w-full bg-cover bg-gradient-to-br from-slate-900 to-purple-900 bg-center relative overflow-hidden px-4 py-6 sm:px-6 lg:px-8">
-      <div className="relative z-10 w-full max-w-md p-6 md:p-8 backdrop-blur-md bg-white bg-opacity-10 rounded-2xl shadow-2xl border border-white border-opacity-20">
-        <div className="absolute -top-12 left-1/2 transform -translate-x-1/2">
-          <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-purple-400 to-indigo-600 rounded-full flex items-center justify-center shadow-lg">
-            {ChainSVG}
-          </div>
+    <div className="flex items-center justify-center min-h-screen w-full bg-cover bg-center relative overflow-hidden px-4 py-6 sm:px-6 lg:px-8">
+      <div className="relative z-10 w-full max-w-sm bg-white rounded-2xl shadow-2xl">
+        <div className="flex justify-center">
+          <img
+            src="/alvo-Square-icon-one.png"
+            alt="ALVO Logo"
+            className="w-32 h-32 sm:w-40 sm:h-40 object-cover"
+          />
         </div>
 
-        {isAwaitingEmail ? (
-          <div className="text-center pt-16">
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">Check Your Email</h2>
-            <p className="text-indigo-200 mb-6">
-              We&apos;ve sent you a magical link to continue your journey with ALVO.
-            </p>
-            <div className="animate-bounce mt-8">{LargeMailSVG}</div>
-          </div>
-        ) : (
-          <>
-            <div className="text-center pt-16 mb-8">
-              <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">ALVO</h1>
-              <p className="text-indigo-200">Dream.Persevere.Achieve.</p>
+        <div className="px-4 sm:px-6 pb-6">
+          {isAwaitingEmail ? (
+            <div className="text-center">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2">Check Your Email</h2>
+              <p className="text-sm text-gray-600 mb-4">
+                We've sent you a magical link to continue your journey with ALVO.
+              </p>
+              <div className="animate-bounce mt-4">
+                {LargeMailSVG}
+              </div>
             </div>
-            <div className="space-y-6">
-              <div className="relative">
-                <EmailInput
-                  className="w-full px-4 py-3 bg-white bg-opacity-20 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 text-white placeholder-indigo-200"
-                  value={email}
-                  onChange={handleEmailChange}
+          ) : (
+            <>
+              <div className="text-center mb-4  ">
+                <p className="text-xl sm:text-2xl text-gray-800 mb-2 font-semibold m-0">Dream. Persevere. Achieve.</p>
+                <p className="text-xs sm:text-sm text-gray-500 mb-2 m-0">
+                  Streamlined motivation website, create new challenges, work
+                  towards them, and accomplish them.
+                </p>
+              </div>
+              <div className="space-y-4">
+                <div className="relative">
+                  <EmailInput
+                    className="w-full px-3 py-2 bg-gray-100 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#61bdfa] text-gray-800 placeholder-gray-500 text-sm"
+                    value={email}
+                    onChange={handleEmailChange}
+                  />
+                </div>
+                <SubmitButton
+                  className="w-full px-3 py-2 bg-gradient-to-r from-[#0b8ee5] to-[#61bdfa] text-white font-semibold rounded-lg shadow-md hover:from-[#61bdfa] hover:to-[#0b8ee5] focus:outline-none focus:ring-2 focus:ring-[#3aa7f5] focus:ring-opacity-75 transition duration-1000 ease-in-out text-sm" onClick={login}
+                  text="Begin Your Journey"
                 />
               </div>
-              <SubmitButton
-                className="w-full px-4 py-3 bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-semibold rounded-lg shadow-md hover:from-purple-600 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-opacity-75 transition duration-300 ease-in-out"
-                onClick={login}
-                text="Begin Your Journey"
-              />
-            </div>
-          </>
-        )}
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

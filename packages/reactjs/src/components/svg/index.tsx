@@ -63,7 +63,7 @@ const SmallChainSVG = (
     viewBox="0 0 24 24"
     strokeWidth={1.5}
     stroke="currentColor"
-    className="w-5 h-5 text-white"
+    className="w-5 h-5 text-black"
   >
     <path
       strokeLinecap="round"
@@ -74,13 +74,7 @@ const SmallChainSVG = (
 );
 
 const LightningSVG = (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    className="w-12 h-12 text-white"
-  >
+  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-[#61bdfa] group-hover:text-[#0b8ee5] transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
   </svg>
 );
