@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { SubmitButton } from "../buttons";
 import { MoonSpinner } from "../loader";
-import { LightningSVG } from "../svg";
 import { useAccount as useAlchemyAccount } from "@alchemy/aa-alchemy/react";
 import toast from "react-hot-toast";
 import { useAccount } from "wagmi";
