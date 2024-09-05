@@ -17,15 +17,18 @@ const ScaffoldEthApp = ({ children }: { children: React.ReactNode }) => {
   useInitializeNativeCurrencyPrice();
   return (
     <Fragment>
-      <div className="flex flex-col min-h-screen">
-        <Header />
-        <main className="relative flex flex-col flex-1">
-          <GlobalWrapper>{children}</GlobalWrapper>
-        </main>
-        <Footer />
-      </div>
-      <Toaster />
-    </Fragment>
+    <div 
+      className="flex flex-col min-h-screen bg-cover bg-center bg-no-repeat"
+      style={{backgroundImage: "url('/alvo-background-img.jpeg')"}}
+    >
+      <Header />
+      <main className="relative flex flex-col flex-1">
+        <GlobalWrapper>{children}</GlobalWrapper>
+      </main>
+      <Footer />
+    </div>
+    <Toaster />
+  </Fragment>
   );
 };
 

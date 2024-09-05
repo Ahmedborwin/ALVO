@@ -6,7 +6,7 @@ import { useAccount as userOperationAccount } from "@alchemy/aa-alchemy/react";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { Address } from "viem";
 import { useAccount } from "wagmi";
-import { SmallChainSVG } from "~~/components/svg";
+import { LightningSVG } from "~~/components/svg";
 import { accountType } from "~~/config/AlchemyConfig";
 import { useNetworkColor } from "~~/hooks/scaffold-eth";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
@@ -39,20 +39,23 @@ const RainbowKitCustomConnectButton = () => {
                   return (
                     <button
                       onClick={openConnectModal}
-                      type="button"
                       className="
-                      px-4 py-2 
-                      bg-gradient-to-r from-[#6b429a] to-[#5e40a0] 
-                      text-white text-sm font-semibold 
-                      rounded-full shadow-lg 
-                      hover:from-[#6b429a] hover:to-[#5e40a0] 
-                      focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 
-                      transform transition-all duration-300 ease-in-out 
-                      hover:scale-105 active:scale-95
+                      w-full px-6 py-2.5
+                      bg-white
+                      text-[#0b8ee5] text-sm font-medium
+                      rounded-lg
+                      shadow-md
+                      hover:bg-gray-50
+                      focus:outline-none focus:ring-2 focus:ring-[#61bdfa] focus:ring-opacity-50
+                      transform transition-all duration-300 ease-in-out
+                      hover:scale-102 active:scale-98
+                      border border-[#61bdfa]
+                      group
                     "
                     >
                       <span className="flex items-center justify-center">
-                        <span className="mr-1">{SmallChainSVG}</span>
+
+                        {LightningSVG}
                         Connect Wallet
                       </span>
                     </button>

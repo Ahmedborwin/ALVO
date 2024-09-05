@@ -103,17 +103,17 @@ const Header = () => {
   );
 
   return (
-    <header className="sticky top-0 z-20 w-full backdrop-blur-md bg-gradient-to-r from-[#5e40a0]/95 to-[#6b429a]/95 border-b border-white/10 shadow-lg">
+    <header className="sticky top-0 z-20 w-full ">
       <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-4">
           <div className="flex items-center">
-            <Link to="/" className="flex items-center gap-3">
-              <div className="relative w-10 h-10">
-                <img alt="ALVO logo" className="w-full h-full object-contain cursor-pointer" src="/logo.svg" />{" "}
-              </div>
-              <div className="flex flex-col">
-                <span className="font-bold text-white text-lg leading-tight">ALVO</span>
-                <span className="text-indigo-200 text-xs">Dream.Persevere.Achieve.</span>
+            <Link to="/" className="flex items-center">
+              <div className="relative w-48 h-24">
+                <img
+                  alt="ALVO logo"
+                  className="w-full h-full object-cover cursor-pointer"
+                  src="/logo.png"
+                />
               </div>
             </Link>
           </div>
