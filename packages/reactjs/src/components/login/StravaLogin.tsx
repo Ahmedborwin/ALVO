@@ -129,28 +129,20 @@ const StravaLogin = () => {
   return isLoading ? (
     <MoonSpinner />
   ) : (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-900 to-purple-900 w-full bg-cover bg-center relative overflow-hidden px-4 py-6 sm:px-6 lg:px-8">
-      <div className="relative z-10 w-full max-w-md p-6 md:p-8 backdrop-blur-md bg-white bg-opacity-10 rounded-2xl shadow-2xl border border-white border-opacity-20">
-        <div className="absolute -top-12 left-1/2 transform -translate-x-1/2">
-          <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-purple-400 to-indigo-600 rounded-full flex items-center justify-center shadow-lg">
-            {LightningSVG}
-          </div>
-        </div>
-
-        <div className="text-center pt-12 sm:pt-16 mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-2 sm:mb-3">Connect to Strava</h1>
-          <p className="text-sm sm:text-base text-indigo-200">Link your account to track your progress</p>
-        </div>
-
-        <div className="space-y-4 sm:space-y-6">
-          <SubmitButton
-            className="w-full px-4 py-3 bg-gradient-to-r from-purple-500 to-indigo-600 text-white text-sm sm:text-base font-semibold rounded-lg shadow-md hover:from-purple-600 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-opacity-75 transition duration-300 ease-in-out"
-            onClick={connectToStrava}
-            text="Connect with Strava"
-          />
-        </div>
-      </div>
+    <div className="flex flex-col items-center justify-center min-h-screen w-full p-4 text-center bg-gradient-to-br ">
+      <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white mb-2 sm:mb-4">
+        Reach your goals
+      </h1>
+      <h3 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-thin text-white mb-6 sm:mb-8">
+        With Alvo.
+      </h3>
+      <SubmitButton
+        text="Join"
+        className="px-8 sm:px-12 py-2 sm:py-3 bg-white text-gray-600 font-semibold rounded-full hover:bg-gray-100 transition duration-300 text-sm sm:text-base"
+        onClick={connectToStrava}
+      />
     </div>
+
   );
 };
 
