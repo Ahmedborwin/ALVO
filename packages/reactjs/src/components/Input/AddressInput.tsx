@@ -56,7 +56,7 @@ const AddressInput = ({ value, name, placeholder, onChange, disabled }: CommonIn
         value={value as string}
         onChange={handleChange}
         disabled={isEnsAddressLoading || isEnsNameLoading || disabled}
-        className={`w-full px-4 py-3 bg-white bg-opacity-20 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 text-white placeholder-indigo-200 ${
+        className={`w-full px-4 py-3 bg-gray-100 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#61bdfa] text-gray-800 placeholder-gray-500 text-sm ${
           ensAddress === null ? "border-red-500" : ""
         }`}
       />
@@ -68,7 +68,7 @@ const AddressInput = ({ value, name, placeholder, onChange, disabled }: CommonIn
             ) : ensAvatar ? (
               <img className="w-8 h-8 rounded-full" src={ensAvatar} alt="ENS avatar" />
             ) : (
-              <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-400 to-purple-500"></div>
+              <div className="w-8 h-8 rounded-full bg-gradient-to-r from-[#0b8ee5] to-[#61bdfa]"></div>
             )}
             <span className="text-gray-800 font-medium px-3 py-1">
               {isEnsNameLoading || isEnsAddressLoading ? "Loading..." : ensName ? ensName : address}

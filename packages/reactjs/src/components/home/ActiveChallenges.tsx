@@ -5,8 +5,8 @@ import { Challenge, IntervalReviews } from "~~/types/utils";
 function ActiveChallenges({ challengeDetails, ranMiles }: { challengeDetails: Challenge; ranMiles: string | null }) {
   return (
     <div className="p-4 sm:p-6 md:p-10">
-      <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center">
-        <span className="mb-2 sm:mb-0">Active Challenge</span>
+      <h2 className="text-2xl sm:text-3xl font-bold  mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center">
+        <span className="mb-2 sm:mb-0  font-semibold">Active Challenge</span>
         <span className="text-sm font-semibold px-3 py-1 bg-green-500 text-white rounded-full sm:ml-3 self-start sm:self-auto">
           Ongoing
         </span>

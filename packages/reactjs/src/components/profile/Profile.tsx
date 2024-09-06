@@ -80,7 +80,7 @@ function Profile() {
   ) : (
     <div>
       <div className="text-center mb-6 sm:mb-8 pt-8 sm:pt-10">
-        <div className="w-24 h-24 sm:w-32 sm:h-32 mx-auto mb-3 sm:mb-4 bg-gradient-to-br from-purple-400 to-indigo-600 rounded-full flex items-center justify-center shadow-lg overflow-hidden border-4 border-white">
+        <div className="w-24 h-24 sm:w-32 sm:h-32 mx-auto mb-3 sm:mb-4 bg-gradient-to-r from-[#61bdfa] to-[#0b8ee5] rounded-full flex items-center justify-center shadow-lg overflow-hidden border-4 border-white">
           <div className="text-white text-3xl sm:text-4xl font-bold">{username?.charAt(0) || "U"}</div>
         </div>
         <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-2">{username || "User Profile"}</h1>
@@ -89,7 +89,7 @@ function Profile() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
         <div className="space-y-4 sm:space-y-6">
-          <h2 className="text-xl sm:text-2xl font-semibold text-white mb-2 sm:mb-4">User Stats</h2>
+          <h2 className="text-xl sm:text-2xl font-semibold text-white mb-1 sm:mb-2">User Stats</h2>
           <div className="bg-white bg-opacity-10 rounded-lg p-3 sm:p-4 space-y-2 sm:space-y-3">
             <ProfileStat label="Challenge Tally" value={challengeData.challengeTally} />
             <ProfileStat label="Successful Challenges" value={challengeData.successChallenge} />
@@ -99,7 +99,7 @@ function Profile() {
         </div>
 
         <div className="space-y-4 sm:space-y-6">
-          <h2 className="text-xl sm:text-2xl font-semibold text-white mb-2 sm:mb-4">Personal Info</h2>
+          <h2 className="text-xl sm:text-2xl font-semibold text-white mb-1 sm:mb-2">Personal Info</h2>
           <div className="bg-white bg-opacity-10 rounded-lg p-3 sm:p-4 space-y-2 sm:space-y-3">
             <ProfileStat label="Name" value={`${firstname || ""} ${lastname || ""}`} />
             <ProfileStat label="Location" value={`${city || ""}, ${state || ""}, ${country || ""}`} />

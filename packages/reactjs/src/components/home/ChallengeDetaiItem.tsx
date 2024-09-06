@@ -8,13 +8,13 @@ const ChallengeDetailItem = ({
   loading?: boolean;
 }) => (
   <div className="flex flex-col items-start">
-    <span className="text-purple-300 text-sm">{label}</span>
+    <span className=" text-sm">{label}</span>
     {loading ? (
       <div className="flex items-center mt-4">
-        <div className="border-2 border-white border-t-transparent rounded-full w-4 h-4 animate-spin"></div>
+        <div className="border-2 border-gray-800 border-t-transparent rounded-full w-4 h-4 animate-spin"></div>
       </div>
     ) : (
-      <span className="text-white font-medium text-lg mt-2">{value}</span>
+      <span className="text-gray-800 font-medium text-lg mt-2">{value}</span>
     )}
   </div>
 );

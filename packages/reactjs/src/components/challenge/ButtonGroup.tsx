@@ -4,7 +4,7 @@ function ButtonGroup({ handleCreateChallenge, clearAll }: { handleCreateChalleng
   return (
     <div className="flex space-x-4 pt-4">
       <SubmitButton
-        className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-semibold rounded-lg shadow-md hover:from-purple-600 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-opacity-75 transition duration-300 ease-in-out"
+        className="flex-1 px-6 py-3 bg-gradient-to-r from-[#0b8ee5] to-[#61bdfa] text-white font-semibold rounded-lg shadow-md hover:from-[#61bdfa] hover:to-[#0b8ee5] focus:outline-none focus:ring-2 focus:ring-[#3aa7f5] focus:ring-opacity-75 transition duration-1000 ease-in-out text-sm"
         onClick={handleCreateChallenge}
       />
       <CancelButton onClick={clearAll} />

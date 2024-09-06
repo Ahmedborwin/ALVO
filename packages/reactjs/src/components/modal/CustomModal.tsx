@@ -23,7 +23,7 @@ function CustomModal({
         className={
           buttonStyle
             ? buttonStyle
-            : "bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-lg transition-colors duration-300 w-full"
+            : "w-full px-3 py-2 bg-gradient-to-r from-[#0b8ee5] to-[#61bdfa] text-white font-semibold rounded-lg shadow-md hover:from-[#61bdfa] hover:to-[#0b8ee5] focus:outline-none focus:ring-2 focus:ring-[#3aa7f5] focus:ring-opacity-75 transition duration-1000 ease-in-out text-sm"
         }
       >
         {buttonChild}
@@ -33,7 +33,7 @@ function CustomModal({
         createPortal(
           <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black bg-opacity-50 backdrop-blur-sm p-4 ">
             <div className="relative w-full max-w-4xl animate-fade-in-up my-8">
-              <div className="z-10 w-full p-4 sm:p-6 md:p-8 bg-gradient-to-br from-purple-900 to-indigo-900 rounded-2xl shadow-2xl border border-white border-opacity-20">
+              <div className="z-10 w-full p-4 sm:p-6 md:p-8 rounded-2xl shadow-2xl border border-white border-opacity-20">
                 <CloseButton onClick={toggleModal} />
                 <div>{children}</div>
               </div>
