@@ -57,8 +57,8 @@ function CreateChallenges({
 
   return (
     <div className="max-w-md mx-auto">
-      <div className="backdrop-blur-md bg-white bg-opacity-10 rounded-3xl shadow-2xl border border-white border-opacity-20 p-8">
-        <h2 className="text-3xl font-bold text-white mb-8 text-center">Create Challenge</h2>
+      <div className="backdrop-blur-md bg-white bg-opacity-10 rounded-3xl shadow-2xl border border-white border-opacity-50 p-8">
+        <h2 className="text-3xl font-bold  mb-8 text-center">Create Challenge</h2>
         <div className="space-y-6">
           <FormInput
             label="Objective"

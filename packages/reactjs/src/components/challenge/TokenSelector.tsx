@@ -16,8 +16,8 @@ function TokenSelector({
   assignValue,
 }: TokenSelectorProps) {
   return (
-    <div className="space-y-6">
-      <div className="backdrop-blur-md bg-white bg-opacity-10 rounded-xl shadow-lg border border-white border-opacity-20 p-6">
+    <div className="space-y-6 ">
+      <div className="backdrop-blur-md bg-white bg-opacity-5 rounded-xl shadow-lg border border-white border-opacity-20 p-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0 mb-4">
           <Label label={`Stake Value (${token ? "ERC" : isGBP ? "GBP" : "USD"})`} />
           <div className="flex space-x-4">
@@ -27,7 +27,7 @@ function TokenSelector({
         </div>
         {token && (
           <CustomSelect
-            className="w-full px-4 py-3 bg-white bg-opacity-20 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 text-white placeholder-indigo-200 transition duration-300 ease-in-out"
+            className="w-full mb-2 px-4 py-3 bg-gray-100 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#61bdfa] text-gray-800 placeholder-gray-500 text-sm"
             onChange={setSelectedToken}
             value={selectedToken}
             placeholder="Select the token"
@@ -35,14 +35,14 @@ function TokenSelector({
           />
         )}
         <CustomInput
-          className="w-full mt-2 px-4 py-3 bg-white bg-opacity-20 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 text-white placeholder-indigo-200 transition duration-300 ease-in-out"
+          className="w-full px-4 py-3 bg-gray-100 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#61bdfa] text-gray-800 placeholder-gray-500 text-sm"
           onChange={value => assignValue(value, setStakeValue)}
           value={stakeValue ?? ""}
           placeholder={`Enter stake value (${token ? "ERC" : isGBP ? "GBP" : "USD"})`}
           type="text"
         />
         {!token && (
-          <p className="mt-4 text-sm text-indigo-200">
+          <p className="mt-4 text-sm">
             Equivalent: ({isGBP ? "USD" : "GBP"}) {price}
           </p>
         )}
