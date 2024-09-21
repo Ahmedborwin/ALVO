@@ -43,9 +43,10 @@ export function handleChallengeCreate(event: NewChallengeCreated): void {
   const challenge = new Challenge(event.params.challengeId.toHexString());
   challenge.challengeId = event.params.challengeId;
   challenge.userAddress = event.params.user;
+  challenge.ChallengeType = event.params.challengeType;
   challenge.user = event.params.user.toHexString();
   challenge.objective = event.params.Objective;
-  challenge.startingMiles = event.params.startingMiles;
+  challenge.initialTarget = event.params.startingTarget;
   challenge.numberOfWeeks = event.params.NumberofWeeks;
   challenge.defaultAddress = event.params.defaultAddress;
   challenge.failedWeeks = BigInt.fromI32(0);
@@ -115,9 +116,9 @@ export function handleIntervalReview(event: IntervalReviewCompleted): void {
   );
   challenge.intervalReviewTally = challenge.intervalReviewTally + 1;
   if (challenge.weeklyTargetIncreasePercentage > 0) {
-    challenge.startingMiles =
-      challenge.startingMiles +
-      (challenge.startingMiles * challenge.weeklyTargetIncreasePercentage) /
+    challenge.initialTarget =
+      challenge.initialTarget +
+      (challenge.initialTarget * challenge.weeklyTargetIncreasePercentage) /
         100;
   }
   challenge.updatedAt = event.block.timestamp;

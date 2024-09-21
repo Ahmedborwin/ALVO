@@ -3,6 +3,7 @@
 yarn chain
 yarn deploy
 yarn start
+Before running yarn run-node make sure to delete the files IPFS and postgres in the subgraph/graph_node/data
 yarn run-node
 yarn local-create
 yarn local-ship

@@ -35,11 +35,12 @@ const deployChainHabits: DeployFunction = async function (hre: HardhatRuntimeEnv
   await tx.wait();
 
   const tx2 = await await chainHabits.createNewChallenge(
+    0, //strava based challenge type
     "Run marathon",
     200,
     4,
     "0x5f2AF68dF96F3e58e1a243F4f83aD4f5D0Ca6029",
-    12,
+    5, // percentage increase
     ZeroAddress,
     0,
     {

@@ -1062,10 +1062,41 @@ const deployedContracts = {
               type: "uint256",
             },
             {
+              indexed: false,
+              internalType: "uint256",
+              name: "longitude",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "lattitude",
+              type: "uint256",
+            },
+          ],
+          name: "LocationChallengeDetails",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "uint256",
+              name: "challengeId",
+              type: "uint256",
+            },
+            {
               indexed: true,
               internalType: "address",
               name: "user",
               type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint8",
+              name: "challengeType",
+              type: "uint8",
             },
             {
               indexed: false,
@@ -1076,7 +1107,7 @@ const deployedContracts = {
             {
               indexed: false,
               internalType: "uint8",
-              name: "startingMiles",
+              name: "startingTarget",
               type: "uint8",
             },
             {
@@ -1213,17 +1244,17 @@ const deployedContracts = {
           outputs: [
             {
               internalType: "uint8",
-              name: "targetMiles",
-              type: "uint8",
-            },
-            {
-              internalType: "uint8",
               name: "NoOfWeeks",
               type: "uint8",
             },
             {
               internalType: "uint8",
               name: "failedWeeks",
+              type: "uint8",
+            },
+            {
+              internalType: "enum ChainHabits.ChallengeType",
+              name: "challengeType",
               type: "uint8",
             },
             {
@@ -1241,6 +1272,11 @@ const deployedContracts = {
               name: "defaultAddress",
               type: "address",
             },
+            {
+              internalType: "uint8",
+              name: "targetMiles",
+              type: "uint8",
+            },
           ],
           stateMutability: "view",
           type: "function",
@@ -1248,13 +1284,18 @@ const deployedContracts = {
         {
           inputs: [
             {
+              internalType: "enum ChainHabits.ChallengeType",
+              name: "_challengeType",
+              type: "uint8",
+            },
+            {
               internalType: "string",
               name: "_obj",
               type: "string",
             },
             {
               internalType: "uint8",
-              name: "_targetMiles",
+              name: "_target",
               type: "uint8",
             },
             {
@@ -1308,17 +1349,17 @@ const deployedContracts = {
               components: [
                 {
                   internalType: "uint8",
-                  name: "targetMiles",
-                  type: "uint8",
-                },
-                {
-                  internalType: "uint8",
                   name: "NoOfWeeks",
                   type: "uint8",
                 },
                 {
                   internalType: "uint8",
                   name: "failedWeeks",
+                  type: "uint8",
+                },
+                {
+                  internalType: "enum ChainHabits.ChallengeType",
+                  name: "challengeType",
                   type: "uint8",
                 },
                 {
@@ -1335,6 +1376,11 @@ const deployedContracts = {
                   internalType: "address",
                   name: "defaultAddress",
                   type: "address",
+                },
+                {
+                  internalType: "uint8",
+                  name: "targetMiles",
+                  type: "uint8",
                 },
               ],
               internalType: "struct ChainHabits.ChallengeDetails",
