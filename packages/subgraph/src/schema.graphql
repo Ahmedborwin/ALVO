@@ -14,9 +14,10 @@ type Challenge @entity {
   id: ID!
   challengeId: BigInt!
   user: User!
+  ChallengeType: Int!
   userAddress: Bytes!
   objective: String!
-  startingMiles: Int!
+  initialTarget: Int!
   numberOfWeeks: Int!
   stakedAmount: BigInt!
   defaultAddress: Bytes!
@@ -28,9 +29,9 @@ type Challenge @entity {
   transactionHash: String!
   ERC20Address: Bytes!
   competitionDeadline: BigInt!
-  nextIntervalReviewEpoch: BigInt!  
-  intervalReviewTally: Int!      
-  weeklyTargetIncreasePercentage: Int!   
+  nextIntervalReviewEpoch: BigInt!
+  intervalReviewTally: Int!
+  weeklyTargetIncreasePercentage: Int!
   reviews: [IntervalReviews!] @derivedFrom(field: "challenge")
 }
 

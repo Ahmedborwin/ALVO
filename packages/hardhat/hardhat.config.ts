@@ -22,6 +22,7 @@ const config: HardhatUserConfig = {
       {
         version: "0.8.17",
         settings: {
+          viaIR: true,
           optimizer: {
             enabled: true,
             // https://docs.soliditylang.org/en/latest/using-the-compiler.html#optimizer-options
@@ -32,6 +33,7 @@ const config: HardhatUserConfig = {
       {
         version: "0.8.19",
         settings: {
+          viaIR: true,
           optimizer: {
             enabled: true,
             // https://docs.soliditylang.org/en/latest/using-the-compiler.html#optimizer-options

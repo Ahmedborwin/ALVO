@@ -9,8 +9,6 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
 
-//TODO datatructure to record all active players
-
 // Errors
 error CHAINHABITS__UserAlreadyRegistered();
 error CHAINHABITS__UserNotYetRegistered();
@@ -49,26 +47,14 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 	}
 	Counters.Counter private _challengeIdCounter;
 
-	// as we are using subgraph do we need this array ?
-	// address[] public allUsers;
-
 	//datafeed
 	AggregatorV3Interface internal dataFeed;
 
-	// STRUCTS
-	struct UserDetails {
-		// uint256 currentStaked;
-		uint256 userID; //fromstrava
-		string refreshToken; //fromstrava
-	}
-
-	struct ChallengeDetails {
-		uint8 targetMiles;
-		uint8 NoOfWeeks;
-		uint8 failedWeeks;
-		bool isLive;
-		uint48 challengeStartDate;
-		address defaultAddress;
+	//ENUMS
+	enum ChallengeType {
+		Strava_Challenge,
+		GeoLocation_Challenge,
+		SelfAdministered_Challenge
 	}
 
 	//create user profile
@@ -81,18 +67,44 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 	mapping(address => address) priceFeedAddress;
 	mapping(address => mapping(address => uint256)) currentStakedByUser;
 
+	// STRUCTS
+	struct UserDetails {
+		// uint256 currentStaked;
+		uint256 userID; //fromstrava
+		string refreshToken; //fromstrava
+	}
+
+	struct ChallengeDetails {
+		uint8 NoOfWeeks;
+		uint8 failedWeeks;
+		ChallengeType challengeType;
+		bool isLive;
+		uint48 challengeStartDate;
+		address defaultAddress;
+		uint8 targetMiles;
+	}
+
 	//EVENTS
 	event NewChallengeCreated(
 		uint256 indexed challengeId,
 		address indexed user,
+		uint8 challengeType,
 		string Objective,
-		uint8 startingMiles,
+		uint8 startingTarget,
 		uint8 NumberofWeeks,
 		uint8 PercentageIncrease,
 		address defaultAddress,
 		uint256 amount,
 		address erc20Address
 	);
+
+	// Secondary Event for geolocation based goals to emit Long and Lattitude?
+	event LocationChallengeDetails(
+		uint256 indexed challengeId,
+		uint256 longitude,
+		uint256 lattitude
+	);
+
 	// indexed user
 	event NewUserRegistered(address indexed user);
 	event IntervalReviewCompleted(
@@ -108,7 +120,11 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 		bool status,
 		uint256 stakeForfeited
 	);
-	event FundsWithdrawn(address indexed user, address indexed erc20Address, uint256 amount);
+	event FundsWithdrawn(
+		address indexed user,
+		address indexed erc20Address,
+		uint256 amount
+	);
 	event ForfeitedFundsFailedToSend(address indexed user, uint256 amount);
 
 	constructor() Ownable() {}
@@ -125,8 +141,9 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 	}
 
 	function createNewChallenge(
+		ChallengeType _challengeType,
 		string calldata _obj,
-		uint8 _targetMiles,
+		uint8 _target,
 		uint8 _weeks,
 		address _forfeitAddress,
 		uint8 _percentageIncrease,
@@ -142,7 +159,7 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 		if (userHasLiveChallenge[msg.sender]) {
 			revert CHAINHABITS__UserHasLiveObjective();
 		}
-
+		//Forfiet Address needs to be a valid address and not challenge creator
 		if (_forfeitAddress == address(0) || _forfeitAddress == msg.sender) {
 			revert CHAINHABITS__ForfeitAddressInvalid();
 		}
@@ -150,21 +167,23 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 		uint256 requiredTokenAmount;
 		uint256 depositAmount;
 
-		//TODO : Cannot send token and msg.value? or can?
+		//IF ERC20 Address Included Then Stake in ERC20 Token
 		if (_erc20Address != address(0)) {
+			//Check That Stake Value Is > 0
 			if (_depositAmount == 0) {
 				revert CHAINHABITS__ERC20DepositAmountIs0();
 			}
 			address _priceFeedAddress = priceFeedAddress[_erc20Address];
-
+			//Check if Chainlink Pricefeeed Address is known
 			if (_priceFeedAddress == address(0)) {
 				revert CHAINHABITS__ERC20TokenNotSupported();
 			}
-
+			//Get ERC20 Price
 			uint256 erc20Price = uint256(
 				getChainlinkDataFeedLatestAnswer(_priceFeedAddress)
 			);
 
+			//get Amount of token based on deposit amount in USD
 			requiredTokenAmount =
 				(_depositAmount * 1 ether) /
 				(erc20Price * 1e10);
@@ -204,13 +223,15 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 		_challengeIdCounter.increment();
 		challengeId = _challengeIdCounter.current();
 
+		//create new challenge instance
 		challengeTable[challengeId] = ChallengeDetails(
-			_targetMiles,
 			_weeks,
 			0,
+			_challengeType,
 			true,
 			uint48(block.timestamp), //initialy start date
-			_forfeitAddress
+			_forfeitAddress,
+			_target
 		);
 
 		usersCurrentChallenge[msg.sender] = challengeId; //record current challenge for user
@@ -226,8 +247,9 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 		emit NewChallengeCreated(
 			challengeId,
 			msg.sender,
+			uint8(_challengeType),
 			_obj,
-			_targetMiles,
+			_target,
 			_weeks,
 			_percentageIncrease,
 			_forfeitAddress,
@@ -236,7 +258,7 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 		);
 	}
 
-	//handle challenge review logic what about passing args as arr of objs and iteration of it instead of calling individualy will that reduce the excecution gas.
+	//handle challenge review logic
 	function handleIntervalReview(
 		uint256 _challengeId,
 		address _user,
@@ -270,14 +292,17 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 		}
 	}
 
-	//handle close challenge
+	//Complete Challenge With ETH Stake
 	function handleCompleteChallengeETH(
 		uint256 _challengeID,
 		uint256 _stakeForfeited,
 		address _userAddress,
 		address _erc20Address
 	) external onlyOwner nonReentrant {
-		require(_erc20Address == address(0) , "This function expects zero address");
+		require(
+			_erc20Address == address(0),
+			"This function expects zero address"
+		);
 		if (_stakeForfeited > 0) {
 			address forfeitAddress = challengeTable[_challengeID]
 				.defaultAddress;
@@ -291,7 +316,7 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 
 			currentStakedByUser[_userAddress][_erc20Address] -= _stakeForfeited;
 			challengeTable[_challengeID].isLive = false;
-			
+
 			//IF ETH Deposit
 			(bool sent, ) = forfeitAddress.call{ value: _stakeForfeited }("");
 
@@ -306,7 +331,13 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 
 		usersCurrentChallenge[_userAddress] = 0;
 		userHasLiveChallenge[_userAddress] = false;
-		emit ChallengeCompleted(_challengeID, _userAddress,_erc20Address, true, _stakeForfeited);
+		emit ChallengeCompleted(
+			_challengeID,
+			_userAddress,
+			_erc20Address,
+			true,
+			_stakeForfeited
+		);
 	}
 
 	function handleCompleteChallengeERC20(
@@ -343,7 +374,13 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 
 		usersCurrentChallenge[_userAddress] = 0;
 		userHasLiveChallenge[_userAddress] = false;
-		emit ChallengeCompleted(_challengeID, _userAddress,_erc20Address, true, _stakeForfeited);
+		emit ChallengeCompleted(
+			_challengeID,
+			_userAddress,
+			_erc20Address,
+			true,
+			_stakeForfeited
+		);
 	}
 
 	//withdraw funds
@@ -373,7 +410,7 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 			);
 		}
 
-		emit FundsWithdrawn(msg.sender,_erc20Address, withdrawAmount);
+		emit FundsWithdrawn(msg.sender, _erc20Address, withdrawAmount);
 	}
 
 	//setter - TODO this needs to be removed when we incorporate the encrypted database

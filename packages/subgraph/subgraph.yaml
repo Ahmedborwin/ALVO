@@ -25,7 +25,7 @@ dataSources:
         - event: NewUserRegistered(indexed address)
           handler: handleUserRegistration
         - event: NewChallengeCreated(indexed uint256,indexed
-            address,string,uint8,uint8,uint8,address,uint256,address)
+            address,uint8,string,uint8,uint8,uint8,address,uint256,address)
           handler: handleChallengeCreate
         - event: FundsWithdrawn(indexed address,indexed address,uint256)
           handler: handleUserWithdraw
