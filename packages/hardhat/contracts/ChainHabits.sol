@@ -57,15 +57,17 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 		SelfAdministered_Challenge
 	}
 
-	//create user profile
-	mapping(address => bool) public isUserRegisteredTable;
-	mapping(address => bool) public userHasLiveChallenge;
-	mapping(address player => UserDetails) private userTable;
-	mapping(uint256 challengeId => ChallengeDetails) public challengeTable;
-	mapping(address user => uint256 challengeId) usersCurrentChallenge;
-	mapping(address => uint256) public ForfeitedFundsToBeCollected;
-	mapping(address => address) priceFeedAddress;
-	mapping(address => mapping(address => uint256)) currentStakedByUser;
+	mapping(address => bool) public isUserRegisteredTable; //table to record user is registered
+	mapping(address => bool) public userHasLiveChallenge; //table to record user has live challenge
+	mapping(address player => UserDetails) private userTable; //user details table with user address as UID
+	mapping(uint256 challengeId => ChallengeDetails) public challengeTable; //challenge details table with challengeId as UID
+	mapping(address user => uint256 challengeId) usersCurrentChallenge; //current live challengeId by User Address
+	//TODO: what is forfeited funds is not eth but an erc20 token?
+	mapping(address => uint256) public ForfeitedFundsToBeCollected; //funds to be collected by forfeit address
+	mapping(address => address) priceFeedAddress; //chainlink price feed address
+	mapping(address => mapping(address => uint256)) currentStakedByUser; //Amount staked bu user Address based on ERC20 address with address0 for ETH
+	//store Geo Point Target
+	mapping(uint256 => GeoPoints) locationTargetForChallenge;
 
 	// STRUCTS
 	struct UserDetails {
@@ -82,6 +84,17 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 		uint48 challengeStartDate;
 		address defaultAddress;
 		uint8 targetMiles;
+		int32 longitude;
+		int32 latitdude;
+	}
+
+	// to be used as the number of decimal places which is 6
+	int32 private constant PRECISION_FACTOR = 1000000; // 1e6
+
+	//int32 to allow for signed integers and to accomodate 180 * 1e6
+	struct GeoPoints {
+		int32 latitude;
+		int32 longitude;
 	}
 
 	//EVENTS
@@ -98,11 +111,18 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 		address erc20Address
 	);
 
-	// Secondary Event for geolocation based goals to emit Long and Lattitude?
-	event LocationChallengeDetails(
+	// Secondary Event for geolocation based goals to emit Long and Lattitude
+	event LocationChallengeCoordinates(
 		uint256 indexed challengeId,
-		uint256 longitude,
-		uint256 lattitude
+		int32 longitude,
+		int32 latitude
+	);
+
+	// Secondary Event for geolocation based goals to emit Long and Lattitude?
+	event RecordCoordinates(
+		uint256 indexed challengeId,
+		int32 longitude,
+		int32 latitude
 	);
 
 	// indexed user
@@ -130,13 +150,14 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 	constructor() Ownable() {}
 
 	//Create New User Pofile
+	//TODO - what does this function really need to do?
+	// we cannot store sensitive info on chain so will not be storing strava token details
 	function registerNewUser(
 		uint256 userID,
 		string calldata _refreshToken
 	) external isUserNotRegistered(msg.sender) {
 		userTable[msg.sender] = UserDetails(userID, _refreshToken);
 		isUserRegisteredTable[msg.sender] = true;
-		// allUsers.push(msg.sender);
 		emit NewUserRegistered(msg.sender);
 	}
 
@@ -148,7 +169,9 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 		address _forfeitAddress,
 		uint8 _percentageIncrease,
 		address _erc20Address,
-		uint256 _depositAmount
+		uint256 _depositAmount,
+		int32 _latitude,
+		int32 _longitude
 	)
 		external
 		payable
@@ -231,7 +254,9 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 			true,
 			uint48(block.timestamp), //initialy start date
 			_forfeitAddress,
-			_target
+			_target,
+			_longitude,
+			_latitude
 		);
 
 		usersCurrentChallenge[msg.sender] = challengeId; //record current challenge for user
@@ -256,6 +281,15 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 			depositAmount,
 			_erc20Address
 		);
+
+		if (_challengeType == ChallengeType(1)) {
+			//If geolocation based goal, emit Long and Lat points
+			emit LocationChallengeCoordinates(
+				challengeId,
+				_longitude,
+				_latitude
+			);
+		}
 	}
 
 	//handle challenge review logic
@@ -421,13 +455,15 @@ contract ChainHabits is ReentrancyGuard, Ownable {
 		userTable[_user].refreshToken = _refreshToken;
 	}
 
-	//
+	// External call to add new Chainlink Price Feed Address
 	function addPriceFeedAddress(
 		address erc20Address,
 		address _priceFeedAddress
 	) external onlyOwner {
 		priceFeedAddress[erc20Address] = _priceFeedAddress;
 	}
+
+	//TODO function to emit event with coordinates from FE by user
 
 	//Helper - Internal
 	function _isChallengeLive(uint256 _challengeId) public view returns (bool) {

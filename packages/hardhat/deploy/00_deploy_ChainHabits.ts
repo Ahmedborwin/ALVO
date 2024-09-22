@@ -35,7 +35,7 @@ const deployChainHabits: DeployFunction = async function (hre: HardhatRuntimeEnv
   await tx.wait();
   console.log("@@user registered");
   const tx2 = await await chainHabits.createNewChallenge(
-    0, //strava based challenge type
+    1, //strava based challenge type
     "Run marathon",
     200,
     4,
@@ -43,6 +43,8 @@ const deployChainHabits: DeployFunction = async function (hre: HardhatRuntimeEnv
     5,
     ZeroAddress,
     0,
+    53457243, //latitude
+    -2244550, //longitude
     {
       value: ethers.parseEther("0.001"),
     },

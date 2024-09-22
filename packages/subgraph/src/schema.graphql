@@ -32,6 +32,9 @@ type Challenge @entity {
   nextIntervalReviewEpoch: BigInt!
   intervalReviewTally: Int!
   weeklyTargetIncreasePercentage: Int!
+  latitude: BigDecimal!
+  longitude: BigDecimal!
+  coordinatesLogged: [RecordedCoordinates!] @derivedFrom(field: "challenge")
   reviews: [IntervalReviews!] @derivedFrom(field: "challenge")
 }
 
@@ -40,6 +43,18 @@ type IntervalReviews @entity {
   challenge: Challenge!
   challengeId: BigInt!
   status: Boolean!
+  createdAt: BigInt!
+  updatedAt: BigInt!
+  transactionHash: String!
+}
+
+type RecordedCoordinates @entity {
+  id: ID!
+  challenge: Challenge!
+  challengeId: BigInt!
+  latitude: BigDecimal!
+  longitude: BigDecimal!
+  CoordinatesLoggedDate: BigInt!
   createdAt: BigInt!
   updatedAt: BigInt!
   transactionHash: String!

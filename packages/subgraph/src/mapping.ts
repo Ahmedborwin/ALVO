@@ -1,12 +1,19 @@
-import { Address, BigInt, log } from "@graphprotocol/graph-ts";
+import { Address, BigInt, log, BigDecimal } from "@graphprotocol/graph-ts";
 import {
   NewUserRegistered,
   NewChallengeCreated,
   FundsWithdrawn,
   ChallengeCompleted,
   IntervalReviewCompleted,
+  LocationChallengeCoordinates,
+  RecordCoordinates,
 } from "../generated/ChainHabits/ChainHabits";
-import { User, Challenge, IntervalReviews } from "../generated/schema";
+import {
+  User,
+  Challenge,
+  IntervalReviews,
+  RecordedCoordinates,
+} from "../generated/schema";
 
 const ONE_WEEK_IN_SECONDS = 7 * 24 * 60 * 60;
 const zeroAddress = Address.fromString(
@@ -69,20 +76,25 @@ export function handleChallengeCreate(event: NewChallengeCreated): void {
   challenge.save();
 }
 
-export function handleUserWithdraw(event: FundsWithdrawn): void {
-  const user = User.load(event.params.user.toHexString());
-  if (!user) {
-    log.error("User not found: {}", [event.params.user.toHexString()]);
+export function handleNewLocationChallengeCoordinates(
+  event: LocationChallengeCoordinates
+): void {
+  const challenge = Challenge.load(event.params.challengeId.toHexString());
+  if (!challenge) {
+    log.error("Challenge not found: {}", [
+      event.params.challengeId.toHexString(),
+    ]);
     return;
   }
+  let precisionFactor = BigDecimal.fromString("10000000");
+  challenge.latitude = BigInt.fromI32(event.params.latitude)
+    .toBigDecimal()
+    .div(precisionFactor);
+  challenge.longitude = BigInt.fromI32(event.params.longitude)
+    .toBigDecimal()
+    .div(precisionFactor);
 
-  if (event.params.erc20Address == zeroAddress) {
-    user.stakedAmount = user.stakedAmount.minus(event.params.amount);
-  } else {
-    user.stakedTokens = user.stakedTokens.minus(event.params.amount);
-  }
-  user.updatedAt = event.block.timestamp;
-  user.save();
+  challenge.save();
 }
 
 export function handleIntervalReview(event: IntervalReviewCompleted): void {
@@ -97,6 +109,7 @@ export function handleIntervalReview(event: IntervalReviewCompleted): void {
   const intervalReview = new IntervalReviews(id);
   intervalReview.challengeId = event.params.challengeId;
   intervalReview.challenge = event.params.challengeId.toHexString();
+  //Do we need both createdAt and updatedAt??
   intervalReview.createdAt = event.block.timestamp;
   intervalReview.updatedAt = event.block.timestamp;
   intervalReview.status = event.params.success;
@@ -157,4 +170,47 @@ export function handleChallengeComplete(event: ChallengeCompleted): void {
   user.save();
 }
 
-//TODO: Need withdraw event to update the balance of user
+// Event to record co-ordinates emitted by user for location based goal
+//location co-ordinates are added to RecordedCoordinates table which is
+//linked back to the challenge table
+export function handleRecordCoordinates(event: RecordCoordinates): void {
+  const challenge = Challenge.load(event.params.challengeId.toHexString());
+  if (!challenge) {
+    log.error("Challenge not found: {}", [
+      event.params.challengeId.toHexString(),
+    ]);
+    return;
+  }
+  //Create Id for new Coordinate Log Event
+  const id = event.transaction.hash
+    .toHexString()
+    .concat("-")
+    .concat(event.block.timestamp.toString())
+    .concat("-")
+    .concat(event.logIndex.toString())
+    .concat("-")
+    .concat(event.transactionLogIndex.toString());
+  //Create new instance of
+  const recordedCoordinates = new RecordedCoordinates(id);
+  recordedCoordinates.CoordinatesLoggedDate = event.block.timestamp;
+  recordedCoordinates.latitude = event.params.latitude;
+  recordedCoordinates.longitude = event.params.longitude;
+  recordedCoordinates.challenge = event.params.challengeId.toHexString();
+  recordedCoordinates.save();
+}
+
+export function handleUserWithdraw(event: FundsWithdrawn): void {
+  const user = User.load(event.params.user.toHexString());
+  if (!user) {
+    log.error("User not found: {}", [event.params.user.toHexString()]);
+    return;
+  }
+
+  if (event.params.erc20Address == zeroAddress) {
+    user.stakedAmount = user.stakedAmount.minus(event.params.amount);
+  } else {
+    user.stakedTokens = user.stakedTokens.minus(event.params.amount);
+  }
+  user.updatedAt = event.block.timestamp;
+  user.save();
+}
